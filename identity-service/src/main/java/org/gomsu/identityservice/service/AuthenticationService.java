@@ -100,6 +100,7 @@ public class AuthenticationService {
                 .issueTime(new Date()) //thoi gian tao?
                 .expirationTime(expiryTime) //Het han sau 1 tieng
                 .jwtID(UUID.randomUUID().toString())
+                .claim("userId", user.getId())
                 .claim("scope", buildScope(user))
                 .build();
 
