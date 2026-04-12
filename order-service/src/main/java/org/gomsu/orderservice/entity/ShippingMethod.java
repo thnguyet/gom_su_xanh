@@ -28,4 +28,6 @@ public class ShippingMethod {
     @ToString.Exclude
     @JsonIgnore
     private List<Order> orders = new ArrayList<>();
+
+    private boolean active = true;
 }
