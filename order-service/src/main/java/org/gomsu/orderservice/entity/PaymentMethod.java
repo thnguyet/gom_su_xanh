@@ -25,4 +25,6 @@ public class PaymentMethod {
     @ToString.Exclude
     @JsonIgnore
     private List<Order> orders = new ArrayList<>();
+
+    private boolean active = true;
 }
