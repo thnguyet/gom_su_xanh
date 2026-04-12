@@ -2,6 +2,7 @@ package org.gomsu.orderservice.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Data
 @Table(name = "orders")
 public class Order {
@@ -22,6 +24,9 @@ public class Order {
     @Column(name = "order_date")
     private LocalDateTime orderDate;
 
+    private String address;
+    private String phoneNumber;
+
     @Column(name = "note")
     private String note;
 
@@ -31,8 +36,8 @@ public class Order {
     @Column(name = "customer_id")
     private Long customerId;
 
-    @Column(name = "totol_amount")
-    private Double totolAmount;
+    @Column(name = "total_amount")
+    private Double totalAmount;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();
@@ -44,4 +49,11 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "shipping_method_id")
     private ShippingMethod shippingMethod;
+
+    @PrePersist
+    protected  void onCreate()
+    {
+        this.orderDate = LocalDateTime.now();
+        if (this.status == null) this.status = OrderStatus.PENDING;
+    }
 }
