@@ -9,126 +9,11 @@ import org.gomsu.orderservice.entity.CartItem;
 import org.gomsu.orderservice.repository.CartRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-//@Service
-//@RequiredArgsConstructor
-//public class CartService {
-//    private final CartRepository cartRepository;
-//    private final ProductClient productClient;
-//
-//    public CartResponse getCart(Cart cart) {
-//        // 1. Gom tất cả ProductId có trong giỏ hàng
-//        List<Long> productIds = cart.getCartItems().stream()
-//                .map(CartItem::getProductId) // LẤY MÃ SẢN PHẨM
-//                .distinct()
-//                .toList();
-//
-//        // 2. Gọi API lấy thông tin sản phẩm hàng loạt
-//        List<ProductDTO> productDetails = productClient.getProductsByIds(productIds);
-//
-//        // 3. Tạo Map để tra cứu nhanh
-//        Map<Long, ProductDTO> productMap = productDetails.stream()
-//                .collect(Collectors.toMap(ProductDTO::getId, p -> p));
-//
-//        // 4. Chuyển đổi sang Response
-//        return toCartResponse(cart, productMap);
-//    }
-//
-//    public CartResponse addToCart(Long customerId, Long productId, Integer quantity) {
-//        Cart cart = cartRepository.findByCustomerId(customerId)
-//                .orElseGet(() -> {
-//                    Cart newCart = Cart.builder().customerId(customerId).build();
-//                    return cartRepository.save(newCart);
-//                });
-//        // Kiem tra xem san phan nay DA CO trong gio hang chua?
-//        Optional<CartItem> existingItem = cart.getCartItems().stream()
-//                .filter(cartItem -> cartItem.getProductId().equals(productId))
-//                .findFirst();
-//        if (existingItem.isPresent()) {
-//            // Neu co roi -> cong don so luong moi + so luong cu
-//            existingItem.get().setQuantity(existingItem.get().getQuantity() + quantity);
-//        } else {
-//            // Neu chua co -> tao mot CartItem moi
-//            CartItem newItem = CartItem.builder()
-//                    .productId(productId)
-//                    .quantity(quantity)
-//                    .cart(cart)
-//                    .build();
-//            cart.getCartItems().add(newItem);
-//        }
-//        Cart savedCart = cartRepository.save(cart);
-//        return getCart(savedCart);
-//    }
-//
-//    public CartResponse updateQuantity(Long customerId, Long productId, Integer newQuantity) {
-//        Cart cart = cartRepository.findByCustomerId(customerId)
-//                .orElseThrow(() -> new RuntimeException("Gio hang khong ton tai"));
-//        cart.getCartItems().stream()
-//                .filter(cartItem -> cartItem.getProductId().equals(productId))
-//                .findFirst()
-//                .ifPresent(cartItem -> cartItem.setQuantity(newQuantity));
-//        Cart savedCart = cartRepository.save(cart);
-//        return getCart(savedCart);
-//    }
-//
-//    public CartResponse removeFromCart(Long customerId, Long productId) {
-//        Cart cart = cartRepository.findByCustomerId(customerId)
-//                .orElseThrow(() -> new RuntimeException("Gio hang khong ton tai"));
-//        cart.getCartItems().removeIf(item -> item.getProductId().equals(productId));
-//        Cart savedCart = cartRepository.save(cart);
-//        return getCart(savedCart);
-//    }
-//
-//    public CartResponse getCartByCustomerId(Long customerId)
-//    {
-//        // Lay Cart tu DB
-//        Cart cart = cartRepository.findByCustomerId(customerId)
-//                .orElseThrow(() -> new RuntimeException("Gio hang khong ton tai!"));
-//
-//        // Gom tat ca productId co trong gio hang
-//        List<Long> productIds = cart.getCartItems().stream()
-//                .map(CartItem::getProductId)
-//                .distinct()
-//                .toList();
-//
-//        List<ProductDTO> productDetails = productClient.getProductsByIds(productIds);
-//
-//        Map<Long, ProductDTO> productMap = productDetails.stream()
-//                .collect(Collectors.toMap(ProductDTO::getId, p -> p));
-//
-//        return toCartResponse(cart, productMap);
-//    }
-//
-//    public CartResponse toCartResponse(Cart cart, Map<Long, ProductDTO> productMap)
-//    {
-//        List<CartResponse.CartItemResponse> itemResponses = cart.getCartItems().stream()
-//                .map(item -> {
-//                    ProductDTO productDTO = productMap.get(item.getId());
-//                    double price = (productDTO != null) ? productDTO.getPrice() : 0;
-//                    return CartResponse.CartItemResponse.builder()
-//                            .productId(item.getProductId())
-//                            .productName(productDTO != null ? productDTO.getName() : "San pham khong ton tai!")
-//                            .productImage(productDTO != null ? productDTO.getImageUrl() : null)
-//                            .unitPrice(price)
-//                            .quantity(item.getQuantity())
-//                            .subTotal(price * item.getQuantity())
-//                            .build();
-//                })
-//                .collect(Collectors.toList());
-//        return CartResponse.builder()
-//                .id(cart.getId())
-//                .customerId(cart.getCustomerId())
-//                .updatedAt(cart.getUpdatedAt())
-//                .cartItemsResponse(itemResponses)
-//                .totalItems(itemResponses.size())
-//                .totalPrice(itemResponses.stream().mapToDouble(i -> i.getSubTotal()).sum())
-//                .build();
-//    }
-//}
 
 @Service
 @RequiredArgsConstructor
@@ -141,6 +26,8 @@ public class CartService {
         // Tìm giỏ hàng, nếu chưa có thì tạo mới luôn cho khách
         Cart cart = cartRepository.findByCustomerId(customerId)
                 .orElseGet(() -> cartRepository.save(Cart.builder().customerId(customerId).build()));
+
+        List<CartItem> cartItems = cart.getCartItems() != null ? cart.getCartItems() : new ArrayList<>();
 
         // 1. Thu thập danh sách ID sản phẩm có trong giỏ
         List<Long> productIds = cart.getCartItems().stream()
@@ -160,17 +47,22 @@ public class CartService {
         return toCartResponse(cart, productMap);
     }
 
+    // Them san pham vao gio hang
     public CartResponse addToCart(Long customerId, Long productId, Integer quantity) {
+        // Tim gio hang theo customerId
         Cart cart = cartRepository.findByCustomerId(customerId)
                 .orElseGet(() -> cartRepository.save(Cart.builder().customerId(customerId).build()));
 
+        // Tim trong gio hang co nhung san pham nao?
         Optional<CartItem> existingItem = cart.getCartItems().stream()
                 .filter(item -> item.getProductId().equals(productId))
                 .findFirst();
 
+        // Neu gio hang co san pham do roi thi tang so luong len
         if (existingItem.isPresent()) {
             existingItem.get().setQuantity(existingItem.get().getQuantity() + quantity);
         } else {
+            // Neu chua co san pham do thi tao san pham moi vao
             CartItem newItem = CartItem.builder()
                     .productId(productId)
                     .quantity(quantity)
@@ -183,10 +75,13 @@ public class CartService {
         return getCartByCustomerId(customerId);
     }
 
+    // Cap nhat so luong cho san pham co trong gio hang
     public CartResponse updateQuantity(Long customerId, Long productId, Integer newQuantity) {
+        // Tim gio hang cua customerId
         Cart cart = cartRepository.findByCustomerId(customerId)
                 .orElseThrow(() -> new RuntimeException("Giỏ hàng không tồn tại"));
 
+        // Lay san pham trong gio hang va neu ton tai thi tang so luong len theo newQuantity
         cart.getCartItems().stream()
                 .filter(item -> item.getProductId().equals(productId))
                 .findFirst()
@@ -196,6 +91,7 @@ public class CartService {
         return getCartByCustomerId(customerId);
     }
 
+    // Xoa san pham ra khoi gio hang
     public CartResponse removeFromCart(Long customerId, Long productId) {
         Cart cart = cartRepository.findByCustomerId(customerId)
                 .orElseThrow(() -> new RuntimeException("Giỏ hàng không tồn tại"));
