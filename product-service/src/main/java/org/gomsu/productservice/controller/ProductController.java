@@ -3,6 +3,7 @@ package org.gomsu.productservice.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.gomsu.productservice.dto.request.ProductCreationRequest;
+import org.gomsu.productservice.dto.request.ProductRestockRequest;
 import org.gomsu.productservice.dto.request.ProductUpdateRequest;
 import org.gomsu.productservice.dto.response.ProductResponse;
 import org.gomsu.productservice.service.ProductService;
@@ -83,5 +84,18 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> uploadProductImage(@PathVariable Long id, @RequestPart(value = "images") List<MultipartFile> images) {
         return ResponseEntity.ok(productService.uploadProductImages(id, images));
+    }
+
+    @PutMapping("/restock")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> restock(@RequestBody List<ProductRestockRequest> requests) {
+        productService.restockProducts(requests);
+        return ResponseEntity.ok("Hoàn kho thành công!");
+    }
+
+    @PutMapping("/reduce-stock")
+    public ResponseEntity<Void> reduceStock(@RequestBody List<ProductRestockRequest> requests) {
+        productService.reduceStock(requests);
+        return ResponseEntity.ok().build();
     }
 }

@@ -2,6 +2,7 @@ package org.gomsu.productservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.gomsu.productservice.dto.request.ProductCreationRequest;
+import org.gomsu.productservice.dto.request.ProductRestockRequest;
 import org.gomsu.productservice.dto.request.ProductUpdateRequest;
 import org.gomsu.productservice.dto.response.ProductResponse;
 import org.gomsu.productservice.entity.*;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -223,6 +225,36 @@ public class ProductService {
         return products.stream()
                 .map(this::toProductResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public  void restockProducts(List<ProductRestockRequest> restockRequests) {
+            for (ProductRestockRequest restockRequest : restockRequests) {
+                // Tim san pham trong DB
+                Product product = productRepository.findById(restockRequest.getProductId())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + restockRequest.getProductId()));
+
+                // Cong lai so luong
+                int newQuantity = product.getStockQuantity() + restockRequest.getQuantity();
+                product.setStockQuantity(newQuantity);
+
+                productRepository.save(product);
+            }
+    }
+
+    @Transactional
+    public void reduceStock(List<ProductRestockRequest> requests) {
+        for (ProductRestockRequest req : requests) {
+            Product product = productRepository.findById(req.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + req.getProductId()));
+
+            if (product.getStockQuantity() < req.getQuantity()) {
+                throw new RuntimeException("Sản phẩm " + product.getName() + " đã hết hàng hoặc không đủ số lượng!");
+            }
+
+            product.setStockQuantity(product.getStockQuantity() - req.getQuantity());
+            productRepository.save(product);
+        }
     }
 
     private ProductResponse toProductResponse(Product product)
