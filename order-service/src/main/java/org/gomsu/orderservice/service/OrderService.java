@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -101,13 +102,13 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse cancelOrder(Long customerId, Long orderId) {
+    public OrderResponse cancelOrder(Long customerId, Long orderId, boolean isAdmin) {
         // Tim don hang
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
 
         // Kiem tra xem don hang co dung la cua nguoi nay khong
-        if (!order.getCustomerId().equals(customerId)) {
+        if (!isAdmin && !order.getCustomerId().equals(customerId)) {
             throw new RuntimeException("Bạn không có quyền hủy đơn hàng này!");
         }
 
@@ -137,25 +138,52 @@ public class OrderService {
         return toOrderResponse(updatedOrder);
     }
 
-    public Page<OrderResponse> getMyOrders(Long customerId, OrderStatus status, int page, int size, String sortBy, String sortDir) {
-        // 1. Tạo đối tượng Sort
+    // 1. Tạo một hàm dùng chung để khởi tạo Pageable (Helper method)
+    private Pageable createPageable(int page, int size, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
+        return PageRequest.of(page, size, sort);
+    }
 
-        // 2. Tạo đối tượng Pageable
-        Pageable pageable = PageRequest.of(page, size, sort);
+    // 2. Hàm cho Admin: Giữ nguyên vì nó là hàm mạnh mẽ nhất
+    public Page<OrderResponse> getAllOrdersForAdmin(
+            Long customerId, OrderStatus status,
+            LocalDateTime startDate, LocalDateTime endDate,
+            int page, int size, String sortBy, String sortDir) {
 
-        // 3. Thực hiện truy vấn
-        Page<Order> orderPage;
-        if (status != null) {
-            orderPage = orderRepository.findByCustomerIdAndStatus(customerId, status, pageable);
-        } else {
-            orderPage = orderRepository.findByCustomerId(customerId, pageable);
+        Pageable pageable = createPageable(page, size, sortBy, sortDir);
+        return orderRepository.findAllOrdersForAdmin(customerId, status, startDate, endDate, pageable)
+                .map(this::toOrderResponse);
+    }
+
+    // 3. Hàm cho User: Tái sử dụng luôn hàm của Admin, cực gọn!
+    public Page<OrderResponse> getMyOrders(Long customerId, OrderStatus status, int page, int size, String sortBy, String sortDir) {
+        // Gọi luôn hàm Admin, truyền startDate và endDate là null
+        return getAllOrdersForAdmin(customerId, status, null, null, page, size, sortBy, sortDir);
+    }
+
+    @Transactional
+    public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus, Long adminId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+
+        // 1. Nếu Admin chọn trạng thái HỦY
+        if (newStatus == OrderStatus.CANCELLED) {
+            // Gọi luôn hàm cancelOrder có sẵn của Nguyệt (truyền isAdmin = true)
+            return this.cancelOrder(adminId, orderId, true);
         }
 
-        // 4. Map sang OrderResponse
-        return orderPage.map(this::toOrderResponse);
+        // 2. Nếu chuyển sang các trạng thái khác (SHIPPING, COMPLETED, v.v.)
+        // Kiểm tra logic: Không cho phép chuyển từ CANCELLED sang các trạng thái khác
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            throw new RuntimeException("Đơn hàng đã hủy không thể cập nhật trạng thái khác!");
+        }
+
+        order.setStatus(newStatus);
+        Order updatedOrder = orderRepository.save(order);
+
+        return toOrderResponse(updatedOrder);
     }
 
     private OrderResponse toOrderResponse(Order order) {
