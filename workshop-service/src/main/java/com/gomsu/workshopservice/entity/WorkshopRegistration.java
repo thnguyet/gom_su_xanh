@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "workshop_registrations")
-@Getter // Dùng Getter/Setter thay cho @Data để an toàn hơn với JPA
+@Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,7 +19,7 @@ public class WorkshopRegistration {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workshop_id", nullable = false)
-    @ToString.Exclude // Ngăn lỗi vòng lặp khi in Log
+    @ToString.Exclude
     private Workshop workshop;
 
     @Column(name = "customer_id", nullable = false)
@@ -28,12 +28,13 @@ public class WorkshopRegistration {
     @Column(nullable = false)
     private Integer ticketQuantity;
 
-    private Double totalPrice;
+    // Đổi sang BigDecimal để tính toán chính xác
+    private java.math.BigDecimal pricePerTicket;
+    private java.math.BigDecimal totalPrice;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime registrationDate;
 
-    // FE sẽ dùng cái này để đổi màu trạng thái (Vàng/Xanh/Đỏ)
     @Enumerated(EnumType.STRING)
     private RegistrationStatus status;
 
@@ -46,9 +47,15 @@ public class WorkshopRegistration {
         if (this.status == null) {
             this.status = RegistrationStatus.PENDING;
         }
-        // Tính tổng tiền dựa trên giá của Workshop liên kết
-        if (this.workshop != null && this.totalPrice == null) {
-            this.totalPrice = this.workshop.getPrice() * this.ticketQuantity;
+
+        // Logic tính tiền an toàn hơn
+        if (this.workshop != null) {
+            // Lưu lại giá tại thời điểm mua
+            this.pricePerTicket = java.math.BigDecimal.valueOf(this.workshop.getPrice());
+
+            if (this.totalPrice == null) {
+                this.totalPrice = this.pricePerTicket.multiply(java.math.BigDecimal.valueOf(this.ticketQuantity));
+            }
         }
     }
 }
