@@ -101,6 +101,8 @@ public class OrderService {
         return toOrderResponse(savedOrder);
     }
 
+    public record RestockMessage(Long orderId, List<ProductRestockRequest> items) {}
+
     @Transactional
     public OrderResponse cancelOrder(Long customerId, Long orderId, boolean isAdmin) {
         // Tim don hang
@@ -132,7 +134,7 @@ public class OrderService {
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.EXCHANGE,
                 RabbitMQConfig.ROUTING_KEY,
-                restockRequests
+                new RestockMessage(orderId, restockRequests)
         );
 
         return toOrderResponse(updatedOrder);
