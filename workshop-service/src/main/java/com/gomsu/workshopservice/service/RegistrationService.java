@@ -55,7 +55,7 @@ public class RegistrationService {
         }
 
         // 4. Gọi Identity Service lấy thông tin User (Username, Email...)
-        UserResponse user = userClient.getUserById(userId);
+        UserResponse user = userClient.getMyInfor();
         if (user == null) {
             throw new RuntimeException("Không tìm thấy thông tin người dùng từ Identity Service!");
         }
@@ -109,11 +109,11 @@ public class RegistrationService {
             int page, int size, String sortBy, String sortDir
     ) {
         Pageable pageable = createPageable(page, size, sortBy, sortDir);
-        Page<WorkshopRegistration> registrations = registrationRepository.findAllByFilter(userId, status, keyword, fromDate, toDate, pageable);
-        UserResponse user = userClient.getUserById(userId);
+        Page<WorkshopRegistration> registrations = registrationRepository.findAllByFilter(
+                userId, status, keyword, fromDate, toDate, pageable);
+        UserResponse user = userClient.getMyInfor();
         return registrations.map(registration -> toResponse(registration, user));
     }
-
     private RegistrationResponse toResponse(WorkshopRegistration registration, UserResponse user) {
         // Cách hay dùng nhất: Nếu không có ảnh thì trả về null để FE tự xử lý
         String workshopImg = registration.getWorkshop().getImages().stream()
@@ -135,7 +135,7 @@ public class RegistrationService {
 
                 .pricePerTicket(BigDecimal.valueOf(registration.getWorkshop().getPrice()))
                 .ticketQuantity(registration.getTicketQuantity())
-                .totalPrice(BigDecimal.valueOf(registration.getTotalPrice()))
+                .totalPrice(registration.getTotalPrice())
 
                 .status(registration.getStatus().name())
                 .registrationDate(registration.getRegistrationDate())

@@ -29,4 +29,19 @@ public interface RegistrationRepository extends JpaRepository<WorkshopRegistrati
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate,
             Pageable pageable);
+
+    @Query("SELECT r FROM WorkshopRegistration r " +
+            "WHERE r.workshop.id = :workshopId " +
+            "AND (:status IS NULL OR r.status = :status) " +
+            // SỬA CHỖ NÀY: Dùng w.name hoặc thông tin String nào đó, bỏ LOWER() quanh Long đi
+            "AND (:keyword IS NULL OR LOWER(r.workshop.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND (:fromDate IS NULL OR r.registrationDate >= :fromDate) " +
+            "AND (:toDate IS NULL OR r.registrationDate <= :toDate)")
+    Page<WorkshopRegistration> findAttendeesByFilter(
+            @Param("workshopId") Long workshopId,
+            @Param("status") RegistrationStatus status,
+            @Param("keyword") String keyword,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
+            Pageable pageable);
 }
