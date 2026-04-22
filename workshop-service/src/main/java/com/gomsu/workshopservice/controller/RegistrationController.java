@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,9 @@ import java.time.LocalDateTime;
 @CrossOrigin("*")
 public class RegistrationController {
     private final RegistrationService registerWorkshop;
+
     @PostMapping("/register")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<RegistrationResponse> register(
             @AuthenticationPrincipal Jwt jwt, // Lấy trực tiếp từ Token JWT
             @RequestParam Long workshopId,
@@ -35,7 +38,9 @@ public class RegistrationController {
         RegistrationResponse response = registerWorkshop.registerWorkshop(userId, workshopId, quantity, note);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
     @GetMapping("/my-registrations")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<RegistrationResponse>> getMyRegistrations(
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam(required = false) RegistrationStatus status,
@@ -55,5 +60,33 @@ public class RegistrationController {
                 userId, status, keyword, fromDate, toDate, page, size, sortBy, sortDir);
 
         return ResponseEntity.ok(response);
+    }
+
+    // Checkin don dang ky
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')") // Chặn: Chỉ Admin mới có quyền duyệt/điểm danh
+    public ResponseEntity<String> updateStatus(@PathVariable Long id) {
+        log.info("Admin đang thực hiện Check-in cho đơn đăng ký: {}", id);
+
+        registerWorkshop.checkInRegistration(id);
+
+        return ResponseEntity.ok("Check-in thành công! Khách hàng đã được xác nhận tham gia.");
+    }
+
+    @PatchMapping("/{registrationId}/cancel")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<String> cancel(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long registrationId) {
+
+        // 1. Lấy userId từ Token JWT (claim "userId")
+        Long userId = jwt.getClaim("userId");
+        log.info("User {} yêu cầu hủy đơn đăng ký {}", userId, registrationId);
+
+        // 2. Gọi service xử lý logic hủy và hoàn vé
+        registerWorkshop.cancelRegistration(registrationId, userId);
+
+        // 3. Trả về thông báo thành công đơn giản
+        return ResponseEntity.ok("Hủy đăng ký thành công. Chỗ trống đã được hoàn lại!");
     }
 }
