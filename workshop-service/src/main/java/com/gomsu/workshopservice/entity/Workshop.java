@@ -48,4 +48,9 @@ public class Workshop {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<WorkshopImage> images;
+
+    // Số lượng người tham gia hiện tại
+    @Builder.Default
+    @Column(name = "current_participants", nullable = false)
+    private Integer currentParticipants = 0; //n mặc định bằng 0
 }

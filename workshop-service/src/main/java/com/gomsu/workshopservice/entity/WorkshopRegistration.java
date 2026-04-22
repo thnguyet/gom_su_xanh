@@ -45,7 +45,7 @@ public class WorkshopRegistration {
     protected void onCreate() {
         this.registrationDate = LocalDateTime.now();
         if (this.status == null) {
-            this.status = RegistrationStatus.PENDING;
+            this.status = RegistrationStatus.CONFIRMED;
         }
 
         // Logic tính tiền an toàn hơn
