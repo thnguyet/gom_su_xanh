@@ -221,6 +221,7 @@ public class WorkshopService {
         workshopRepository.deleteById(id);
     }
 
+    // Xem so luong nguoi tham gia cua 1 workshop
     public WorkshopAttendeeResponse getAttendeesWithFilter(
             Long workshopId, RegistrationStatus status, String keyword,
             LocalDateTime fromDate, LocalDateTime toDate,
@@ -237,7 +238,7 @@ public class WorkshopService {
         // 3. Lấy thông tin Workshop & Số lượng (Dùng các hàm Nguyệt đã có)
         Workshop workshop = workshopRepository.findById(workshopId)
                 .orElseThrow(() -> new RuntimeException("Workshop không tồn tại"));
-        Integer totalSold = registrationRepository.countSoldTicketsByWorkshopId(workshopId);
+        Integer totalSold = workshop.getCurrentParticipants();
 
         // 4. Map sang Response (Lấy thông tin User từ Identity Service)
         // Dùng cách dùng Map/Cache để tối ưu n+1 như mình đã nhắc Nguyệt nhé
@@ -277,6 +278,7 @@ public class WorkshopService {
                 .location(workshop.getLocation())
                 .price(workshop.getPrice())
                 .maxParticipants(workshop.getMaxParticipants())
+                .currentParticipants(workshop.getCurrentParticipants())
                 .startDate(workshop.getStartDate())
                 .endDate(workshop.getEndDate())
                 .registrationStartDate(workshop.getRegistrationStartDate())

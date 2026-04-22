@@ -4,7 +4,10 @@ import com.gomsu.workshopservice.entity.Workshop;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -24,4 +27,18 @@ public interface WorkshopRepository extends JpaRepository<Workshop, Long> {
             LocalDateTime fromDate, LocalDateTime toDate,
             Boolean isAdmin,
             Pageable pageable);
+
+    // Tru ve khi dang ki thanh cong
+    @Modifying
+    @Transactional
+    @Query("UPDATE Workshop w SET w.currentParticipants = w.currentParticipants + :quantity " +
+            "WHERE w.id = :id AND (w.currentParticipants + :quantity) <= w.maxParticipants")
+    int updateParticipants(@Param("id") Long id, @Param("quantity") Integer quantity);
+
+    // Cong lai ve khi huy ve
+    @Modifying
+    @Transactional
+    @Query("UPDATE Workshop w SET w.currentParticipants = w.currentParticipants - :quantity " +
+            "WHERE w.id = :id AND w.currentParticipants >= :quantity")
+    int decreaseParticipants(@Param("id") Long id, @Param("quantity") Integer quantity);
 }

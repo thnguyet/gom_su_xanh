@@ -20,6 +20,7 @@ public class WorkshopResponse {
     private String location;
     private Double price;
     private Integer maxParticipants;
+    private Integer currentParticipants;
 
     private LocalDateTime startDate;
     private LocalDateTime endDate;

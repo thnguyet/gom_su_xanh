@@ -49,9 +49,9 @@ public class RegistrationService {
         }
 
         // 3. Kiểm tra số lượng vé còn lại
-        Integer soldTickets = registrationRepository.countSoldTicketsByWorkshopId(workshopId);
-        if (soldTickets + quantity > workshop.getMaxParticipants()) {
-            throw new RuntimeException("Workshop đã hết chỗ! Chỉ còn lại " + (workshop.getMaxParticipants() - soldTickets) + " chỗ.");
+        int updatedRows = workshopRepository.updateParticipants(workshopId, quantity);
+        if (updatedRows == 0) {
+            throw new RuntimeException("Workshop đã hết chỗ hoặc số lượng đăng ký vượt quá giới hạn!");
         }
 
         // 4. Gọi Identity Service lấy thông tin User (Username, Email...)
@@ -66,7 +66,7 @@ public class RegistrationService {
                 .customerId(userId)
                 .ticketQuantity(quantity)
                 .note(note)
-                .status(RegistrationStatus.PENDING)
+                .status(RegistrationStatus.CONFIRMED)
                 .build();
 
         // Lưu xuống DB (Hàm @PrePersist trong Entity sẽ tự tính totalPrice)
@@ -114,6 +114,66 @@ public class RegistrationService {
         UserResponse user = userClient.getMyInfor();
         return registrations.map(registration -> toResponse(registration, user));
     }
+
+    @Transactional
+    public void cancelRegistration(Long registrationId, Long userId) {
+        // 1. Tìm bản ghi đăng ký
+        WorkshopRegistration registration = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đăng ký!"));
+
+        // 2. Kiểm tra quyền sở hữu (tránh việc user A hủy vé của user B)
+        if (!registration.getCustomerId().equals(userId)) {
+            throw new RuntimeException("Bạn không có quyền hủy đơn đăng ký này!");
+        }
+
+        // 3. Kiểm tra trạng thái (chỉ hủy khi đơn đang ở trạng thái CONFIRMED)
+        if (registration.getStatus() != RegistrationStatus.CONFIRMED) {
+            throw new RuntimeException("Đơn hàng này đã bị hủy hoặc đã hoàn thành, không thể hủy thêm.");
+        }
+
+        // 4. LOGIC QUAN TRỌNG: Kiểm tra điều kiện trước 3 ngày
+        // Lấy thời gian bắt đầu Workshop
+        LocalDateTime workshopStartTime = registration.getWorkshop().getStartDate();
+        LocalDateTime now = LocalDateTime.now();
+
+        // Nếu thời gian hiện tại đã vượt quá (thời gian bắt đầu - 3 ngày)
+        if (now.isAfter(workshopStartTime.minusDays(3))) {
+            throw new RuntimeException("Đã quá hạn hủy vé! Bạn chỉ có thể hủy trước ngày diễn ra ít nhất 3 ngày.");
+        }
+
+        // 5. Cập nhật trạng thái đơn hàng
+        registration.setStatus(RegistrationStatus.CANCELLED);
+        registrationRepository.save(registration);
+
+        // 6. Hoàn lại số lượng vé vào kho Workshop
+        int updatedRows = workshopRepository.decreaseParticipants(
+                registration.getWorkshop().getId(),
+                registration.getTicketQuantity()
+        );
+
+        if (updatedRows == 0) {
+            throw new RuntimeException("Có lỗi xảy ra khi hoàn trả số lượng vé!");
+        }
+
+        log.info("User {} đã hủy thành công đơn đăng ký {}. Vé đã được hoàn lại kho.", userId, registrationId);
+    }
+
+    @Transactional
+    public void checkInRegistration(Long registrationId) {
+        WorkshopRegistration workshopRegistration = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đăng ký!"));
+
+        if (workshopRegistration.getStatus() != RegistrationStatus.CONFIRMED) {
+            throw new RuntimeException("Đơn đăng ký không hợp lệ để check-in");
+        }
+
+        workshopRegistration.setStatus(RegistrationStatus.COMPLETED);
+        registrationRepository.save(workshopRegistration);
+
+        log.info("Admin đã check-in thành công cho đơn đăng ký ID: {}", registrationId);
+
+    }
+
     private RegistrationResponse toResponse(WorkshopRegistration registration, UserResponse user) {
         // Cách hay dùng nhất: Nếu không có ảnh thì trả về null để FE tự xử lý
         String workshopImg = registration.getWorkshop().getImages().stream()
