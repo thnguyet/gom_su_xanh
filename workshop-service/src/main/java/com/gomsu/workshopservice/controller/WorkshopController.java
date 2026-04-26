@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -138,6 +139,31 @@ public class WorkshopController {
                 id, status, keyword, fromDate, toDate, page, size, sortBy, sortDir);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/stats")
+    @PreAuthorize("hasRole('ADMIN')") // Chốt chặn bảo mật: Chỉ Admin mới được xem tiền
+    public ResponseEntity<Map<String, Object>> getWorkshopStats(@PathVariable Long id) {
+        // Gọi sang Service để lấy Map chứa totalTickets và totalRevenue
+        Map<String, Object> stats = workshopService.getWorkshopStatsByWorkshopID(id);
+
+        // Nếu chưa có ai mua vé, SUM sẽ trả về NULL, mình nên xử lý một chút cho đẹp
+        if (stats.get("totalTickets") == null) {
+            stats.put("totalTickets", 0);
+            stats.put("totalRevenue", 0);
+        }
+
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/statistics")
+    @PreAuthorize("hasRole('ADMIN')") // Chỉ Admin mới được xem "ví tiền" của hệ thống
+    public ResponseEntity<List<Map<String, Object>>> getAllWorkshopsStatistics() {
+        // Gọi Service để lấy danh sách (bao gồm cả các Workshop có doanh thu = 0)
+        List<Map<String, Object>> stats = workshopService.getAllWorkshopsStatistics();
+
+        // Trả về kết quả kèm trạng thái 200 OK
+        return ResponseEntity.ok(stats);
     }
 
 }

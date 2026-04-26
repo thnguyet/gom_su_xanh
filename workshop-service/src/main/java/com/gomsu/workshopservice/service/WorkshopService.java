@@ -259,6 +259,16 @@ public class WorkshopService {
                 .build();
     }
 
+    public Map<String, Object> getWorkshopStatsByWorkshopID(Long id) {
+        return registrationRepository.getWorkshopStatsByWorkshopID(id);
+    }
+
+    public List<Map<String, Object>> getAllWorkshopsStatistics() {
+        List<Map<String, Object>> stats = registrationRepository.getAllWorkshopStats();
+
+        return stats;
+    }
+
     private WorkshopResponse toWorkshopResponse(Workshop workshop) {
         // 1. Kiểm tra danh sách images từ Entity tránh bị Null
         List<String> imageUrls = (workshop.getImages() != null)
