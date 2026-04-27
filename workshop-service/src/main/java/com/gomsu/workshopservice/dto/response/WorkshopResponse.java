@@ -15,6 +15,7 @@ import java.util.List;
 public class WorkshopResponse {
     private Long id;
     private String name;
+    private String slug;
     private String description;
     private String content; // Trả về nội dung chi tiết
     private String location;
@@ -34,4 +35,5 @@ public class WorkshopResponse {
 
     private String mainImage;
     private List<String> allImages;
+    private Boolean active;
 }

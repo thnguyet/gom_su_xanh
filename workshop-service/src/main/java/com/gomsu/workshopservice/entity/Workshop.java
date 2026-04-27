@@ -19,6 +19,9 @@ public class Workshop {
 
     private String name;
 
+    @Column(name = "slug", unique = true, nullable = false) // BẮT BUỘC THÊM
+    private String slug;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -53,4 +56,6 @@ public class Workshop {
     @Builder.Default
     @Column(name = "current_participants", nullable = false)
     private Integer currentParticipants = 0; //n mặc định bằng 0
+
+    private Boolean active = true;
 }

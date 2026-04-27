@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 public class RegistrationController {
     private final RegistrationService registerWorkshop;
 
+    // THÀNH CÔNG
     @PostMapping("/register")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<RegistrationResponse> register(
@@ -39,6 +40,7 @@ public class RegistrationController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    // THÀNH CÔNG
     @GetMapping("/my-registrations")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<RegistrationResponse>> getMyRegistrations(
@@ -63,6 +65,7 @@ public class RegistrationController {
     }
 
     // Checkin don dang ky
+    // THÀNH CÔNG
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')") // Chặn: Chỉ Admin mới có quyền duyệt/điểm danh
     public ResponseEntity<String> updateStatus(@PathVariable Long id) {
@@ -73,6 +76,7 @@ public class RegistrationController {
         return ResponseEntity.ok("Check-in thành công! Khách hàng đã được xác nhận tham gia.");
     }
 
+    // THÀNH CÔNG
     @PatchMapping("/{registrationId}/cancel")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> cancel(

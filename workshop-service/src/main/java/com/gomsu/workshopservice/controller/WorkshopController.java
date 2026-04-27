@@ -34,6 +34,7 @@ import java.util.Map;
 public class WorkshopController {
     private final WorkshopService workshopService;
 
+    // THÀNH CÔNG
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')") // Chặn User thường, chỉ cho phép ADMIN
     public ResponseEntity<WorkshopResponse> createWorkshop(
@@ -45,9 +46,11 @@ public class WorkshopController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    // THÀNH CÔNG
     @GetMapping("/all")
     public ResponseEntity<Page<WorkshopResponse>> getAllWorkshops(
-            @AuthenticationPrincipal Jwt jwt, // Lấy thông tin user từ token
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam(required = false) Boolean active, // 1. Bổ sung nhận diện lọc trạng thái
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String location,
             @RequestParam(required = false) Double minPrice,
@@ -59,36 +62,46 @@ public class WorkshopController {
             @RequestParam(defaultValue = "startDate") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDir
     ) {
-        // 1. Kiểm tra xem có phải Admin không (Dựa vào Roles trong Token của Nguyệt)
-        // Giả sử claim roles của Nguyệt trả về list các String
-        boolean isAdmin = false;
+        Boolean isAdmin = false;
 
         if (jwt != null) {
-            // 1. Lấy claim "scope" (vì Nguyệt đặt tên là scope trong token)
             String scope = jwt.getClaimAsString("scope");
+            log.info(">>> Check quyền truy cập - Scope nhận được: [{}]", scope);
 
-            // 2. Kiểm tra xem trong chuỗi scope có chứa ROLE_ADMIN không
-            if (scope != null && scope.contains("ROLE_ADMIN")) {
+            // Vẫn dùng logic chứa chữ ADMIN để linh hoạt
+            if (scope != null && scope.contains("ADMIN")) {
                 isAdmin = true;
             }
 
-            // Bonus: Tiện thể lấy luôn userId cho chuẩn bài
             Long userId = jwt.getClaim("userId");
-            log.info("User ID {} đang truy cập với quyền Admin: {}", userId, isAdmin);
+            log.info(">>> User ID: {} | Quyền Admin: {}", userId, isAdmin);
         }
 
+        // 2. Truyền thêm biến active vào hàm gọi Service
         Page<WorkshopResponse> response = workshopService.getWorkshops(
-                keyword, location, minPrice, maxPrice, fromDate, toDate, isAdmin, page, size, sortBy, sortDir);
+                keyword, location, minPrice, maxPrice, fromDate, toDate,
+                isAdmin,
+                active, // <-- Nhớ truyền thêm tham số này vào Nguyệt nhé
+                page, size, sortBy, sortDir);
 
         return ResponseEntity.ok(response);
     }
 
+    // THÀNH CÔNG
     @GetMapping("/{id}")
     public ResponseEntity<WorkshopResponse> getWorkshopById(@PathVariable Long id) {
         WorkshopResponse response = workshopService.getWorkshopById(id);
         return ResponseEntity.ok(response);
     }
 
+    // THÀNH CÔNG
+    @GetMapping("/s/{slug}")
+    public ResponseEntity<WorkshopResponse> getWorkshopBySlug(@PathVariable String slug) {
+        WorkshopResponse response = workshopService.getWorkshopBySlug(slug);
+        return ResponseEntity.ok(response);
+    }
+
+    // THÀNH CÔNG
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "/{id}/add-images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<WorkshopResponse> addImagesToWorkshop(
@@ -100,6 +113,7 @@ public class WorkshopController {
         return ResponseEntity.ok(response);
     }
 
+    // THÀNH CÔNG
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<WorkshopResponse> updateWorkshop(
@@ -112,6 +126,7 @@ public class WorkshopController {
     }
 
     // API Xóa Workshop
+    // THÀNH CÔNG
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteWorkshop(@PathVariable Long id) {
@@ -120,6 +135,7 @@ public class WorkshopController {
         return ResponseEntity.ok("Xóa workshop thành công!");
     }
 
+    // THÀNH CÔNG
     @GetMapping("/{id}/attendees")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<WorkshopAttendeeResponse> getAttendees(
@@ -141,6 +157,7 @@ public class WorkshopController {
         return ResponseEntity.ok(response);
     }
 
+    // THÀNH CÔNG
     @GetMapping("/{id}/stats")
     @PreAuthorize("hasRole('ADMIN')") // Chốt chặn bảo mật: Chỉ Admin mới được xem tiền
     public ResponseEntity<Map<String, Object>> getWorkshopStats(@PathVariable Long id) {
@@ -156,6 +173,7 @@ public class WorkshopController {
         return ResponseEntity.ok(stats);
     }
 
+    // THÀNH CÔNG
     @GetMapping("/statistics")
     @PreAuthorize("hasRole('ADMIN')") // Chỉ Admin mới được xem "ví tiền" của hệ thống
     public ResponseEntity<List<Map<String, Object>>> getAllWorkshopsStatistics() {

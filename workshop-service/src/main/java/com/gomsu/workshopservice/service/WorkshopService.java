@@ -26,11 +26,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +50,7 @@ public class WorkshopService {
         // 1. Tạo đối tượng Workshop từ Request (Bổ sung các trường mới)
         Workshop workshop = Workshop.builder()
                 .name(request.getName())
+                .slug(toSlug(request.getName()))
                 .description(request.getDescription())
                 .content(request.getContent()) // <--- THÊM DÒNG NÀY
                 .location(request.getLocation())
@@ -61,6 +64,7 @@ public class WorkshopService {
                 .tools(request.getTools())                   // <--- THÊM DÒNG NÀY
                 .benefits(request.getBenefits())             // <--- THÊM DÒNG NÀY
                 .images(new ArrayList<>())
+                .active(true)
                 .build();
 
         Workshop savedWorkshop = workshopRepository.save(workshop);
@@ -90,21 +94,53 @@ public class WorkshopService {
             String keyword, String location,
             Double minPrice, Double maxPrice,
             LocalDateTime fromDate, LocalDateTime toDate,
-            boolean isAdmin, // Tham số quyết định quyền xem
+            Boolean isAdmin, // Đổi sang Boolean để khớp với Repo
+            Boolean active,
             int page, int size, String sortBy, String sortDir) {
 
+        // 1. Kiểm tra isAdmin null thì mặc định là false (User)
+        Boolean adminFlag = (isAdmin != null && isAdmin);
+
+        // 2. Tạo Pageable
         Sort sort = sortDir.equalsIgnoreCase("ASC") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
+        // 3. Gọi Repo với câu Query đã có logic "(:isAdmin IS TRUE OR w.active IS TRUE)"
         Page<Workshop> workshops = workshopRepository.findAllForUserAndAdmin(
-                keyword, location, minPrice, maxPrice, fromDate, toDate, isAdmin, pageable);
+                keyword,
+                location,
+                minPrice,
+                maxPrice,
+                fromDate,
+                toDate,
+                adminFlag,
+                active,
+                pageable);
 
         return workshops.map(this::toWorkshopResponse);
     }
 
     public WorkshopResponse getWorkshopById(Long id) {
         Workshop workshop = workshopRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Workshop với ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Workshop!"));
+
+        // Bổ sung: Nếu không phải Admin mà cố tình vào Workshop đã ẩn qua ID thì chặn luôn
+        if (Boolean.FALSE.equals(workshop.getActive())) {
+            throw new RuntimeException("Workshop này hiện không còn hoạt động!");
+        }
+
+        return toWorkshopResponse(workshop);
+    }
+
+    public WorkshopResponse getWorkshopBySlug(String slug) {
+        Workshop workshop = workshopRepository.findBySlug(slug)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Workshop!"));
+
+        // Nếu không phải Admin mà xem Workshop đã ẩn thì báo lỗi luôn
+        // (Giả sử Nguyệt truyền thêm isAdmin vào hàm này)
+        if (Boolean.FALSE.equals(workshop.getActive())) {
+            throw new RuntimeException("Workshop này hiện không còn hoạt động!");
+        }
 
         return toWorkshopResponse(workshop);
     }
@@ -139,6 +175,7 @@ public class WorkshopService {
 
         if (workshopUpdateRequest.getName() != null && !workshopUpdateRequest.getName().isEmpty()) {
             workshop.setName(workshopUpdateRequest.getName());
+            workshop.setSlug(toSlug(workshopUpdateRequest.getName()));
         }
 
         if (workshopUpdateRequest.getPrice() != null && workshopUpdateRequest.getPrice() != 0) {
@@ -159,6 +196,11 @@ public class WorkshopService {
 
         if (workshopUpdateRequest.getMaxParticipants() != null && workshopUpdateRequest.getMaxParticipants() != 0) {
             workshop.setMaxParticipants(workshopUpdateRequest.getMaxParticipants());
+        }
+
+        // Bổ sung cập nhật trạng thái Active (Chỉ update nếu có truyền giá trị mới)
+        if (workshopUpdateRequest.getActive() != null) {
+            workshop.setActive(workshopUpdateRequest.getActive());
         }
 
         // 2. Cập nhật thời gian
@@ -204,21 +246,21 @@ public class WorkshopService {
         return toWorkshopResponse(workshopRepository.save(workshop));
     }
 
-    //Xoa san pham
     @Transactional
     public void deleteWorkshop(Long id) {
-        Workshop deleteWorkshop = workshopRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Workshop cần xóa!"));
-        if(deleteWorkshop.getImages() != null && !deleteWorkshop.getImages().isEmpty()) {
-            for (WorkshopImage workshopImage : deleteWorkshop.getImages()) {
-                try {
-                    cloudinaryService.deleteImage(workshopImage.getImageUrl());
-                } catch (IOException e) {
-                    System.err.println("Cảnh báo: Không thể xóa ảnh này trên Cloudinary");
-                }
-            }
+        Workshop workshop = workshopRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Workshop!"));
+
+        // Vẫn nên giữ logic chặn nếu đang có người tham gia thực tế
+        if (workshop.getCurrentParticipants() != null && workshop.getCurrentParticipants() > 0) {
+            throw new RuntimeException("Không thể xóa (ẩn) Workshop vì đang có khách đăng ký tham gia!");
         }
-        workshopRepository.deleteById(id);
+
+        // Thực hiện "Xóa mềm"
+        workshop.setActive(false);
+        workshopRepository.save(workshop);
+
+        log.info(">>> Đã ẩn Workshop ID: {} thành công.", id);
     }
 
     // Xem so luong nguoi tham gia cua 1 workshop
@@ -227,35 +269,25 @@ public class WorkshopService {
             LocalDateTime fromDate, LocalDateTime toDate,
             int page, int size, String sortBy, String sortDir
     ) {
-        // 1. Khởi tạo phân trang
         Sort sort = sortDir.equalsIgnoreCase("ASC") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        // 2. Lấy Page dữ liệu từ Repo
         Page<WorkshopRegistration> registrationPage = registrationRepository.findAttendeesByFilter(
                 workshopId, status, keyword, fromDate, toDate, pageable);
 
-        // 3. Lấy thông tin Workshop & Số lượng (Dùng các hàm Nguyệt đã có)
         Workshop workshop = workshopRepository.findById(workshopId)
                 .orElseThrow(() -> new RuntimeException("Workshop không tồn tại"));
-        Integer totalSold = workshop.getCurrentParticipants();
 
-        // 4. Map sang Response (Lấy thông tin User từ Identity Service)
-        // Dùng cách dùng Map/Cache để tối ưu n+1 như mình đã nhắc Nguyệt nhé
-        Map<Long, UserResponse> userCache = new HashMap<>();
-        Page<RegistrationResponse> attendeePage = registrationPage.map(reg -> {
-            UserResponse user = userCache.computeIfAbsent(reg.getCustomerId(),
-                    id -> userClient.getUserById(id));
-            return toResponse(reg, user);
-        });
+        // Thay vì dùng userCache và gọi Client, mình truyền null vào toResponse
+        // vì toResponse đã được mình sửa để ưu tiên lấy Name từ bản ghi Registration rồi.
+        Page<RegistrationResponse> attendeePage = registrationPage.map(reg -> toResponse(reg, null));
 
-        // 5. Trả về Wrapper chứa Page
         return WorkshopAttendeeResponse.builder()
                 .workshopId(workshopId)
                 .workshopName(workshop.getName())
                 .maxParticipants(workshop.getMaxParticipants())
-                .currentParticipants(totalSold)
-                .attendees(attendeePage) // Trả về cả cục Page để FE làm phân trang
+                .currentParticipants(workshop.getCurrentParticipants())
+                .attendees(attendeePage)
                 .build();
     }
 
@@ -283,6 +315,7 @@ public class WorkshopService {
         return WorkshopResponse.builder()
                 .id(workshop.getId())
                 .name(workshop.getName())
+                .slug(toSlug(workshop.getName()))
                 .description(workshop.getDescription())
                 .content(workshop.getContent())   // <--- THÊM DÒNG NÀY
                 .location(workshop.getLocation())
@@ -298,6 +331,7 @@ public class WorkshopService {
                 .benefits(workshop.getBenefits())             // <--- THÊM DÒNG NÀY
                 .mainImage(mainImg)
                 .allImages(imageUrls)
+                .active(workshop.getActive())
                 .build();
     }
 
@@ -320,7 +354,7 @@ public class WorkshopService {
 
                 // --- Thông tin khách hàng (Lấy từ UserResponse của Identity Service) ---
                 .customerId(reg.getCustomerId())
-                .customerName(user != null ? user.getUsername() : "N/A")
+                .customerName(reg.getCustomerName() != null ? reg.getCustomerName() : (user != null ? user.getUsername() : "N/A"))
 
                 // --- Thông tin Workshop (Lấy từ Entity) ---
                 .workshopId(workshop.getId())
@@ -344,5 +378,25 @@ public class WorkshopService {
 
                 .message("Thành công")
                 .build();
+    }
+
+    public String toSlug(String title) {
+        if (title == null || title.isBlank()) return "";
+
+        // 1. Chuyển về chữ thường trước để xử lý cho dễ
+        String slug = title.toLowerCase();
+
+        // 2. Thay thế các ký tự đặc biệt của tiếng Việt (đ, ý, ...)
+        slug = slug.replaceAll("đ", "d");
+
+        // 3. Chuẩn hóa để loại bỏ dấu (Normalizer)
+        String normalized = Normalizer.normalize(slug, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        slug = pattern.matcher(normalized).replaceAll("");
+
+        // 4. Xóa các ký tự không phải chữ cái/số, thay khoảng trắng bằng gạch ngang
+        return slug.replaceAll("[^a-z0-9\\s]", "") // Xóa ký tự đặc biệt còn sót lại
+                .replaceAll("\\s+", "-")           // Thay khoảng trắng thành 1 dấu gạch ngang
+                .replaceAll("^-+|-+$", "");        // Xóa dấu gạch ngang dư thừa ở đầu và cuối
     }
 }

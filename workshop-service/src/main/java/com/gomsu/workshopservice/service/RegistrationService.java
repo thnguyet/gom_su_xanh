@@ -48,6 +48,11 @@ public class RegistrationService {
             throw new RuntimeException("Thời gian đăng ký không hợp lệ (chưa mở hoặc đã kết thúc)!");
         }
 
+        // BỔ SUNG: Chặn đăng ký nếu Workshop đang bị ẩn (active = false)
+        if (Boolean.FALSE.equals(workshop.getActive())) {
+            throw new RuntimeException("Workshop này hiện không còn hoạt động hoặc đã bị đóng!");
+        }
+
         // 3. Kiểm tra số lượng vé còn lại
         int updatedRows = workshopRepository.updateParticipants(workshopId, quantity);
         if (updatedRows == 0) {
@@ -64,6 +69,7 @@ public class RegistrationService {
         WorkshopRegistration registration = WorkshopRegistration.builder()
                 .workshop(workshop)
                 .customerId(userId)
+                .customerName(user.getUsername())
                 .ticketQuantity(quantity)
                 .note(note)
                 .status(RegistrationStatus.CONFIRMED)

@@ -31,4 +31,6 @@ public class WorkshopUpdateRequest {
 
     // Danh sách ID các ảnh cũ mà Admin muốn xóa
     private List<Long> deletedImageIds;
+
+    private Boolean active;
 }

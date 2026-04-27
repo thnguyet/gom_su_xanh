@@ -25,6 +25,8 @@ public class WorkshopRegistration {
     @Column(name = "customer_id", nullable = false)
     private Long customerId;
 
+    private String customerName;
+
     @Column(nullable = false)
     private Integer ticketQuantity;
 
