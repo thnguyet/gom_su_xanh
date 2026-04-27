@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "promotions")
-public class Promotion {
+public class Promotion extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,11 +21,17 @@ public class Promotion {
     @Column(name = "name")
     private String name;
 
+    @Column(unique = true, nullable = false)
+    private String slug;
+
     @Column(name = "start_date")
     private LocalDateTime startDate;
 
     @Column(name = "end_date")
     private LocalDateTime endDate;
+
+    @Column(name = "is_active")
+    private Boolean isActive = true; // Cho phép bật/tắt nhanh chương trình
 
     @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductPromotion>  productPromotions;

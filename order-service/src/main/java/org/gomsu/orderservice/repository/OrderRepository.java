@@ -22,8 +22,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o WHERE " +
             "(:customerId IS NULL OR o.customerId = :customerId) AND " +
             "(:status IS NULL OR o.status = :status) AND " +
-            "(:startDate IS NULL OR o.orderDate >= :startDate) AND " +
-            "(:endDate IS NULL OR o.orderDate <= :endDate)")
+            // Sửa orderDate thành createdAt để khớp với BaseEntity
+            "(:startDate IS NULL OR o.createdAt >= :startDate) AND " +
+            "(:endDate IS NULL OR o.createdAt <= :endDate)")
     Page<Order> findAllOrdersForAdmin(
             @Param("customerId") Long customerId,
             @Param("status") OrderStatus status,

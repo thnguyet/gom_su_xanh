@@ -5,5 +5,6 @@ public enum OrderStatus {
     CONFIRMED, // Da xac nhan -> Tuy chinh sach, thuong van huy duoc
     SHIPPING, // Dang giao -> KHONG DUOC HUY
     DELIVERED, // Da gia -> KHONG DUOC HUY
+    COMPLETED,
     CANCELLED
 }

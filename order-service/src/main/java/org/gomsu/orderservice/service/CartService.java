@@ -24,8 +24,14 @@ public class CartService {
     // Hàm lấy chi tiết giỏ hàng và gọi sang Product Service
     public CartResponse getCartByCustomerId(Long customerId) {
         // Tìm giỏ hàng, nếu chưa có thì tạo mới luôn cho khách
+        // Trong hàm getCartByCustomerId và addToCart, sửa lại đoạn orElseGet:
         Cart cart = cartRepository.findByCustomerId(customerId)
-                .orElseGet(() -> cartRepository.save(Cart.builder().customerId(customerId).build()));
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setCustomerId(customerId);
+                    newCart.setCartItems(new ArrayList<>());
+                    return cartRepository.save(newCart);
+                });
 
         List<CartItem> cartItems = cart.getCartItems() != null ? cart.getCartItems() : new ArrayList<>();
 
@@ -56,8 +62,14 @@ public class CartService {
         Integer stockAvailable = product.getStockQuantity();
 
         // Tim gio hang theo customerId
+        // Trong hàm getCartByCustomerId và addToCart, sửa lại đoạn orElseGet:
         Cart cart = cartRepository.findByCustomerId(customerId)
-                .orElseGet(() -> cartRepository.save(Cart.builder().customerId(customerId).build()));
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setCustomerId(customerId);
+                    newCart.setCartItems(new ArrayList<>());
+                    return cartRepository.save(newCart);
+                });
 
         // Tim trong gio hang co nhung san pham nao?
         Optional<CartItem> existingItem = cart.getCartItems().stream()
@@ -133,7 +145,9 @@ public class CartService {
                     return CartResponse.CartItemResponse.builder()
                             .productId(item.getProductId())
                             .productName(dto != null ? dto.getName() : "Sản phẩm không tồn tại")
-                            .productImage(dto != null ? dto.getImageUrl() : null)
+                            .productImage(dto != null && dto.getImageUrls() != null && !dto.getImageUrls().isEmpty()
+                                    ? dto.getImageUrls().get(0) // Lấy ảnh đầu tiên
+                                    : null)
                             .unitPrice(price)
                             .quantity(item.getQuantity())
                             .subTotal(price * item.getQuantity())
@@ -144,9 +158,11 @@ public class CartService {
         return CartResponse.builder()
                 .id(cart.getId())
                 .customerId(cart.getCustomerId())
+                .createdAt(cart.getCreatedAt()) // 2. Thêm thời gian từ BaseEntity
+                .updatedAt(cart.getUpdatedAt())
                 .cartItemsResponse(itemResponses)
                 .totalPrice(itemResponses.stream().mapToDouble(CartResponse.CartItemResponse::getSubTotal).sum())
-                .totalItems(itemResponses.size())
+                .totalItems(itemResponses.stream().mapToInt(CartResponse.CartItemResponse::getQuantity).sum())
                 .build();
     }
 }

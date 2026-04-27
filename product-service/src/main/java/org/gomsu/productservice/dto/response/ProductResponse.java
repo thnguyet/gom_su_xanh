@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -18,6 +19,7 @@ public class ProductResponse {
     private String description;
     private String brand;
     private Integer stockQuantity;
+    private String slug;
 
     // Thay vì trả về cả object Category, ta chỉ cần tên của nó
     private String categoryName;
@@ -27,4 +29,12 @@ public class ProductResponse {
 
     // Nếu sản phẩm đang được giảm giá, có thể trả thêm trường này (hiển thị % giảm)
     private Double discountPercentage;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    // BỔ SUNG THÊM
+    private Double averageRating; // Điểm sao trung bình (VD: 4.5)
+    private Long reviewCount;     // Tổng số lượt đánh giá (VD: 120)
+
 }

@@ -1,8 +1,10 @@
 package org.gomsu.productservice.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.gomsu.productservice.dto.request.ProductCreationRequest;
 import org.gomsu.productservice.dto.request.PromotionRequest;
+import org.gomsu.productservice.dto.request.PromotionUpdateRequest;
 import org.gomsu.productservice.dto.response.PromotionResponse;
 import org.gomsu.productservice.entity.Product;
 import org.gomsu.productservice.entity.ProductPromotion;
@@ -17,12 +19,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PromotionService {
     private final PromotionRepository promotionRepository;
 
@@ -31,10 +37,19 @@ public class PromotionService {
     //Tao promotion moi
     @Transactional
     public PromotionResponse createPromotion(PromotionRequest promotionRequest) {
+        String name = promotionRequest.getName().trim();
+        String slug = toSlug(name);
+
+        // Check trùng cho chắc chắn nè Nguyệt
+        if (promotionRepository.existsBySlug(slug)) {
+            throw new RuntimeException("Chương trình khuyến mãi này đã tồn tại rồi!");
+        }
         Promotion promotion = new Promotion();
         promotion.setName(promotionRequest.getName());
+        promotion.setSlug(toSlug(promotionRequest.getName()));
         promotion.setStartDate(promotionRequest.getStartDate());
         promotion.setEndDate(promotionRequest.getEndDate());
+        promotion.setIsActive(true);
         List<ProductPromotion> productPromotions = promotionRequest.getProductDiscounts().stream()
                 .map(item -> {
                     Product product = productRepository.findById(item.getProductId())
@@ -52,67 +67,94 @@ public class PromotionService {
 
     // Sua promotion
     @Transactional
-    public PromotionResponse updatePromotion(Long id, PromotionRequest request) {
-        // 1. Kiểm tra sự tồn tại của chương trình khuyến mãi trong DB
+    public PromotionResponse updatePromotion(Long id, PromotionUpdateRequest request) {
+        // 1. Kiểm tra sự tồn tại
         Promotion promotion = promotionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khuyến mãi ID: " + id));
 
-        // 2. Cập nhật các thông tin cơ bản của chương trình
-        promotion.setName(request.getName());
-        promotion.setStartDate(request.getStartDate());
-        promotion.setEndDate(request.getEndDate());
+        // 2. Cập nhật thông tin cơ bản (Chỉ cập nhật nếu KHÔNG NULL)
+        if (request.getName() != null && !request.getName().isBlank()) {
+            promotion.setName(request.getName());
+            promotion.setSlug(toSlug(request.getName()));
+        }
 
-        // 3. Tạo một bản đồ (Map) chứa các sản phẩm khuyến mãi hiện đang có trong DB
-        // Key: productId, Value: đối tượng ProductPromotion
-        // Mục đích: Để kiểm tra nhanh xem sản phẩm trong request đã tồn tại chưa
-        Map<Long, ProductPromotion> existingMap = promotion.getProductPromotions().stream()
-                .collect(Collectors.toMap(pp -> pp.getProduct().getId(), pp -> pp));
+        if (request.getStartDate() != null) {
+            promotion.setStartDate(request.getStartDate());
+        }
 
-        // 4. Xử lý danh sách sản phẩm giảm giá gửi lên từ Request
-        List<ProductPromotion> updatedList = request.getProductDiscounts().stream()
-                .map(dto -> {
-                    // TRƯỜNG HỢP 1: Sản phẩm đã có trong chương trình khuyến mãi này rồi
-                    if (existingMap.containsKey(dto.getProductId())) {
-                        ProductPromotion existing = existingMap.get(dto.getProductId());
-                        // Cập nhật lại phần trăm giảm giá mới
-                        existing.setDiscountPercentage(dto.getDiscountPercentage());
-                        // Xóa khỏi Map để đánh dấu là sản phẩm này vẫn được giữ lại
-                        existingMap.remove(dto.getProductId());
-                        return existing;
-                    }
-                    // TRƯỜNG HỢP 2: Sản phẩm mới được thêm vào chương trình
-                    else {
-                        Product product = productRepository.findById(dto.getProductId())
-                                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + dto.getProductId()));
+        if (request.getEndDate() != null) {
+            promotion.setEndDate(request.getEndDate());
+        }
 
-                        ProductPromotion pp = new ProductPromotion();
-                        pp.setProduct(product);
-                        pp.setPromotion(promotion); // Thiết lập mối quan hệ với bảng Promotion (Cha)
-                        pp.setDiscountPercentage(dto.getDiscountPercentage());
-                        return pp;
-                    }
-                }).collect(Collectors.toList());
+        // 3. Logic MERGE sản phẩm: Cập nhật hoặc Thêm mới, tuyệt đối không .clear()
+        if (request.getProductDiscounts() != null && !request.getProductDiscounts().isEmpty()) {
 
-        // 5. Đồng bộ hóa danh sách (Sync List)
-        // Xóa sạch danh sách cũ trong bộ nhớ (nhờ orphanRemoval=true nên những thằng bị xóa ở bước 4 sẽ mất khỏi DB)
-        promotion.getProductPromotions().clear();
-        // Thêm danh sách đã được cập nhật/thêm mới vào lại
-        promotion.getProductPromotions().addAll(updatedList);
+            // Tạo Map để tra cứu nhanh các sản phẩm đang có trong khuyến mãi hiện tại
+            Map<Long, ProductPromotion> existingMap = promotion.getProductPromotions().stream()
+                    .collect(Collectors.toMap(pp -> pp.getProduct().getId(), pp -> pp));
 
-        // 6. Lưu lại vào Database và chuyển đổi sang đối tượng Response để trả về cho Client
+            for (PromotionRequest.ProductDiscountRequest dto : request.getProductDiscounts()) {
+                if (existingMap.containsKey(dto.getProductId())) {
+                    // TRƯỜNG HỢP 1: Sản phẩm đã tồn tại -> Chỉ cập nhật lại % giảm giá
+                    ProductPromotion existing = existingMap.get(dto.getProductId());
+                    existing.setDiscountPercentage(dto.getDiscountPercentage());
+                }
+                else {
+                    // TRƯỜNG HỢP 2: Sản phẩm chưa có trong đợt này -> Tạo mới và thêm vào List
+                    Product product = productRepository.findById(dto.getProductId())
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + dto.getProductId()));
+
+                    ProductPromotion pp = new ProductPromotion();
+                    pp.setProduct(product);
+                    pp.setPromotion(promotion);
+                    pp.setDiscountPercentage(dto.getDiscountPercentage());
+
+                    // Thêm trực tiếp vào danh sách của promotion (JPA sẽ tự động save bản ghi mới vào bảng trung gian)
+                    promotion.getProductPromotions().add(pp);
+                }
+            }
+        }
+
+        // 4. Lưu lại (Hibernate sẽ tự động nhận biết thay đổi ở các Object bên trong List)
         return toPromotionResponse(promotionRepository.save(promotion));
     }
 
-    // Dừng khuyến mãi ngay lập tức (Kết thúc sớm)
     @Transactional
     public PromotionResponse stopPromotion(Long id) {
+        // 1. Tìm chương trình khuyến mãi
         Promotion promotion = promotionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đợt khuyến mãi này"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đợt khuyến mãi ID: " + id));
 
-        // Gán ngày kết thúc là bây giờ
-        promotion.setEndDate(java.time.LocalDateTime.now());
+        // 2. Kiểm tra nếu nó đã dừng rồi thì không cần làm gì nữa
+        if (Boolean.FALSE.equals(promotion.getIsActive())) {
+            throw new RuntimeException("Chương trình này đã tạm dừng từ trước đó.");
+        }
 
-        return toPromotionResponse(promotionRepository.save(promotion));
+        // 3. Cập nhật trạng thái và thời gian kết thúc
+        promotion.setIsActive(false);
+        promotion.setEndDate(LocalDateTime.now()); // Kết thúc ngay tại giây này
+
+        // 4. (Quan trọng) Xử lý các sản phẩm đang liên kết
+        // Nguyệt nên cân nhắc:
+        // Cách A: Xóa sạch các bản ghi giảm giá trong bảng trung gian để Product quay về giá gốc.
+        // Cách B: Giữ lại để làm lịch sử nhưng logic lấy giá phải check isActive của Promotion.
+
+        // Ở đây mình chọn cách xóa (Clear) để giải phóng Database và ngắt kết nối giảm giá:
+        promotion.getProductPromotions().clear();
+
+        // 5. Lưu lại
+        Promotion savedPromotion = promotionRepository.save(promotion);
+
+        log.info("Admin đã dừng khẩn cấp chương trình: {}", savedPromotion.getName());
+
+        return toPromotionResponse(savedPromotion);
+    }
+
+    // Lay promotion theo slug
+    public PromotionResponse getPromotionBySlug(String slug) {
+        Promotion promotion = promotionRepository.findBySlug(slug)
+                .orElseThrow(() -> new RuntimeException("Chương trình khuyến mãi không tồn tại!"));
+        return toPromotionResponse(promotion);
     }
 
     // Hàm xóa Promotion
@@ -137,10 +179,31 @@ public class PromotionService {
     }
 
     // Lấy tất cả đợt khuyến mãi (Phân trang)
-    public Page<PromotionResponse> getAllPromotions(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").descending());
-        return promotionRepository.findAll(pageable)
-                .map(this::toPromotionResponse);
+    public Page<PromotionResponse> getAllPromotions(
+            int page,
+            int size,
+            String keyword,
+            String sortBy,
+            String sortDir,
+            LocalDateTime fromDate,
+            LocalDateTime toDate) {
+
+        // 1. Quyết định chiều sắp xếp (Mặc định lấy createdAt từ BaseEntity)
+        String actualSortBy = (sortBy == null || sortBy.equals("id")) ? "createdAt" : sortBy;
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(actualSortBy).ascending()
+                : Sort.by(actualSortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // 2. Gọi Repository để search tổng hợp (Giống Product)
+        Page<Promotion> promotionPage = promotionRepository.searchPromotions(
+                keyword != null ? keyword.trim() : null,
+                fromDate,
+                toDate,
+                pageable);
+
+        return promotionPage.map(this::toPromotionResponse);
     }
 
     public PromotionResponse toPromotionResponse(Promotion promotion) {
@@ -156,6 +219,7 @@ public class PromotionService {
                     return PromotionResponse.ProductPromotionItemResponse.builder()
                             .productId(productId)
                             .productName(productName)
+                            .productSlug(product.getSlug())
                             .discountPercentage(discountPercentage)
                             .originalPrice(originalPrice)
                             .discountedPrice(discountedPrice)
@@ -165,10 +229,34 @@ public class PromotionService {
         return PromotionResponse.builder()
                 .id(promotion.getId())
                 .name(promotion.getName())
+                .slug(promotion.getSlug())
+                .isActive(promotion.getIsActive())
                 .startDate(promotion.getStartDate())
                 .endDate(promotion.getEndDate())
+                .createdAt(promotion.getCreatedAt())
+                .updatedAt(promotion.getUpdatedAt())
                 .items(items)
                 .build();
+    }
+
+    public String toSlug(String title) {
+        if (title == null || title.isBlank()) return "";
+
+        // 1. Chuyển về chữ thường trước để xử lý cho dễ
+        String slug = title.toLowerCase();
+
+        // 2. Thay thế các ký tự đặc biệt của tiếng Việt (đ, ý, ...)
+        slug = slug.replaceAll("đ", "d");
+
+        // 3. Chuẩn hóa để loại bỏ dấu (Normalizer)
+        String normalized = Normalizer.normalize(slug, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        slug = pattern.matcher(normalized).replaceAll("");
+
+        // 4. Xóa các ký tự không phải chữ cái/số, thay khoảng trắng bằng gạch ngang
+        return slug.replaceAll("[^a-z0-9\\s]", "") // Xóa ký tự đặc biệt còn sót lại
+                .replaceAll("\\s+", "-")           // Thay khoảng trắng thành 1 dấu gạch ngang
+                .replaceAll("^-+|-+$", "");        // Xóa dấu gạch ngang dư thừa ở đầu và cuối
     }
 
 }

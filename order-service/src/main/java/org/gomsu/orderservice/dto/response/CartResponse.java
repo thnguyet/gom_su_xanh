@@ -16,6 +16,7 @@ import java.util.List;
 public class CartResponse {
     private Long id;
     private Long customerId;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<CartItemResponse> cartItemsResponse;
 

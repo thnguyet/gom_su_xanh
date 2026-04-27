@@ -1,25 +1,29 @@
 package org.gomsu.productservice.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Formula;
 
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "categories")
-public class Category {
+@Builder
+public class Category extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name", unique = true, nullable = false)
     private String name;
+
+    @Column(unique = true, nullable = false)
+    private String slug; // Thêm slug cho Category
 
     private boolean deleted = false;
 

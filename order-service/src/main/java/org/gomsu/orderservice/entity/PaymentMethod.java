@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "payment_methods")
-public class PaymentMethod {
+public class PaymentMethod extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,5 +26,5 @@ public class PaymentMethod {
     @JsonIgnore
     private List<Order> orders = new ArrayList<>();
 
-    private boolean active = true;
+    private Boolean active = true;
 }

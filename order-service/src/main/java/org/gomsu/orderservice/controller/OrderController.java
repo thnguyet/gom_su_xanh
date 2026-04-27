@@ -1,5 +1,6 @@
 package org.gomsu.orderservice.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.gomsu.orderservice.dto.request.OrderRequest;
 import org.gomsu.orderservice.dto.response.OrderResponse;
@@ -21,15 +22,17 @@ import java.time.LocalDateTime;
 public class OrderController {
     private final OrderService orderService;
 
+    // THÀNH CÔNG
     @PostMapping("/checkout")
     public ResponseEntity<OrderResponse> checkout(
             @AuthenticationPrincipal Jwt jwt,
-            @RequestBody OrderRequest orderRequest
+            @Valid @RequestBody OrderRequest orderRequest
     ){
         Long userId = jwt.getClaim("userId");
         return ResponseEntity.ok(orderService.createOrder(userId, orderRequest));
     }
 
+    // THÀNH CÔNG
     @PutMapping("/{orderId}/cancel")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')") // Cả User và Admin đều có quyền hủy
     public ResponseEntity<OrderResponse> cancelOrder(
@@ -49,6 +52,7 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    // THÀNH CÔNG
     @GetMapping("/my-orders")
     public ResponseEntity<Page<OrderResponse>> getMyOrders(
             @AuthenticationPrincipal Jwt jwt,
@@ -57,7 +61,7 @@ public class OrderController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "orderDate") String sortBy,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir
     ) {
         // Lấy ID từ token (khớp với key "userId" trong Identity Service của Nguyệt)
@@ -79,7 +83,7 @@ public class OrderController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "orderDate") String sortBy,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir
     ) {
         Page<OrderResponse> orders = orderService.getAllOrdersForAdmin(
@@ -108,5 +112,11 @@ public class OrderController {
 
         OrderResponse response = orderService.updateOrderStatus(orderId, status, adminId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderById(id));
     }
 }

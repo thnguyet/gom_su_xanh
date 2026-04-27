@@ -16,15 +16,16 @@ import java.util.List;
 public class OrderResponse {
     private Long id;
     private Long customerId;
-    private LocalDateTime orderDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String status;
 
     private Double totalAmount;
     private String address;
     private String phoneNumber;
-    private  String note;
+    private String note;
     private String paymentMethod;
-    private String shippingAddress;
+    private String shippingMethod;
     private List<OrderDetailResponse> orderDetails;
 
     @Data
