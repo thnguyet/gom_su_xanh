@@ -3,33 +3,35 @@ package com.gomsu.contentservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "reviews")
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter @Setter @Builder
+@NoArgsConstructor @AllArgsConstructor
 public class Review extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long productId; // ID sản phẩm từ Product Service
-
-    @Column(nullable = false)
-    private Long userId; // ID người dùng từ Identity Service
-
-    private String username; // Lưu tên để hiển thị nhanh cho FE
-
-    @Column(nullable = false)
-    private int rating; // 1 -> 5 sao
+    private Long productId;
+    private Long userId;
+    private String username;
+    private Integer rating;
+    private String title; // Tiêu đề đánh giá
 
     @Column(columnDefinition = "TEXT")
     private String comment;
+    private String imageReview;
+    private Long orderId;
 
-    private String imageReview; // Khách có thể đính kèm ảnh thật
+    @Builder.Default
+    private boolean isApproved = false; // Mặc định chờ duyệt (trừ khi mua thật)
 
-    private boolean isApproved = true; // Admin có thể ẩn đánh giá xấu nếu cần
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private boolean isDeleted = false; // Xóa mềm
+
+    private String adminReply;
+    private LocalDateTime repliedAt;
 }

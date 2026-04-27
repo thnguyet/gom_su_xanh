@@ -13,32 +13,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String REGISTRATION_QUEUE = "workshop_registration_queue";
-    public static final String WORKSHOP_EXCHANGE = "workshop_exchange";
-    public static final String REGISTRATION_ROUTING_KEY = "registration_routing_key";
+    // --- CẤU HÌNH REVIEW (Chỉ tập trung vào Review) ---
+    public static final String REVIEW_EXCHANGE = "review.exchange";
+    public static final String REVIEW_ROUTING_KEY = "review.update.key";
 
     @Bean
-    public Queue registrationQueue() {
-        // Queue bền vững (durable = true) để không mất tin nhắn khi RabbitMQ restart
-        return new Queue(REGISTRATION_QUEUE, true);
-    }
-
-    @Bean
-    public TopicExchange workshopExchange() {
-        return new TopicExchange(WORKSHOP_EXCHANGE);
-    }
-
-    @Bean
-    public Binding registrationBinding(Queue registrationQueue, TopicExchange workshopExchange) {
-        return BindingBuilder.bind(registrationQueue)
-                .to(workshopExchange)
-                .with(REGISTRATION_ROUTING_KEY);
+    public DirectExchange reviewExchange() {
+        // Khai báo DirectExchange để gửi tin nhắn chính xác theo Routing Key
+        return new DirectExchange(REVIEW_EXCHANGE);
     }
 
     @Bean
     public MessageConverter jsonMessageConverter() {
         ObjectMapper objectMapper = new ObjectMapper();
-        // Giúp Jackson xử lý được kiểu LocalDateTime (rất quan trọng cho Workshop)
+        // Cực kỳ quan trọng để xử lý LocalDateTime trong Review
         objectMapper.registerModule(new JavaTimeModule());
         return new Jackson2JsonMessageConverter(objectMapper);
     }

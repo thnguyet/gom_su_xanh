@@ -5,17 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class CategoryResponse {
     private Long id;
-
-    private String name; // Tên thể loại: "Kiến thức gốm sứ"
-
-    private String description; // Mô tả ngắn (nếu cần hiện ở trang danh mục)
-
-    // Nếu Nguyệt muốn làm URL đẹp cho cả danh mục thì thêm slug ở đây
+    private String name;
     private String slug;
+    private String description;
+    private LocalDateTime createdAt;
+    private Boolean active;
 }
