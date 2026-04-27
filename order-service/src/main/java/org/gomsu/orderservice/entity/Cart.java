@@ -16,16 +16,13 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Cart {
+public class Cart extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "customer_id")
     private Long customerId;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems = new ArrayList<>();

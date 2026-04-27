@@ -16,13 +16,10 @@ import java.util.List;
 @Builder
 @Data
 @Table(name = "orders")
-public class Order {
+public class Order extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "order_date")
-    private LocalDateTime orderDate;
 
     private String address;
     private String phoneNumber;
@@ -50,10 +47,4 @@ public class Order {
     @JoinColumn(name = "shipping_method_id")
     private ShippingMethod shippingMethod;
 
-    @PrePersist
-    protected  void onCreate()
-    {
-        this.orderDate = LocalDateTime.now();
-        if (this.status == null) this.status = OrderStatus.PENDING;
-    }
 }

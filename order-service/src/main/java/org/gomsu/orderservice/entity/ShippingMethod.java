@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "shipping_methods")
-public class ShippingMethod {
+public class ShippingMethod extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,5 +29,5 @@ public class ShippingMethod {
     @JsonIgnore
     private List<Order> orders = new ArrayList<>();
 
-    private boolean active = true;
+    private Boolean active = true;
 }
