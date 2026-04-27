@@ -27,10 +27,23 @@ public class CloudinaryService {
     public void deleteImage(String imageUrl) throws IOException {
         if (imageUrl != null && !imageUrl.isEmpty()) {
             try {
-                String publicId = imageUrl.substring(imageUrl.lastIndexOf("/") + 1, imageUrl.lastIndexOf("."));
+                // 1. Tách lấy phần sau chữ /upload/
+                // Ví dụ: https://res.cloudinary.com/thunguyet/image/upload/v12345/gomsu/posts/anh_dep.jpg
+                String temp = imageUrl.substring(imageUrl.lastIndexOf("/upload/") + 8);
+
+                // 2. Bỏ phần version (v12345/) nếu có
+                if (temp.contains("/v")) {
+                    temp = temp.substring(temp.indexOf("/") + 1);
+                }
+
+                // 3. Bỏ phần định dạng file (.jpg, .png) để lấy publicId
+                String publicId = temp.substring(0, temp.lastIndexOf("."));
+
+                // 4. Thực hiện xóa
                 cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
             } catch (Exception e) {
-                throw new IOException("Không thể xóa ảnh trên Cloudinary: " + e.getMessage());
+                // Log lỗi nhưng không làm sập luồng xóa trong DB của Nguyệt
+                System.err.println("Cảnh báo: Lỗi xóa ảnh Cloudinary " + e.getMessage());
             }
         }
     }

@@ -1,6 +1,7 @@
 package org.gomsu.productservice.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.gomsu.productservice.dto.request.ProductCreationRequest;
 import org.gomsu.productservice.dto.request.ProductRestockRequest;
 import org.gomsu.productservice.dto.request.ProductUpdateRequest;
@@ -13,21 +14,25 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
@@ -35,13 +40,16 @@ public class ProductService {
     private final CloudinaryService cloudinaryService;
 
     //Them san pham
+    @Transactional
     public ProductResponse createProduct(ProductCreationRequest productCreationRequest, List<MultipartFile> images) {
-        Product product = new Product();
-        product.setName(productCreationRequest.getName());
-        product.setPrice(productCreationRequest.getPrice());
-        product.setDescription(productCreationRequest.getDescription());
-        product.setBrand(productCreationRequest.getBrand());
-        product.setStockQuantity(productCreationRequest.getStockQuantity());
+        Product product = Product.builder()
+                .name(productCreationRequest.getName())
+                .slug(toSlug(productCreationRequest.getName())) // Tự động tạo slug từ tên
+                .price(productCreationRequest.getPrice())
+                .description(productCreationRequest.getDescription())
+                .brand(productCreationRequest.getBrand())
+                .stockQuantity(productCreationRequest.getStockQuantity())
+                .build();
 
         Category category = categoryRepository.findById(productCreationRequest.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục với ID này!"));
@@ -50,38 +58,60 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
 
         // 3. XỬ LÝ UPLOAD DANH SÁCH ẢNH
-        List<ProductImage> savedImages = new ArrayList<>();
-
+//        List<ProductImage> savedImages = new ArrayList<>();
+//
+//        if (images != null && !images.isEmpty()) {
+//            for (MultipartFile file : images) {
+//                try {
+//                    // Đẩy lên mây lấy link
+//                    String imageUrl = cloudinaryService.uploadImage(file);
+//
+//                    // Tạo đối tượng ProductImage và lưu DB
+//                    ProductImage productImage = new ProductImage();
+//                    productImage.setImageUrl(imageUrl);
+//                    productImage.setProduct(savedProduct); // Gắn với áo vừa tạo
+//
+//                    savedImages.add(productImageRepository.save(productImage));
+//                } catch (IOException e) {
+//                    throw new RuntimeException("Lỗi khi upload ảnh: " + e.getMessage());
+//                }
+//            }
+//        }
+        // Xử lý upload ảnh (Dùng hàm dùng chung để code ngắn gọn hơn)
         if (images != null && !images.isEmpty()) {
-            for (MultipartFile file : images) {
-                try {
-                    // Đẩy lên mây lấy link
-                    String imageUrl = cloudinaryService.uploadImage(file);
-
-                    // Tạo đối tượng ProductImage và lưu DB
-                    ProductImage productImage = new ProductImage();
-                    productImage.setImageUrl(imageUrl);
-                    productImage.setProduct(savedProduct); // Gắn với áo vừa tạo
-
-                    savedImages.add(productImageRepository.save(productImage));
-                } catch (IOException e) {
-                    throw new RuntimeException("Lỗi khi upload ảnh: " + e.getMessage());
-                }
-            }
+            handleImageUploads(images, savedProduct);
         }
-
-        savedProduct.setProductImages(savedImages);
 
         return toProductResponse(savedProduct);
     }
 
+    // --- HÀM HỖ TRỢ UPLOAD ẢNH (Tách ra để dùng chung) ---
+    private void handleImageUploads(List<MultipartFile> images, Product product) {
+        for (MultipartFile file : images) {
+            try {
+                String imageUrl = cloudinaryService.uploadImage(file);
+                ProductImage productImage = new ProductImage();
+                productImage.setImageUrl(imageUrl);
+                productImage.setProduct(product);
+                productImageRepository.save(productImage);
+                // Thêm vào list của product để toProductResponse lấy được ngay
+                if (product.getProductImages() == null) product.setProductImages(new ArrayList<>());
+                product.getProductImages().add(productImage);
+            } catch (IOException e) {
+                throw new RuntimeException("Lỗi upload ảnh");
+            }
+        }
+    }
+
     //Sua san pham
+    @Transactional
     public ProductResponse updateProduct(ProductUpdateRequest productUpdateRequest, Long id, List<MultipartFile> images) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm!"));
 
         if (productUpdateRequest.getName() != null && !productUpdateRequest.getName().isEmpty()) {
             product.setName(productUpdateRequest.getName());
+            product.setSlug(toSlug(productUpdateRequest.getName()));
         }
 
         if (productUpdateRequest.getPrice() != null && productUpdateRequest.getPrice() != 0) {
@@ -100,19 +130,9 @@ public class ProductService {
             product.setStockQuantity(productUpdateRequest.getStockQuantity());
         }
 
-        // Them anh
+        // Thêm ảnh mới
         if (images != null && !images.isEmpty()) {
-            for (MultipartFile file : images) {
-                try {
-                    String imageUrl = cloudinaryService.uploadImage(file);
-                    ProductImage productImage = new ProductImage();
-                    productImage.setImageUrl(imageUrl);
-                    productImage.setProduct(product);
-                    product.getProductImages().add(productImageRepository.save(productImage));
-                } catch (IOException e) {
-                    throw new RuntimeException("Lỗi khi upload ảnh mới");
-                }
-            }
+            handleImageUploads(images, product);
         }
 
         //Xoa anh
@@ -133,7 +153,15 @@ public class ProductService {
         return toProductResponse(productRepository.save(product));
     }
 
+    // 3. THÊM HÀM LẤY SẢN PHẨM THEO SLUG (Dành cho khách xem trang chi tiết)
+    public ProductResponse getProductBySlug(String slug) {
+        Product product = productRepository.findBySlug(slug)
+                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại!"));
+        return toProductResponse(product);
+    }
+
     //Xoa san pham
+    @Transactional
     public void deleteProduct(Long id) {
         Product deleteProduct = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm cần xóa!"));
@@ -150,23 +178,35 @@ public class ProductService {
     }
 
     //Xem toan bo san pham
-    public Page<ProductResponse> getAllProducts(int page, int size, String keyword, String sortBy, String sortDir) {
-        // 1. Quyết định chiều sắp xếp (Tăng dần - ASC hay Giảm dần - DESC)
+    @Transactional
+    public Page<ProductResponse> getAllProducts(
+            int page,
+            int size,
+            String keyword,
+            String sortBy,
+            String sortDir,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate) {
+
+        // 1. Quyết định chiều sắp xếp
+        // Nếu muốn mặc định cái mới nhất hiện lên đầu, Nguyệt có thể set sortBy = "createdAt"
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
-        // 2. Tạo đối tượng Pageable bao gồm: Trang số mấy + Kích thước + Sắp xếp thế nào
         Pageable pageable = PageRequest.of(page, size, sort);
 
+        // 2. Sử dụng Specification hoặc Query tùy biến để lọc theo thời gian
+        // Ở đây mình hướng dẫn cách dùng đơn giản nhất là bổ sung Query vào Repository
         Page<Product> productPage;
 
-        if (keyword != null && !keyword.isEmpty()) {
-            productPage = productRepository.findByNameContainingIgnoreCase(keyword.trim(), pageable);
-        }
-        else {
-            productPage = productRepository.findAll(pageable);
-        }
+        // Nguyệt cần xử lý logic lọc kết hợp: Keyword + Thời gian
+        // Mình giả định Nguyệt sẽ dùng một hàm Search tổng hợp trong Repository
+        productPage = productRepository.searchProducts(
+                keyword != null ? keyword.trim() : null,
+                fromDate,
+                toDate,
+                pageable);
 
         return productPage.map(this::toProductResponse);
     }
@@ -179,6 +219,7 @@ public class ProductService {
     }
 
     //Them anh cho san pham
+    @Transactional
     public ProductResponse uploadProductImages(Long id, List<MultipartFile> images) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm này"));
@@ -257,11 +298,37 @@ public class ProductService {
         }
     }
 
+    @Transactional
+    public void updateProductRating(Long productId, Double averageRating, Long reviewCount) {
+        // 1. Tìm sản phẩm
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + productId));
+
+        // 2. Xử lý giá trị NULL trước khi so sánh
+        // Nếu trong DB là null thì coi như là 0.0 hoặc 0
+        Double currentAvg = (product.getAverageRating() != null) ? product.getAverageRating() : 0.0;
+        Long currentCount = (product.getReviewCount() != null) ? product.getReviewCount() : 0L;
+
+        // So sánh an toàn
+        if (currentAvg.equals(averageRating) && currentCount.equals(reviewCount)) {
+            log.info(">>> Rating SP {} không đổi, bỏ qua cập nhật.", productId);
+            return;
+        }
+
+        // 3. Cập nhật thông số
+        product.setAverageRating(averageRating);
+        product.setReviewCount(reviewCount);
+
+        log.info(">>> Cập nhật Rating thành công cho SP {}: {} sao, {} đánh giá",
+                productId, averageRating, reviewCount);
+    }
+
     private ProductResponse toProductResponse(Product product)
     {
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
+                .slug(product.getSlug())
                 .price(product.getPrice())
                 .description(product.getDescription())
                 .brand(product.getBrand())
@@ -272,6 +339,30 @@ public class ProductService {
                             .map(ProductImage::getImageUrl)
                             .toList() : null)
                 .discountPercentage(calculateBestDiscount(product))
+                .createdAt(product.getCreatedAt()) // Lấy từ BaseEntity
+                .updatedAt(product.getUpdatedAt()) // Lấy từ BaseEntity
+                .averageRating(product.getAverageRating() != null ? product.getAverageRating() : 0.0)
+                .reviewCount(product.getReviewCount() != null ? product.getReviewCount() : 0)
                 .build();
+    }
+
+    public String toSlug(String title) {
+        if (title == null || title.isBlank()) return "";
+
+        // 1. Chuyển về chữ thường trước để xử lý cho dễ
+        String slug = title.toLowerCase();
+
+        // 2. Thay thế các ký tự đặc biệt của tiếng Việt (đ, ý, ...)
+        slug = slug.replaceAll("đ", "d");
+
+        // 3. Chuẩn hóa để loại bỏ dấu (Normalizer)
+        String normalized = Normalizer.normalize(slug, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        slug = pattern.matcher(normalized).replaceAll("");
+
+        // 4. Xóa các ký tự không phải chữ cái/số, thay khoảng trắng bằng gạch ngang
+        return slug.replaceAll("[^a-z0-9\\s]", "") // Xóa ký tự đặc biệt còn sót lại
+                .replaceAll("\\s+", "-")           // Thay khoảng trắng thành 1 dấu gạch ngang
+                .replaceAll("^-+|-+$", "");        // Xóa dấu gạch ngang dư thừa ở đầu và cuối
     }
 }
