@@ -102,28 +102,8 @@
 
   <main class="page-main">
     
-    <!-- Categories -->
-    <div class="category-scroll">
-      <a href="trang-san-pham_945-1348.html" class="category-card">
-        <img src="../assets/images/3838a9d43772b2011d5823350fb83965460ef7e7.jpg" alt="Fridge magnet">
-        <div class="overlay"><h3>Fridge<br>magnet</h3></div>
-      </a>
-      <a href="trang-san-pham_945-1348.html" class="category-card">
-        <img src="../assets/images/4f104504f6e60a16bf34ab9632875014e953e479.jpg" alt="Móc khóa">
-        <div class="overlay"><h3>Móc<br>khóa</h3></div>
-      </a>
-      <a href="trang-san-pham_945-1348.html" class="category-card">
-        <img src="../assets/images/5671cbed570674bbb8b7a8070ed765851887e396.jpg" alt="Tranh gốm tái chế">
-        <div class="overlay"><h3>Tranh gốm<br>tái chế</h3></div>
-      </a>
-      <a href="trang-san-pham_945-1348.html" class="category-card">
-        <img src="../assets/images/be2e3a2e3c83489a5a3914bd568b06c5c09930d2.jpg" alt="Bộ kit thủ công">
-        <div class="overlay"><h3>Bộ kit<br>thủ công</h3></div>
-      </a>
-      <a href="trang-san-pham_945-1348.html" class="category-card">
-        <img src="../assets/images/95624edfa4edfccd25b11e43ac08e222708024d5.jpg" alt="Sản phẩm Kintsugi">
-        <div class="overlay"><h3>Sản phẩm<br>Kintsugi</h3></div>
-      </a>
+    <div class="category-scroll" id="categoryScroll">
+      <!-- Categories will be dynamically loaded here -->
     </div>
 
     <!-- Products Header -->
@@ -150,10 +130,15 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       var currentPage = 0;
-      var pageSize = 15;
+      var pageSize = 8;
+      var currentCategoryId = null;
 
       function loadProducts(page) {
-        fetch('http://localhost:8080/product/products/all?page=' + page + '&size=' + pageSize)
+        var url = 'http://localhost:8080/product/products/all?page=' + page + '&size=' + pageSize;
+        if (currentCategoryId) {
+          url += '&categoryId=' + currentCategoryId;
+        }
+        fetch(url)
           .then(res => res.json())
           .then(data => {
             // Spring Data JPA Page format
@@ -183,6 +168,10 @@
               var priceStr = new Intl.NumberFormat('vi-VN').format(p.price || 0) + 'VNĐ';
               var detailUrl = 'trang-san-pham-chi-tiet.html?slug=' + (p.slug || p.id);
               
+              var isOutOfStock = (p.stockQuantity <= 0);
+              var btnText = isOutOfStock ? 'Hết hàng' : 'Mua ngay';
+              var btnStyle = isOutOfStock ? 'background: #ccc; color: #666; cursor: not-allowed;' : '';
+              
               var card = document.createElement('div');
               card.className = 'gsx-card';
               card.innerHTML = `
@@ -191,7 +180,7 @@
                 <div class="gsx-card-body">
                   <h3 class="gsx-card-title">${p.name}</h3>
                   <p class="gsx-card-price">${priceStr}</p>
-                  <a href="${detailUrl}" class="gsx-card-btn">Mua ngay</a>
+                  <a href="${isOutOfStock ? '#' : detailUrl}" class="gsx-card-btn" style="${btnStyle}">${btnText}</a>
                 </div>
               `;
               grid.appendChild(card);
@@ -222,6 +211,52 @@
           });
       }
 
+      function loadCategories() {
+        fetch('http://localhost:8080/product/categories?size=4')
+          .then(res => res.json())
+          .then(data => {
+            var categories = data.content || (data.result ? data.result.content : []) || (Array.isArray(data) ? data : []);
+            var scroll = document.getElementById('categoryScroll');
+            
+            // Add "All" Category
+            var allHtml = `
+              <a href="#" class="category-card" data-id="null" style="border: 3px solid var(--clr-moss)">
+                <img src="../assets/images/3838a9d43772b2011d5823350fb83965460ef7e7.jpg" alt="Tất cả">
+                <div class="overlay"><h3>Tất cả<br>sản phẩm</h3></div>
+              </a>
+            `;
+            
+            var html = allHtml;
+            categories.forEach(cat => {
+              var catImg = cat.imageUrl || "../assets/images/placeholder.jpg";
+              html += `
+                <a href="#" class="category-card" data-id="${cat.id}">
+                  <img src="${catImg}" alt="${cat.name}">
+                  <div class="overlay"><h3>${cat.name}</h3></div>
+                </a>
+              `;
+            });
+            scroll.innerHTML = html;
+
+            // Add Click Events
+            scroll.querySelectorAll('.category-card').forEach(card => {
+              card.addEventListener('click', function(e) {
+                e.preventDefault();
+                var id = this.getAttribute('data-id');
+                currentCategoryId = (id === 'null') ? null : id;
+                currentPage = 0;
+                loadProducts(currentPage);
+                
+                // Highlight active category
+                scroll.querySelectorAll('.category-card').forEach(c => c.style.border = '1px solid rgba(148,181,120,.3)');
+                this.style.border = '3px solid var(--clr-moss)';
+              });
+            });
+          })
+          .catch(err => console.error('Lỗi tải danh mục:', err));
+      }
+
+      loadCategories();
       loadProducts(currentPage);
     });
   </script>

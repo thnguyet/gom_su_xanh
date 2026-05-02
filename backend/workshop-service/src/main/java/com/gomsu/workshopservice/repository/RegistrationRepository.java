@@ -16,6 +16,24 @@ public interface RegistrationRepository extends JpaRepository<WorkshopRegistrati
     @Query("SELECT COALESCE(SUM(r.ticketQuantity), 0) FROM WorkshopRegistration r " +
             "WHERE r.workshop.id = :workshopId AND r.status != 'CANCELLED'")
     Integer countSoldTicketsByWorkshopId(@Param("workshopId") Long workshopId);
+    @Query(value = "SELECT r FROM WorkshopRegistration r " +
+            "JOIN FETCH r.workshop w " +
+            "WHERE (:status IS NULL OR r.status = :status) " +
+            "AND (:keyword IS NULL OR LOWER(w.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND (:fromDate IS NULL OR r.registrationDate >= :fromDate) " +
+            "AND (:toDate IS NULL OR r.registrationDate <= :toDate)",
+            countQuery = "SELECT COUNT(r) FROM WorkshopRegistration r JOIN r.workshop w " +
+                    "WHERE (:status IS NULL OR r.status = :status) " +
+                    "AND (:keyword IS NULL OR LOWER(w.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+                    "AND (:fromDate IS NULL OR r.registrationDate >= :fromDate) " +
+                    "AND (:toDate IS NULL OR r.registrationDate <= :toDate)")
+    Page<WorkshopRegistration> findAllAdminByFilter(
+            @Param("status") RegistrationStatus status,
+            @Param("keyword") String keyword,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
+            Pageable pageable);
+
     @Query("SELECT r FROM WorkshopRegistration r " +
             "JOIN FETCH r.workshop w " +
             "LEFT JOIN FETCH w.images " +

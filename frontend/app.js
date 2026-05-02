@@ -535,10 +535,12 @@
           /* Header */
           '<div class="gsx-modal-header">' +
             '<h2 class="gsx-modal-title">PHIẾU ĐĂNG KÝ</h2>' +
-            '<p class="gsx-modal-subtitle">Workshop Gốm Sứ Xanh — Trải nghiệm làm gốm thủ công</p>' +
+            '<p class="gsx-modal-subtitle" id="gsxModalSubtitle">Workshop Gốm Sứ Xanh — Trải nghiệm làm gốm thủ công</p>' +
           '</div>' +
           /* Divider */
           '<div class="gsx-modal-divider"></div>' +
+          /* Error Message Container */
+          '<div id="gsxModalError" class="gsx-modal-error" style="display:none; color: #d32f2f; background: #ffebee; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; border: 1px solid #ffcdd2;"></div>' +
           /* Form */
           '<form class="gsx-reg-form" id="gsxRegForm" novalidate>' +
             fieldsHTML +
@@ -581,6 +583,71 @@
     });
     document.body.style.overflow = 'hidden';
 
+    // Auto-fill user info if logged in
+    var token = localStorage.getItem('gsx_token');
+    if (token) {
+      fetch('http://localhost:8080/identity/users/my-infor', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+      .then(res => res.json())
+      .then(data => {
+        var user = data.result || data;
+        if (user) {
+          if (user.username) modal.querySelector('#reg-name').value = user.username;
+          if (user.phone) modal.querySelector('#reg-phone').value = user.phone;
+          
+          // Address handling
+          if (user.addresses && user.addresses.length > 0) {
+            modal.querySelector('#reg-address').value = user.addresses[0].detail;
+          } else if (user.address) {
+            modal.querySelector('#reg-address').value = user.address;
+          }
+        }
+      })
+      .catch(e => console.error('Error fetching user info for auto-fill:', e));
+    }
+
+    // Set date constraints and subtitle
+    if (window.gsxCurrentWorkshop) {
+      var dateInput = modal.querySelector('#reg-date');
+      var subtitle = modal.querySelector('#gsxModalSubtitle');
+      
+      var wsStart = new Date(window.gsxCurrentWorkshop.startDate);
+      var wsEnd = new Date(window.gsxCurrentWorkshop.endDate);
+      
+      // Local format YYYY-MM-DD
+      var toLocalISO = function(date) {
+        var offset = date.getTimezoneOffset();
+        var local = new Date(date.getTime() - (offset * 60 * 1000));
+        return local.toISOString().split('T')[0];
+      };
+
+      var minDate = toLocalISO(wsStart);
+      var maxDate = toLocalISO(wsEnd);
+      
+      dateInput.setAttribute('min', minDate);
+      dateInput.setAttribute('max', maxDate);
+      dateInput.value = minDate;
+
+      if (subtitle) {
+        subtitle.innerHTML = 'Workshop: <strong>' + window.gsxCurrentWorkshop.name + '</strong><br>' +
+                             'Thời gian diễn ra: <strong>' + wsStart.toLocaleDateString('vi-VN') + '</strong> đến <strong>' + wsEnd.toLocaleDateString('vi-VN') + '</strong>';
+      }
+    }
+
+    var isProcessing = false;
+    function showModalError(msg) {
+      var errBox = modal.querySelector('#gsxModalError');
+      if (errBox) {
+        errBox.textContent = msg;
+        errBox.style.display = 'block';
+      }
+    }
+    function hideModalError() {
+      var errBox = modal.querySelector('#gsxModalError');
+      if (errBox) errBox.style.display = 'none';
+    }
+
     // Close handlers
     if (closeBtn) closeBtn.addEventListener('click', closeRegistrationModal);
     if (backdrop) backdrop.addEventListener('click', closeRegistrationModal);
@@ -593,9 +660,9 @@
       }
     });
 
-    var isProcessing = false;
     function handleSubmit(e) {
       if (e) e.preventDefault();
+      hideModalError();
       
       if (!submitBtn || submitBtn.disabled || isProcessing) return;
       isProcessing = true;
@@ -618,9 +685,29 @@
         });
 
         if (!allValid) {
-          toast('Vui lòng điền đầy đủ thông tin bắt buộc');
+          showModalError('Vui lòng điền đầy đủ thông tin bắt buộc');
           isProcessing = false;
           return;
+        }
+
+        // Date validation: must be within workshop dates
+        if (window.gsxCurrentWorkshop) {
+          var selDate = new Date(modal.querySelector('#reg-date').value);
+          var wsStart = new Date(window.gsxCurrentWorkshop.startDate);
+          var wsEnd = new Date(window.gsxCurrentWorkshop.endDate);
+          
+          selDate.setHours(0,0,0,0);
+          wsStart.setHours(0,0,0,0);
+          wsEnd.setHours(0,0,0,0);
+
+          if (selDate < wsStart || selDate > wsEnd) {
+            var startStr = wsStart.toLocaleDateString('vi-VN');
+            var endStr = wsEnd.toLocaleDateString('vi-VN');
+            showModalError('Ngày tham gia không hợp lệ! Workshop này diễn ra từ ' + startStr + ' đến ' + endStr);
+            isProcessing = false;
+            modal.querySelector('#reg-date').classList.add('is-error');
+            return;
+          }
         }
 
         submitBtn.classList.add('is-loading');
@@ -692,7 +779,8 @@
         })
         .catch(function(err) {
           console.error(err);
-          toast('Lỗi kết nối: ' + err.message);
+          var errorMsg = err.message || 'Lỗi kết nối máy chủ';
+          showModalError('Lỗi hệ thống: ' + errorMsg);
           submitBtn.classList.remove('is-loading');
           if (btnText) btnText.textContent = 'Đăng ký ngay';
           submitBtn.disabled = false;
@@ -782,6 +870,9 @@
         var isReg = text.indexOf('đăng ký') !== -1 || text.indexOf('dang ky') !== -1;
         if (isReg) {
           link.addEventListener('click', function(e) {
+            // Fix: If it's an anchor link for scrolling, let it be
+            if (href.indexOf('#') === 0) return;
+
             e.preventDefault();
             e.stopPropagation();
             window.gsxCurrentWorkshopId = this.getAttribute('data-id') || 1;

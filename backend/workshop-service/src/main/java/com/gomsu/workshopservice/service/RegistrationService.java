@@ -88,18 +88,23 @@ public class RegistrationService {
     }
 
     private void sendNotificationToRabbitMQ(UserResponse user, Workshop workshop, Integer quantity) {
-        Map<String, Object> emailEvent = new HashMap<>();
-        emailEvent.put("userEmail", user.getEmail());
-        emailEvent.put("userName", user.getUsername());
-        emailEvent.put("workshopName", workshop.getName());
-        emailEvent.put("quantity", quantity);
+        try {
+            Map<String, Object> emailEvent = new HashMap<>();
+            emailEvent.put("userEmail", user.getEmail());
+            emailEvent.put("userName", user.getUsername());
+            emailEvent.put("workshopName", workshop.getName());
+            emailEvent.put("quantity", quantity);
 
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.WORKSHOP_EXCHANGE,
-                RabbitMQConfig.REGISTRATION_ROUTING_KEY,
-                emailEvent
-        );
-        log.info("Đã bắn Event thông báo lên RabbitMQ cho User: {}", user.getUsername());
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.WORKSHOP_EXCHANGE,
+                    RabbitMQConfig.REGISTRATION_ROUTING_KEY,
+                    emailEvent
+            );
+            log.info("Đã bắn Event thông báo lên RabbitMQ cho User: {}", user.getUsername());
+        } catch (Exception e) {
+            log.error("Không thể gửi thông báo RabbitMQ (có thể server RabbitMQ chưa chạy): {}", e.getMessage());
+            // Không ném lỗi ra ngoài để tránh rollback transaction đăng ký thành công
+        }
     }
 
     private Pageable createPageable(int page, int size, String sortBy, String sortDir) {
@@ -117,8 +122,27 @@ public class RegistrationService {
         Pageable pageable = createPageable(page, size, sortBy, sortDir);
         Page<WorkshopRegistration> registrations = registrationRepository.findAllByFilter(
                 userId, status, keyword, fromDate, toDate, pageable);
-        UserResponse user = userClient.getMyInfor();
-        return registrations.map(registration -> toResponse(registration, user));
+        
+        // Cố gắng gọi userClient một lần, nếu lỗi thì bỏ qua (dùng fallback)
+        UserResponse user = null;
+        try {
+            user = userClient.getMyInfor();
+        } catch(Exception e) {
+            log.warn("Không thể lấy thông tin user hiện tại từ Identity Service");
+        }
+        UserResponse finalUser = user;
+        return registrations.map(registration -> toResponse(registration, finalUser));
+    }
+
+    public Page<RegistrationResponse> getAllRegistrations(
+            RegistrationStatus status, String keyword,
+            LocalDateTime fromDate, LocalDateTime toDate,
+            int page, int size, String sortBy, String sortDir
+    ) {
+        Pageable pageable = createPageable(page, size, sortBy, sortDir);
+        Page<WorkshopRegistration> registrations = registrationRepository.findAllAdminByFilter(
+                status, keyword, fromDate, toDate, pageable);
+        return registrations.map(registration -> toResponse(registration, null));
     }
 
     @Transactional
@@ -190,7 +214,7 @@ public class RegistrationService {
         return RegistrationResponse.builder()
                 .id(registration.getId())
                 .customerId(registration.getCustomerId())
-                .customerName(user.getUsername())
+                .customerName(user != null ? user.getUsername() : registration.getCustomerName())
 
                 .workshopId(registration.getWorkshop().getId())
                 .workshopName(registration.getWorkshop().getName())
@@ -206,7 +230,7 @@ public class RegistrationService {
                 .status(registration.getStatus().name())
                 .registrationDate(registration.getRegistrationDate())
                 .note(registration.getNote())
-                .message("Chào " + user.getUsername() + ", đơn đăng ký của bạn đã được tiếp nhận thành công!")
+                .message("Chào " + (user != null ? user.getUsername() : registration.getCustomerName()) + ", đơn đăng ký của bạn đã được tiếp nhận thành công!")
                 .build();
     }
 }

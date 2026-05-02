@@ -28,7 +28,7 @@ public class OrderController {
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody OrderRequest orderRequest
     ){
-        Long userId = jwt.getClaim("userId");
+        Long userId = Long.valueOf(jwt.getClaim("userId").toString());
         return ResponseEntity.ok(orderService.createOrder(userId, orderRequest));
     }
 
@@ -40,7 +40,7 @@ public class OrderController {
             @AuthenticationPrincipal Jwt jwt) {
 
         // Lấy userId từ Token để đảm bảo tính bảo mật (User chỉ được hủy đơn của chính mình)
-        Long userId = jwt.getClaim("userId");
+        Long userId = Long.valueOf(jwt.getClaim("userId").toString());
 
         // Kiểm tra xem trong Token có Role ADMIN không
         String scope = jwt.getClaim("scope");

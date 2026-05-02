@@ -33,7 +33,7 @@ public class RegistrationController {
             @RequestParam(required = false) String note) {
 
         // Giả sử trong Token Nguyệt lưu userId vào claim tên là "id"
-        Long userId = jwt.getClaim("userId");
+        Long userId = Long.valueOf(jwt.getClaim("userId").toString());
 
         RegistrationResponse response = registerWorkshop.registerWorkshop(userId, workshopId, quantity, note);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -54,11 +54,32 @@ public class RegistrationController {
             @RequestParam(defaultValue = "DESC") String sortDir) {
 
         // Lấy userId tự động từ Token
-        Long userId = jwt.getClaim("userId");
+        Long userId = Long.valueOf(jwt.getClaim("userId").toString());
         log.info("User {} truy cập lịch sử đặt vé", userId);
 
         Page<RegistrationResponse> response = registerWorkshop.getMyRegistrations(
                 userId, status, keyword, fromDate, toDate, page, size, sortBy, sortDir);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // THÀNH CÔNG
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<RegistrationResponse>> getAllRegistrations(
+            @RequestParam(required = false) RegistrationStatus status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "registrationDate") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDir) {
+
+        log.info("Admin truy cập danh sách tất cả đơn đăng ký");
+
+        Page<RegistrationResponse> response = registerWorkshop.getAllRegistrations(
+                status, keyword, fromDate, toDate, page, size, sortBy, sortDir);
 
         return ResponseEntity.ok(response);
     }

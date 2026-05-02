@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -80,6 +81,19 @@ public class ProductService {
         // Xử lý upload ảnh (Dùng hàm dùng chung để code ngắn gọn hơn)
         if (images != null && !images.isEmpty()) {
             handleImageUploads(images, savedProduct);
+        }
+
+        // Xử lý thêm link ảnh từ Request (nếu có)
+        if (productCreationRequest.getImageUrls() != null && !productCreationRequest.getImageUrls().isEmpty()) {
+            for (String url : productCreationRequest.getImageUrls()) {
+                if (url == null || url.isBlank()) continue;
+                ProductImage productImage = new ProductImage();
+                productImage.setImageUrl(url);
+                productImage.setProduct(savedProduct);
+                productImageRepository.save(productImage);
+                if (savedProduct.getProductImages() == null) savedProduct.setProductImages(new ArrayList<>());
+                savedProduct.getProductImages().add(productImage);
+            }
         }
 
         return toProductResponse(savedProduct);
@@ -155,8 +169,14 @@ public class ProductService {
 
     // 3. THÊM HÀM LẤY SẢN PHẨM THEO SLUG (Dành cho khách xem trang chi tiết)
     public ProductResponse getProductBySlug(String slug) {
-        Product product = productRepository.findBySlug(slug)
-                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại!"));
+        Optional<Product> productOpt = productRepository.findBySlug(slug);
+
+        // Nếu không tìm thấy theo slug, thử tìm theo ID nếu slug là số
+        if (productOpt.isEmpty() && slug.matches("\\d+")) {
+            productOpt = productRepository.findById(Long.parseLong(slug));
+        }
+
+        Product product = productOpt.orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại!"));
         return toProductResponse(product);
     }
 
@@ -183,6 +203,7 @@ public class ProductService {
             int page,
             int size,
             String keyword,
+            Long categoryId,
             String sortBy,
             String sortDir,
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
@@ -204,6 +225,7 @@ public class ProductService {
         // Mình giả định Nguyệt sẽ dùng một hàm Search tổng hợp trong Repository
         productPage = productRepository.searchProducts(
                 keyword != null ? keyword.trim() : null,
+                categoryId,
                 fromDate,
                 toDate,
                 pageable);

@@ -42,12 +42,13 @@ public class ProductController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "createdAt") String sortBy, // Mặc định xếp theo ngày tạo
-            @RequestParam(defaultValue = "desc") String sortDir,      // Mặc định cái mới nhất lên đầu
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate
     ) {
-        return ResponseEntity.ok(productService.getAllProducts(page, size, keyword, sortBy, sortDir, fromDate, toDate));
+        return ResponseEntity.ok(productService.getAllProducts(page, size, keyword, categoryId, sortBy, sortDir, fromDate, toDate));
     }
 
     // 3. Lấy chi tiết sản phẩm THEO SLUG (Dành cho trang khách hàng) (THÀNH CÔNG)

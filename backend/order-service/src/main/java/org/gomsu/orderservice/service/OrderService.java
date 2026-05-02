@@ -274,6 +274,14 @@ public class OrderService {
     }
 
     private OrderResponse toOrderResponse(Order order) {
+        String customerName = "N/A";
+        try {
+            UserResponse user = userClient.getUserById(order.getCustomerId());
+            if (user != null) customerName = user.getUsername();
+        } catch (Exception e) {
+            // Log error or ignore
+        }
+
         List<OrderResponse.OrderDetailResponse> detailsResponse = order.getOrderDetails().stream()
                 .map(detail -> OrderResponse.OrderDetailResponse.builder()
                         .productId(detail.getProductId())
@@ -286,6 +294,7 @@ public class OrderService {
         return OrderResponse.builder()
                 .id(order.getId())
                 .customerId(order.getCustomerId())
+                .customerName(customerName)
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .status(order.getStatus().name())

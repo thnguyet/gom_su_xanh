@@ -21,6 +21,9 @@ public class PaymentMethod extends BaseEntity{
     @Column(name = "name")
     private String name;
 
+    @Column(name = "payment_code")
+    private String paymentCode;
+
     @OneToMany(mappedBy = "paymentMethod")
     @ToString.Exclude
     @JsonIgnore

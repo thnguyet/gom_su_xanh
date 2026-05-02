@@ -19,10 +19,12 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
 
     @Query("SELECT p FROM Product p WHERE " +
             "(:keyword IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+            "(:categoryId IS NULL OR p.category.id = :categoryId) AND " +
             "(:fromDate IS NULL OR p.createdAt >= :fromDate) AND " +
             "(:toDate IS NULL OR p.createdAt <= :toDate)")
     Page<Product> searchProducts(
             @Param("keyword") String keyword,
+            @Param("categoryId") Long categoryId,
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate,
             Pageable pageable);

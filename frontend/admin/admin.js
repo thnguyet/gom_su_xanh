@@ -84,7 +84,7 @@ function navigate(section){
   currentSection=section;
   var items=document.querySelectorAll('.adm-nav-item[data-section]');
   items.forEach(function(it){it.classList.toggle('is-active',it.dataset.section===section);});
-  var titles={dashboard:'Tổng quan',products:'Sản phẩm',orders:'Đơn hàng',workshops:'Workshop',posts:'Bài viết',reviews:'Đánh giá',users:'Người dùng',promotions:'Khuyến mãi'};
+  var titles={dashboard:'Tổng quan',products:'Sản phẩm',orders:'Đơn hàng',workshops:'Workshop',workshopRegs:'ĐK Workshop',posts:'Bài viết',reviews:'Đánh giá',users:'Người dùng',promotions:'Khuyến mãi'};
   $('admTopTitle').textContent=titles[section]||section;
   pageState={page:0,size:10,keyword:''};
   renderSection(section);
@@ -92,7 +92,7 @@ function navigate(section){
 
 function renderSection(s){
   var c=$('admContent');
-  var fn={dashboard:renderDashboard,products:renderProducts,orders:renderOrders,workshops:renderWorkshops,posts:renderPosts,reviews:renderReviews,users:renderUsers,promotions:renderPromotions};
+  var fn={dashboard:renderDashboard,products:renderProducts,orders:renderOrders,workshops:renderWorkshops,workshopRegs:renderWorkshopRegs,posts:renderPosts,reviews:renderReviews,users:renderUsers,promotions:renderPromotions};
   if(fn[s])fn[s](c);else c.innerHTML='<div class="adm-empty"><div class="adm-empty-icon">🚧</div><p>Đang phát triển...</p></div>';
 }
 
@@ -121,7 +121,7 @@ function renderDashboard(c){
     var rows=(data.content||[]);
     if(!rows.length){$('admRecentOrders').innerHTML=emptyMsg('Chưa có đơn hàng');return;}
     $('admRecentOrders').innerHTML=tableWrap(['ID','Khách hàng','Tổng tiền','Trạng thái','Ngày tạo'],rows.map(function(o){
-      return '<tr><td>#'+o.id+'</td><td>KH-'+o.customerId+'</td><td>'+fmtMoney(o.totalAmount)+'</td><td>'+statusBadge(o.status)+'</td><td>'+fmtDate(o.createdAt)+'</td></tr>';
+      return '<tr><td>#'+o.id+'</td><td>'+esc(o.customerName||'KH-'+o.customerId)+'</td><td>'+fmtMoney(o.totalAmount)+'</td><td>'+statusBadge(o.status)+'</td><td>'+fmtDate(o.createdAt)+'</td></tr>';
     }).join(''));
   }).catch(function(){$('admRecentOrders').innerHTML=emptyMsg('Không thể tải đơn hàng');});
 }
@@ -137,9 +137,9 @@ function loadProducts(){
   api('/product/products/all?page='+p.page+'&size='+p.size+q).then(function(data){
     var rows=data.content||[];
     if(!rows.length){$('admProdTable').innerHTML=emptyMsg('Không tìm thấy sản phẩm');$('admProdPage').innerHTML='';return;}
-    $('admProdTable').innerHTML=tableWrap(['Ảnh','Tên','Giá','Kho','Danh mục','Ngày tạo',''],rows.map(function(p){
+    $('admProdTable').innerHTML=tableWrap(['Ảnh','Tên','Giá','Kho','Danh mục','Ngày tạo','Thao tác'],rows.map(function(p){
       var img=p.imageUrls&&p.imageUrls[0]?'<img class="adm-thumb" src="'+p.imageUrls[0]+'" alt="">':'—';
-      return '<tr><td>'+img+'</td><td style="font-weight:600;color:var(--adm-text)">'+esc(p.name)+'</td><td>'+fmtMoney(p.price)+'</td><td>'+(p.stockQuantity||0)+'</td><td>'+esc(p.categoryName||'—')+'</td><td>'+fmtDate(p.createdAt)+'</td><td><button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delProduct('+p.id+')">Xóa</button></td></tr>';
+      return '<tr><td>'+img+'</td><td style="font-weight:600;color:var(--adm-text)">'+esc(p.name)+'</td><td>'+fmtMoney(p.price)+'</td><td>'+(p.stockQuantity||0)+'</td><td>'+esc(p.categoryName||'—')+'</td><td>'+fmtDate(p.createdAt)+'</td><td><button class="adm-btn adm-btn--outline adm-btn--sm" onclick="ADM.openEditProductModal('+p.id+')">Sửa</button> <button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delProduct('+p.id+')">Xóa</button></td></tr>';
     }).join(''));
     $('admProdPage').innerHTML=paginate(data);
   }).catch(function(){$('admProdTable').innerHTML=emptyMsg('Lỗi tải sản phẩm');});
@@ -158,7 +158,7 @@ function loadOrders(){
     if(!rows.length){$('admOrdTable').innerHTML=emptyMsg('Không có đơn hàng');$('admOrdPage').innerHTML='';return;}
     $('admOrdTable').innerHTML=tableWrap(['ID','Khách','Tổng tiền','Thanh toán','Trạng thái','Ngày','Thao tác'],rows.map(function(o){
       var acts='<select class="adm-select" onchange="ADM.updateOrder('+o.id+',this.value)" style="font-size:12px"><option value="">Cập nhật...</option><option value="CONFIRMED">Xác nhận</option><option value="SHIPPING">Giao hàng</option><option value="DELIVERED">Đã giao</option><option value="COMPLETED">Hoàn thành</option><option value="CANCELLED">Hủy</option></select>';
-      return '<tr><td>#'+o.id+'</td><td>KH-'+o.customerId+'</td><td>'+fmtMoney(o.totalAmount)+'</td><td>'+esc(o.paymentMethod||'—')+'</td><td>'+statusBadge(o.status)+'</td><td>'+fmtDate(o.createdAt)+'</td><td>'+acts+'</td></tr>';
+      return '<tr><td>#'+o.id+'</td><td>'+esc(o.customerName||'KH-'+o.customerId)+'</td><td>'+fmtMoney(o.totalAmount)+'</td><td>'+esc(o.paymentMethod||'—')+'</td><td>'+statusBadge(o.status)+'</td><td>'+fmtDate(o.createdAt)+'</td><td>'+acts+'</td></tr>';
     }).join(''));
     $('admOrdPage').innerHTML=paginate(data);
   }).catch(function(){$('admOrdTable').innerHTML=emptyMsg('Lỗi tải đơn hàng');});
@@ -177,7 +177,8 @@ function loadWorkshops(){
     $('admWsTable').innerHTML=tableWrap(['Ảnh','Tên','Địa điểm','Giá','Số người','Trạng thái','Thao tác'],rows.map(function(w){
       var img=w.mainImage?'<img class="adm-thumb" src="'+w.mainImage+'" alt="">':'—';
       var badge=w.active?'<span class="adm-badge adm-badge--success">Hoạt động</span>':'<span class="adm-badge adm-badge--neutral">Tạm dừng</span>';
-      return '<tr><td>'+img+'</td><td style="font-weight:600;color:var(--adm-text)">'+esc(w.name)+'</td><td>'+esc(w.location||'—')+'</td><td>'+fmtMoney(w.price)+'</td><td>'+((w.currentParticipants||0)+'/'+(w.maxParticipants||0))+'</td><td>'+badge+'</td><td><button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delWorkshop('+w.id+')">Xóa</button></td></tr>';
+      var toggleBtn=w.active?'<button class="adm-btn adm-btn--warning adm-btn--sm" onclick="ADM.toggleWorkshopStatus('+w.id+',true)">Tạm dừng</button>':'<button class="adm-btn adm-btn--success adm-btn--sm" onclick="ADM.toggleWorkshopStatus('+w.id+',false)">Hoạt động</button>';
+      return '<tr><td>'+img+'</td><td style="font-weight:600;color:var(--adm-text)">'+esc(w.name)+'</td><td>'+esc(w.location||'—')+'</td><td>'+fmtMoney(w.price)+'</td><td>'+((w.currentParticipants||0)+'/'+(w.maxParticipants||0))+'</td><td>'+badge+'</td><td>'+toggleBtn+'</td></tr>';
     }).join(''));
     $('admWsPage').innerHTML=paginate(data);
   }).catch(function(){$('admWsTable').innerHTML=emptyMsg('Lỗi tải workshop');});
@@ -248,6 +249,33 @@ function loadPromotions(){
   }).catch(function(){$('admPromoTable').innerHTML=emptyMsg('Lỗi tải khuyến mãi');});
 }
 
+/* ===== WORKSHOP REGISTRATIONS ===== */
+function renderWorkshopRegs(c){
+  c.innerHTML='<div class="adm-quick-actions"><select class="adm-select" id="admRegFilter"><option value="">Tất cả trạng thái</option><option value="CONFIRMED">Đã xác nhận</option><option value="COMPLETED">Đã tham gia</option><option value="CANCELLED">Đã hủy</option></select></div>'+sectionHeader('ĐK Workshop','workshopRegs')+'<div id="admRegTable">'+skeleton(5)+'</div><div id="admRegPage"></div>';
+  $('admRegFilter').addEventListener('change',function(){pageState.status=this.value;pageState.page=0;loadWorkshopRegs();});
+  bindSearch('workshopRegs');loadWorkshopRegs();
+}
+function loadWorkshopRegs(){
+  var p=pageState;var statusQ=p.status?'&status='+p.status:'';
+  var q=p.keyword?'&keyword='+encodeURIComponent(p.keyword):'';
+  api('/workshop/regis-workshops/all?page='+p.page+'&size='+p.size+statusQ+q+'&sortBy=registrationDate&sortDir=desc').then(function(data){
+    var rows=data.content||[];
+    if(!rows.length){$('admRegTable').innerHTML=emptyMsg('Không có lượt đăng ký nào');$('admRegPage').innerHTML='';return;}
+    $('admRegTable').innerHTML=tableWrap(['ID','Khách hàng','Workshop','Số vé','Tổng tiền','Ngày ĐK','Trạng thái','Thao tác'],rows.map(function(r){
+      var badge = r.status === 'CONFIRMED' ? '<span class="adm-badge adm-badge--info">Đã xác nhận</span>' :
+                  r.status === 'COMPLETED' ? '<span class="adm-badge adm-badge--success">Đã tham gia</span>' :
+                  '<span class="adm-badge adm-badge--danger">Đã hủy</span>';
+      var actions = '';
+      if (r.status === 'CONFIRMED') {
+        actions = '<button class="adm-btn adm-btn--success adm-btn--sm" onclick="ADM.checkInWorkshop('+r.id+')">Check-in</button> ' +
+                  '<button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.cancelWorkshopReg('+r.id+')">Hủy</button>';
+      }
+      return '<tr><td>#'+r.id+'</td><td>'+esc(r.customerName||'KH-'+r.customerId)+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.workshopName)+'</td><td>'+r.ticketQuantity+'</td><td>'+fmtMoney(r.totalPrice)+'</td><td>'+fmtDate(r.registrationDate)+'</td><td>'+badge+'</td><td>'+actions+'</td></tr>';
+    }).join(''));
+    $('admRegPage').innerHTML=paginate(data);
+  }).catch(function(){$('admRegTable').innerHTML=emptyMsg('Lỗi tải danh sách đăng ký');});
+}
+
 /* ===== ACTIONS (exposed globally) ===== */
 window.ADM={
   goPage:function(page){pageState.page=page;renderSection(currentSection);},
@@ -258,6 +286,15 @@ window.ADM={
   delPromo:function(id){if(confirm('Xóa khuyến mãi #'+id+'?'))api('/product/promotions/'+id,{method:'DELETE'}).then(function(){toast('Đã xóa');loadPromotions();}).catch(function(){toast('Lỗi xóa');});},
   stopPromo:function(id){if(confirm('Dừng khuyến mãi #'+id+'?'))api('/product/promotions/'+id+'/stop',{method:'PATCH'}).then(function(){toast('Đã dừng');loadPromotions();}).catch(function(){toast('Lỗi');});},
   updateOrder:function(id,status){if(!status)return;if(confirm('Cập nhật đơn #'+id+' → '+status+'?'))api('/order/orders/'+id+'/status?status='+status,{method:'PATCH'}).then(function(){toast('Đã cập nhật');loadOrders();}).catch(function(){toast('Lỗi cập nhật');});},
+  checkInWorkshop:function(id){if(confirm('Xác nhận khách hàng đã tham gia workshop?'))api('/workshop/regis-workshops/'+id,{method:'PUT'}).then(function(){toast('Đã check-in thành công');loadWorkshopRegs();}).catch(function(e){toast('Lỗi check-in: '+e.message);});},
+  cancelWorkshopReg:function(id){if(confirm('Hủy đơn đăng ký này?'))api('/workshop/regis-workshops/'+id+'/cancel',{method:'PATCH'}).then(function(){toast('Đã hủy đăng ký');loadWorkshopRegs();}).catch(function(e){toast('Lỗi hủy đăng ký: '+e.message);});},
+  toggleWorkshopStatus:function(id,currentActive){
+    if(confirm(currentActive ? 'Tạm dừng workshop này?' : 'Mở lại workshop này?')) {
+      var fd = new FormData();
+      fd.append("request", new Blob([JSON.stringify({ active: !currentActive })], { type: "application/json" }));
+      api('/workshop/workshops/'+id, { method:'PUT', body: fd, formData: true }).then(function(){toast('Đã cập nhật trạng thái');loadWorkshops();}).catch(function(){toast('Lỗi cập nhật');});
+    }
+  },
   
   openAddProductModal: function() {
     showModal('Thêm sản phẩm mới', `
@@ -298,7 +335,8 @@ window.ADM={
     // Load categories
     api('/product/categories').then(data => {
       var sel = $('modalCategorySelect');
-      if(sel) sel.innerHTML = (data || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('') || '<option value="">Chưa có danh mục</option>';
+      var rows = data.content || (Array.isArray(data) ? data : []);
+      if(sel) sel.innerHTML = rows.map(c => `<option value="${c.id}">${c.name}</option>`).join('') || '<option value="">Chưa có danh mục</option>';
     });
 
     $('addProductForm').onsubmit = function(e) {
@@ -310,9 +348,13 @@ window.ADM={
       obj.categoryId = parseInt(obj.categoryId);
       obj.imageUrls = obj.imageUrls ? [obj.imageUrls] : [];
 
+      var finalFd = new FormData();
+      finalFd.append('data', new Blob([JSON.stringify(obj)], {type: 'application/json'}));
+
       api('/product/products', {
         method: 'POST',
-        body: JSON.stringify(obj)
+        body: finalFd,
+        formData: true
       }).then(() => {
         toast('Đã thêm sản phẩm thành công!');
         ADM.closeModal();
@@ -321,6 +363,83 @@ window.ADM={
         toast('Lỗi: Không có quyền (401) hoặc dữ liệu sai');
       });
     };
+  },
+  openEditProductModal: function(id) {
+    // Fetch current product
+    api('/product/products/'+id).then(function(p){
+      showModal('Sửa sản phẩm #'+id, `
+        <form class="adm-form" id="editProductForm">
+          <div class="adm-form-group">
+            <label>Tên sản phẩm</label>
+            <input type="text" name="name" required value="${p.name || ''}">
+          </div>
+          <div class="adm-form-row">
+            <div class="adm-form-group">
+              <label>Giá (VNĐ)</label>
+              <input type="number" name="price" required value="${p.price || 0}">
+            </div>
+            <div class="adm-form-group">
+              <label>Số lượng kho</label>
+              <input type="number" name="stockQuantity" required value="${p.stockQuantity || 0}">
+            </div>
+          </div>
+          <div class="adm-form-group">
+            <label>Danh mục</label>
+            <select name="categoryId" id="modalCategorySelectEdit" data-sel="${p.categoryId||''}"><option value="">Đang tải...</option></select>
+          </div>
+          <div class="adm-form-group">
+            <label>Mô tả</label>
+            <textarea name="description" rows="3">${p.description || ''}</textarea>
+          </div>
+          <div class="adm-form-group">
+            <label>Thêm URL Hình ảnh</label>
+            <input type="text" name="imageUrls" placeholder="Dán link ảnh vào đây (để trống nếu không đổi)">
+          </div>
+          <div class="adm-form-actions">
+            <button type="button" class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Hủy</button>
+            <button type="submit" class="adm-btn adm-btn--primary">Lưu thay đổi</button>
+          </div>
+        </form>
+      `);
+
+      api('/product/categories').then(data => {
+        var sel = $('modalCategorySelectEdit');
+        var rows = data.content || (Array.isArray(data) ? data : []);
+        var selId = parseInt(sel.getAttribute('data-sel'));
+        if(sel) sel.innerHTML = rows.map(c => `<option value="${c.id}" ${c.id===selId?'selected':''}>${c.name}</option>`).join('') || '<option value="">Chưa có danh mục</option>';
+      });
+
+      $('editProductForm').onsubmit = function(e) {
+        e.preventDefault();
+        var fd = new FormData(this);
+        var obj = Object.fromEntries(fd.entries());
+        obj.price = parseFloat(obj.price);
+        obj.stockQuantity = parseInt(obj.stockQuantity);
+        obj.categoryId = parseInt(obj.categoryId);
+        if (obj.imageUrls) {
+          obj.imageUrls = [obj.imageUrls];
+        } else {
+          delete obj.imageUrls;
+        }
+
+        var finalFd = new FormData();
+        finalFd.append('data', new Blob([JSON.stringify(obj)], {type: 'application/json'}));
+
+        api('/product/products/'+id, {
+          method: 'PUT',
+          body: finalFd,
+          formData: true
+        }).then(() => {
+          toast('Đã cập nhật sản phẩm thành công!');
+          ADM.closeModal();
+          loadProducts();
+        }).catch(err => {
+          toast('Lỗi cập nhật sản phẩm');
+        });
+      };
+    }).catch(function(){
+      toast('Không thể lấy thông tin sản phẩm');
+    });
   },
   closeModal: function() {
     var m = $('admModalOverlay');

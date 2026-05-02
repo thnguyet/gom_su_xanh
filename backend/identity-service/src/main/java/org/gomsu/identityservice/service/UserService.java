@@ -116,6 +116,7 @@ public class UserService {
         }
 
         user.setPassword(passwordEncoder.encode(passwordChangeRequest.getNewPassword()));
+        userRepository.save(user);
         return toUserResponse(user);
     }
 

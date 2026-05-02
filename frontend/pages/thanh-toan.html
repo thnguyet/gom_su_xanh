@@ -267,22 +267,6 @@
         <div class="address-box">
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Tỉnh / thành</label>
-              <select class="form-input" id="checkout-province">
-                <option value="">Chọn tỉnh/thành</option>
-                <option value="Hà Nội">Hà Nội</option>
-                <option value="Hồ Chí Minh">Hồ Chí Minh</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Quận / huyện</label>
-              <select class="form-input" id="checkout-district">
-                <option value="">Chọn quận/huyện</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
               <label class="form-label">Đơn vị vận chuyển</label>
               <select class="form-input" id="checkout-shipping-method" required>
                 <option value="">Đang tải đơn vị vận chuyển...</option>
@@ -563,10 +547,9 @@
         .then(res => res.json())
         .then(data => {
           console.log('Order Response:', data);
-          if (data.code === 1000 || data.result) {
-            var orderId = (data.result && data.result.id) ? data.result.id : (data.id || '');
-            // Success: Go to QR code page
-            window.location.href = 'ma-qr.html?orderId=' + orderId + '&total=' + document.getElementById('checkoutTotal').textContent.replace(/\D/g,'');
+          if (data.id || data.code === 1000 || data.result) {
+            // Success: Go to Completion page
+            window.location.href = 'hoan-thanh-don-hang.html';
           } else {
             var msg = data.message || 'Lỗi đặt hàng';
             if (data.details && Array.isArray(data.details)) {

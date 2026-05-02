@@ -21,7 +21,7 @@ public class CartController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping
     public ResponseEntity<CartResponse> getCart(@AuthenticationPrincipal Jwt jwt) {
-        Long userId = jwt.getClaim("userId");
+        Long userId = Long.valueOf(jwt.getClaim("userId").toString());
         return ResponseEntity.ok(cartService.getCartByCustomerId(userId));
     }
 
@@ -33,7 +33,7 @@ public class CartController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam Long productId,
             @RequestParam(defaultValue = "1") Integer quantity) {
-        Long userId = jwt.getClaim("userId");
+        Long userId = Long.valueOf(jwt.getClaim("userId").toString());
         return ResponseEntity.ok(cartService.addToCart(userId, productId, quantity));
     }
 
@@ -45,7 +45,7 @@ public class CartController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam Long productId,
             @RequestParam Integer quantity) {
-        Long userId = jwt.getClaim("userId");
+        Long userId = Long.valueOf(jwt.getClaim("userId").toString());
         return ResponseEntity.ok(cartService.updateQuantity(userId, productId, quantity));
     }
 
@@ -56,7 +56,7 @@ public class CartController {
     public ResponseEntity<CartResponse> removeFromCart(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long productId) {
-        Long userId = jwt.getClaim("userId");
+        Long userId = Long.valueOf(jwt.getClaim("userId").toString());
         return ResponseEntity.ok(cartService.removeFromCart(userId, productId));
     }
 }

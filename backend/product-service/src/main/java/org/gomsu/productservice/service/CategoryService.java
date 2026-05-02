@@ -115,11 +115,20 @@ public class CategoryService {
 
     // Mapping Response
     public CategoryResponse toCategoryResponse(Category category) {
+        String catImg = null;
+        if (category.getProducts() != null && !category.getProducts().isEmpty()) {
+            var firstProd = category.getProducts().get(0);
+            if (firstProd.getProductImages() != null && !firstProd.getProductImages().isEmpty()) {
+                catImg = firstProd.getProductImages().get(0).getImageUrl();
+            }
+        }
+
         return CategoryResponse.builder()
                 .id(category.getId())
                 .name(category.getName())
                 .slug(category.getSlug())
                 .productCount(category.getProductCount() != null ? category.getProductCount() : 0)
+                .imageUrl(catImg)
                 .createdAt(category.getCreatedAt())
                 .build();
     }

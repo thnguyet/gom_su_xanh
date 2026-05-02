@@ -72,7 +72,7 @@ public class WorkshopController {
                 isAdmin = true;
             }
 
-            Long userId = jwt.getClaim("userId");
+            Long userId = Long.valueOf(jwt.getClaim("userId").toString());
             log.info(">>> User ID: {} | Quyền Admin: {}", userId, isAdmin);
         }
 

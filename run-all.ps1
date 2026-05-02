@@ -1,7 +1,8 @@
-$env:DB_PASSWORD = "123456"
-$env:JWT_SIGNER_KEY = "DayLaMotChuoiBaoMatChoJWT123456789" # Dự phòng luôn cho JWT_SIGNER_KEY
-$env:CLOUDINARY_API_KEY = "dummy_key_12345" # Cấu hình giả để service khởi động được
-$env:CLOUDINARY_API_SECRET = "dummy_secret_12345" # Bạn có thể thay bằng key thật sau
+$env:DB_PASSWORD = "Nguyetdth892005"
+$env:JWT_SIGNER_KEY = "Nguyetdth89200512345678910111213" # Dự phòng luôn cho JWT_SIGNER_KEY
+$env:CLOUDINARY_API_KEY = "316921521754154" # Cấu hình giả để service khởi động được
+$env:CLOUDINARY_API_SECRET = "_UmYMjvVBmizhELcVrSaUrYMPjw" # Bạn có thể thay bằng key thật sau
+
 
 $services = @(
     "discovery-service",

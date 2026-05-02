@@ -8,4 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public interface UserClient {
     @GetMapping("/users/my-infor")
     UserResponse getMyInfor();
+
+    @GetMapping("/users/{id}")
+    UserResponse getUserById(@org.springframework.web.bind.annotation.PathVariable("id") Long id);
 }

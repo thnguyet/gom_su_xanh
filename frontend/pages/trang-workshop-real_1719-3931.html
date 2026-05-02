@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="vi">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,6 +14,7 @@
       padding: 80px 20px;
       text-align: center;
     }
+
     .workshop-hero-card {
       max-width: 800px;
       margin: 0 auto;
@@ -21,11 +23,13 @@
       padding: 60px 40px;
       box-shadow: var(--shadow-card);
     }
+
     .workshop-hero-card h1 {
       color: var(--clr-teal);
       margin: 0 0 24px;
       font-size: clamp(32px, 4vw, 48px);
     }
+
     .workshop-hero-card p {
       font-size: 20px;
       line-height: 1.6;
@@ -39,21 +43,25 @@
       max-width: 1200px;
       margin: 0 auto;
     }
+
     .why-section .section-title {
       text-align: center;
       margin-bottom: 60px;
     }
+
     .why-grid {
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       gap: 40px;
       align-items: center;
     }
+
     .why-col {
       display: flex;
       flex-direction: column;
       gap: 32px;
     }
+
     .why-item {
       background: var(--clr-cream);
       border: 1px solid var(--clr-forest);
@@ -61,6 +69,7 @@
       padding: 24px;
       position: relative;
     }
+
     .why-number {
       position: absolute;
       top: -16px;
@@ -76,6 +85,7 @@
       font-weight: bold;
       color: var(--clr-forest);
     }
+
     .why-center-img {
       width: 100%;
       max-width: 360px;
@@ -88,6 +98,7 @@
       padding: 80px 20px;
       text-align: center;
     }
+
     .values-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -95,6 +106,7 @@
       max-width: 1200px;
       margin: 40px auto 0;
     }
+
     .value-card {
       border: 1px dashed var(--clr-forest);
       border-radius: 12px;
@@ -111,6 +123,7 @@
       flex-direction: column;
       gap: 40px;
     }
+
     .workshop-item {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -120,8 +133,14 @@
       box-shadow: var(--shadow-card);
       align-items: center;
     }
-    .workshop-item:nth-child(even) { direction: rtl; }
-    .workshop-item:nth-child(even) > * { direction: ltr; }
+
+    .workshop-item:nth-child(even) {
+      direction: rtl;
+    }
+
+    .workshop-item:nth-child(even)>* {
+      direction: ltr;
+    }
 
     .ws-img {
       width: 100%;
@@ -129,20 +148,24 @@
       min-height: 360px;
       object-fit: cover;
     }
+
     .ws-content {
       padding: 48px;
     }
+
     .ws-content h2 {
       font-size: 32px;
       color: var(--clr-forest);
       margin: 0 0 16px;
     }
+
     .ws-content p {
       font-size: 18px;
       line-height: 1.6;
       color: var(--clr-forest);
       margin-bottom: 24px;
     }
+
     .ws-info {
       display: flex;
       justify-content: space-between;
@@ -153,38 +176,94 @@
       border-radius: 12px;
       margin-bottom: 24px;
     }
+
     .ws-price {
       font-size: 20px;
       font-weight: 700;
       color: var(--clr-forest);
     }
+
     .ws-time {
       color: var(--clr-forest);
-      opacity: 0.8;
+      font-weight: 600;
     }
-    
+
+    .ws-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .ws-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--clr-forest);
+      opacity: 0.9;
+    }
+
+    .ws-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(148, 181, 120, 0.2);
+      color: var(--clr-forest);
+      border: 1px solid var(--clr-forest);
+      border-radius: 100px;
+      font-size: 12px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
-      .why-grid { grid-template-columns: 1fr; }
-      .why-center-img { display: none; }
-      .values-grid { grid-template-columns: 1fr; }
-      .workshop-item, .workshop-item:nth-child(even) { grid-template-columns: 1fr; }
-      .ws-img { min-height: 240px; }
-      .ws-content { padding: 32px 20px; }
-      .ws-info { flex-direction: column; gap: 12px; text-align: center; }
+      .why-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .why-center-img {
+        display: none;
+      }
+
+      .values-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .workshop-item,
+      .workshop-item:nth-child(even) {
+        grid-template-columns: 1fr;
+      }
+
+      .ws-img {
+        min-height: 240px;
+      }
+
+      .ws-content {
+        padding: 32px 20px;
+      }
+
+      .ws-info {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <main class="page-main">
-    
+
     <!-- Hero -->
     <section class="workshop-hero">
       <div class="workshop-hero-card">
         <h1 class="all-caps">Sáng tạo bắt đầu từ những mảnh vỡ</h1>
-        <p>Chính từ những mảnh gốm không còn nguyên vẹn, hành trình sáng tạo được mở ra. Mỗi lần ghép nối là một khởi đầu mới, nơi giá trị không đến từ sự hoàn hảo, mà từ cách ta tạo nên điều mới mẻ từ những điều tưởng chừng đã vỡ vụn.</p>
-        <a href="#" class="btn-solid" style="display:inline-block; padding: 14px 40px;">Đăng ký ngay!</a>
+        <p>Chính từ những mảnh gốm không còn nguyên vẹn, hành trình sáng tạo được mở ra. Mỗi lần ghép nối là một khởi
+          đầu mới, nơi giá trị không đến từ sự hoàn hảo, mà từ cách ta tạo nên điều mới mẻ từ những điều tưởng chừng đã
+          vỡ vụn.</p>
+        <a href="#workshopList" class="btn-solid" style="display:inline-block; padding: 14px 40px;">Đăng ký ngay!</a>
       </div>
     </section>
 
@@ -206,8 +285,9 @@
             <p>Thư giãn và chữa lành qua các hoạt động thủ công nhẹ nhàng, giảm căng thẳng</p>
           </div>
         </div>
-        
-        <img src="../assets/images/b51224649be9ed629bc7397750b6c16a6c3de27c.png" alt="Gốm Sứ Xanh" class="why-center-img">
+
+        <img src="../assets/images/b51224649be9ed629bc7397750b6c16a6c3de27c.png" alt="Gốm Sứ Xanh"
+          class="why-center-img">
 
         <div class="why-col" style="justify-content: center;">
           <div class="why-item">
@@ -227,66 +307,111 @@
       <h2 class="section-title all-caps">Giá trị mà chúng mình muốn mang lại</h2>
       <div class="values-grid">
         <div class="value-card">
-          <p>Người tham gia không chỉ làm ra một sản phẩm thủ công mang dấu ấn cá nhân, mà còn trực tiếp góp phần giảm rác thải, kéo dài vòng đời vật liệu và lan tỏa tinh thần sống xanh.</p>
+          <p>Người tham gia không chỉ làm ra một sản phẩm thủ công mang dấu ấn cá nhân, mà còn trực tiếp góp phần giảm
+            rác thải, kéo dài vòng đời vật liệu và lan tỏa tinh thần sống xanh.</p>
         </div>
         <div class="value-card">
-          <p>Hoạt động giúp mỗi người kết nối sâu hơn với làng nghề Bát Tràng, hiểu được hành trình của gốm và trân trọng hơn những giá trị thủ công truyền thống.</p>
+          <p>Hoạt động giúp mỗi người kết nối sâu hơn với làng nghề Bát Tràng, hiểu được hành trình của gốm và trân
+            trọng hơn những giá trị thủ công truyền thống.</p>
         </div>
         <div class="value-card">
-          <p>Đây cũng là một phương thức chữa lành, mang lại sự thư giãn và cảm giác ý nghĩa khi tạo nên điều tốt đẹp cho bản thân và môi trường.</p>
+          <p>Đây cũng là một phương thức chữa lành, mang lại sự thư giãn và cảm giác ý nghĩa khi tạo nên điều tốt đẹp
+            cho bản thân và môi trường.</p>
         </div>
       </div>
     </section>
 
     <!-- Workshop List -->
-    <section class="workshop-list">
-      
-      <!-- WS 1 -->
-      <div class="workshop-item">
-        <img src="../assets/images/584260b1445e8ed2db5923ef8227900f261634cd.png" alt="Vẽ tranh gốm tái chế" class="ws-img">
-        <div class="ws-content">
-          <h2 class="all-caps">Vẽ tranh gốm tái chế</h2>
-          <p>Vẽ tranh gốm tái chế là hoạt động sáng tạo dùng mảnh gốm vỡ để ghép và tô màu thành tranh. Nó vừa giúp giảm rác thải, vừa mang lại cảm giác thư giãn cho người thực hiện.</p>
-          <div class="ws-info">
-            <div class="ws-time">T2 - CN | 8h00 - 17h30</div>
-            <div class="ws-price">Từ 60.000VNĐ/sản phẩm</div>
-          </div>
-          <a href="#" data-id="1" class="btn-outline" style="display:inline-block; padding: 12px 32px;">Đăng ký</a>
-        </div>
-      </div>
-
-      <!-- WS 2 -->
-      <div class="workshop-item">
-        <img src="../assets/images/df3e0c422807e8e5827a235a02b507d9558bdf06.png" alt="Fridge magnet" class="ws-img">
-        <div class="ws-content">
-          <h2 class="all-caps">Fridge magnet</h2>
-          <p>Sản phẩm thủ công nhỏ xinh từ những mảnh gốm vỡ, nơi người tham gia tự tay trang trí và tạo nên chiếc nam châm mang dấu ấn riêng, góp phần lan tỏa lối sống xanh.</p>
-          <div class="ws-info">
-            <div class="ws-time">T2 - CN | 8h00 - 17h30</div>
-            <div class="ws-price">Từ 40.000VNĐ/sản phẩm</div>
-          </div>
-          <a href="#" data-id="2" class="btn-outline" style="display:inline-block; padding: 12px 32px;">Đăng ký</a>
-        </div>
-      </div>
-
-      <!-- WS 3 -->
-      <div class="workshop-item">
-        <img src="../assets/images/fce7654eb6f9fefb49b3d178981ad6ae21e88663.png" alt="Làm móc khóa" class="ws-img">
-        <div class="ws-content">
-          <h2 class="all-caps">Làm móc khóa</h2>
-          <p>Hoạt động làm móc khóa từ gốm tái chế mang đến trải nghiệm sáng tạo nhẹ nhàng, nơi những mảnh gốm cũ được “hồi sinh” thành món đồ nhỏ xinh, mang đậm dấu ấn cá nhân.</p>
-          <div class="ws-info">
-            <div class="ws-time">T2 - CN | 8h00 - 17h30</div>
-            <div class="ws-price">Từ 40.000VNĐ/sản phẩm</div>
-          </div>
-          <a href="#" data-id="3" class="btn-outline" style="display:inline-block; padding: 12px 32px;">Đăng ký</a>
-        </div>
-      </div>
-
+    <section class="workshop-list" id="workshopList">
+      <div style="text-align: center; padding: 40px; color: var(--clr-forest);">Đang tải danh sách workshop...</div>
     </section>
 
   </main>
 
   <script src="../app.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      function loadTopWorkshops() {
+        // Fetch all workshops (increased size to 20)
+        fetch('http://localhost:8080/workshop/workshops/all?page=0&size=20&sortBy=currentParticipants&sortDir=DESC')
+          .then(res => res.json())
+          .then(data => {
+            var list = document.getElementById('workshopList');
+            var workshops = data.content || (data.result ? data.result.content : []) || [];
+
+            if (workshops.length === 0) {
+              list.innerHTML = '<p style="text-align:center; padding: 40px;">Hiện chưa có workshop nào đang hoạt động.</p>';
+              return;
+            }
+
+            var html = '';
+            window.gsxAllWorkshops = {}; // Lưu trữ toàn cục
+            workshops.forEach(ws => {
+              window.gsxAllWorkshops[ws.id] = ws;
+              var img = ws.mainImage || '../assets/images/584260b1445e8ed2db5923ef8227900f261634cd.png';
+              var priceStr = new Intl.NumberFormat('vi-VN').format(ws.price || 0) + 'VNĐ';
+
+              var startDate = new Date(ws.startDate);
+              var endDate = new Date(ws.endDate);
+              var timeStr = startDate.toLocaleDateString('vi-VN') + ' | ' +
+                startDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' - ' +
+                endDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+              // Slots calculation
+              var slotsLeft = (ws.maxParticipants || 0) - (ws.currentParticipants || 0);
+              var slotsText = slotsLeft > 0 ? `Còn ${slotsLeft}/${ws.maxParticipants} chỗ` : 'Đã hết chỗ';
+              var slotsColor = slotsLeft <= 3 ? '#d32f2f' : 'var(--clr-forest)';
+
+              html += `
+                <div class="workshop-item">
+                  <img src="${img}" alt="${ws.name}" class="ws-img">
+                  <div class="ws-content">
+                    ${ws.targetAudience ? `<span class="ws-badge">${ws.targetAudience}</span>` : ''}
+                    <h2 class="all-caps">${ws.name}</h2>
+                    <p>${ws.description || ''}</p>
+                    
+                    <div class="ws-meta">
+                      <div class="ws-meta-item">📍 ${ws.location || 'Bát Tràng, Hà Nội'}</div>
+                      <div class="ws-meta-item" style="color: ${slotsColor}">🎟️ ${slotsText}</div>
+                      <div class="ws-meta-item">🛠️ ${ws.tools || 'Dụng cụ có sẵn'}</div>
+                      <div class="ws-meta-item">🎁 ${ws.benefits || 'Mang sản phẩm về'}</div>
+                    </div>
+
+                    <div class="ws-info">
+                      <div class="ws-time">${timeStr}</div>
+                      <div class="ws-price">Từ ${priceStr}/người</div>
+                    </div>
+                    <a href="#" data-id="${ws.id}" class="btn-outline gsx-reg-btn" style="display:inline-block; padding: 12px 32px;">Đăng ký ngay</a>
+                  </div>
+                </div>
+              `;
+            });
+            list.innerHTML = html;
+
+            // Re-attach registration modal events
+            list.querySelectorAll('.gsx-reg-btn').forEach(btn => {
+              btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (window.openRegistrationModal) {
+                  var id = this.getAttribute('data-id');
+                  window.gsxCurrentWorkshop = window.gsxAllWorkshops[id];
+                  window.gsxCurrentWorkshopId = id;
+                  window.openRegistrationModal();
+                } else {
+                  console.error('Registration modal function not found in app.js');
+                }
+              });
+            });
+          })
+          .catch(err => {
+            console.error('Lỗi tải workshop:', err);
+            document.getElementById('workshopList').innerHTML = '<p style="text-align:center; padding: 40px; color: red;">Lỗi kết nối máy chủ.</p>';
+          });
+      }
+
+      loadTopWorkshops();
+    });
+  </script>
 </body>
+
 </html>

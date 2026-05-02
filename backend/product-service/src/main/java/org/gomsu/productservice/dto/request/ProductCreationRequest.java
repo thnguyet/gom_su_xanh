@@ -27,4 +27,6 @@ public class ProductCreationRequest {
 
     @NotNull(message = "Mã danh mục không được để trống!")
     private Long categoryId;
+
+    private java.util.List<String> imageUrls;
 }

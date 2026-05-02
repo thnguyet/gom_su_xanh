@@ -361,9 +361,30 @@
           var metaHtml = '<div><span>Mã sản phẩm:</span> HSA' + String(product.id).padStart(4, '0') + '</div>';
           if (product.brand) metaHtml += '<div><span>Thương hiệu:</span> ' + product.brand + '</div>';
           if (product.categoryName) metaHtml += '<div><span>Danh mục:</span> ' + product.categoryName + '</div>';
-          if (product.stockQuantity !== undefined) metaHtml += '<div><span>Tồn kho:</span> ' + product.stockQuantity + '</div>';
+          
+          var stockLabel = (product.stockQuantity > 0) ? product.stockQuantity : '<span style="color: #d32f2f; font-weight: 700;">Hết hàng</span>';
+          metaHtml += '<div><span>Tồn kho:</span> ' + stockLabel + '</div>';
           
           document.querySelector('.product-meta').innerHTML = metaHtml;
+
+          // Disable buttons if out of stock
+          if (product.stockQuantity <= 0) {
+            var addToCartBtn = document.getElementById('addToCartBtn');
+            var buyNowBtn = document.getElementById('buyNowBtn');
+            if (addToCartBtn) {
+              addToCartBtn.disabled = true;
+              addToCartBtn.textContent = 'HẾT HÀNG';
+              addToCartBtn.style.background = '#ccc';
+              addToCartBtn.style.cursor = 'not-allowed';
+            }
+            if (buyNowBtn) {
+              buyNowBtn.disabled = true;
+              buyNowBtn.textContent = 'HẾT HÀNG';
+              buyNowBtn.style.background = '#eee';
+              buyNowBtn.style.color = '#999';
+              buyNowBtn.style.cursor = 'not-allowed';
+            }
+          }
 
           // Update Description
           document.querySelector('.tab-content').innerHTML = product.description || '<p>Đang cập nhật mô tả...</p>';
@@ -474,9 +495,35 @@
               return;
             }
 
-            // Mua ngay: Chuyển thẳng đến thanh toán với thông tin sản phẩm này
-            // Không thêm vào giỏ hàng chung để tách biệt luồng
-            window.location.href = 'thanh-toan.html?buyNow=true&productId=' + product.id + '&quantity=1';
+            // Mua ngay: Thêm vào giỏ hàng trước, sau đó mới chuyển đến thanh toán
+            var btnOriginalText = this.textContent;
+            this.textContent = 'Đang xử lý...';
+            this.disabled = true;
+
+            var formData = new URLSearchParams();
+            formData.append('productId', product.id);
+            formData.append('quantity', 1);
+
+            fetch('http://localhost:8080/order/cart/add', {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              body: formData
+            })
+            .then(res => {
+              if (res.ok) return res.json();
+              throw new Error('Không thể thêm sản phẩm vào hệ thống thanh toán.');
+            })
+            .then(() => {
+              window.location.href = 'thanh-toan.html?buyNow=true&productId=' + product.id + '&quantity=1';
+            })
+            .catch(err => {
+              alert(err.message);
+              this.textContent = btnOriginalText;
+              this.disabled = false;
+            });
           });
         })
         .catch(err => {
