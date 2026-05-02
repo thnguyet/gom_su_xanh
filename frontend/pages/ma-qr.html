@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mã QR Thanh toán - Gốm Sứ Xanh</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../styles-pages.css">
+  <style>
+    .qr-page {
+      padding: 48px 24px 96px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Checkout Steps Breadcrumb */
+    .checkout-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 64px;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--clr-forest);
+      font-size: 16px;
+    }
+    .step.active .step-num {
+      background: var(--clr-forest);
+      color: var(--clr-cream);
+    }
+    .step.completed .step-num {
+      background: rgba(148, 181, 120, 0.6);
+      color: var(--clr-forest);
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(148, 181, 120, 0.4);
+      color: var(--clr-forest);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .step-divider {
+      height: 1px;
+      width: 40px;
+      background: rgba(148, 181, 120, 0.4);
+    }
+
+    .page-title {
+      font-family: var(--font-heading);
+      font-size: 32px;
+      color: var(--clr-forest);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .page-subtitle {
+      font-size: 16px;
+      color: var(--clr-forest);
+      margin-bottom: 48px;
+      border-bottom: 1px dashed rgba(148, 181, 120, 0.5);
+      padding-bottom: 24px;
+    }
+
+    .section-heading {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--clr-forest);
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .qr-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 48px;
+    }
+    .qr-container img {
+      width: 320px;
+      height: 320px;
+      border-radius: 8px;
+      border: 1px solid var(--clr-mint);
+      padding: 12px;
+      background: white;
+    }
+
+    .info-list {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 16px 24px;
+      font-size: 16px;
+      color: var(--clr-forest);
+      margin-bottom: 48px;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 600px;
+    }
+    .info-label {
+      font-weight: 400;
+    }
+    .info-value {
+      font-weight: 700;
+    }
+
+    .order-details-box {
+      border-top: 1px solid rgba(148, 181, 120, 0.4);
+      padding-top: 32px;
+      margin-bottom: 48px;
+    }
+    .order-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 16px;
+      color: var(--clr-forest);
+    }
+    .order-table th {
+      text-align: left;
+      border-bottom: 2px solid rgba(148, 181, 120, 0.6);
+      padding-bottom: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .order-table th.right { text-align: right; }
+    
+    .order-table td {
+      padding: 16px 0;
+    }
+    .order-table td.right { text-align: right; font-weight: 700; }
+    
+    .order-table tr.total td {
+      border-top: 2px solid rgba(148, 181, 120, 0.6);
+      padding-top: 24px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .btn-finish {
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+      background: var(--clr-forest);
+      color: var(--clr-cream);
+      text-align: center;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-finish:hover {
+      background: var(--clr-leaf);
+    }
+
+    @media (max-width: 600px) {
+      .info-list { grid-template-columns: 1fr; gap: 8px; }
+      .info-value { margin-bottom: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="qr-page">
+    
+    <div class="checkout-steps">
+      <div class="step completed"><div class="step-num">1</div> Giỏ hàng</div>
+      <div class="step-divider"></div>
+      <div class="step active"><div class="step-num">2</div> Thanh toán</div>
+      <div class="step-divider"></div>
+      <div class="step"><div class="step-num">3</div> Hoàn thành đơn hàng</div>
+    </div>
+
+    <h1 class="page-title">Thanh toán</h1>
+    <p class="page-subtitle">Chuyển khoản ngân hàng hoặc quét mã QR vui lòng viết nội dung để chúng tôi xác nhận đơn hàng</p>
+
+    <h2 class="section-heading">Mã QR chuyển khoản ngân hàng</h2>
+    <div class="qr-container">
+      <!-- Mocks the QR code -->
+      <img src="../assets/images/a0ac96b69babb4981f6477852f7869eb0055b8e3.png" alt="QR Code">
+    </div>
+
+    <h2 class="section-heading">Thông tin chuyển khoản ngân hàng</h2>
+    <p style="text-align: center; font-size: 14px; margin-bottom: 24px;">Vui lòng chuyển đúng nội dung THANH TOÁN - MÃ SẢN PHẨM để chúng tôi xác nhận thanh toán.</p>
+    
+    <div class="info-list">
+      <div class="info-label">Tên tài khoản:</div>
+      <div class="info-value">Nguyễn Văn A</div>
+      
+      <div class="info-label">Số tài khoản:</div>
+      <div class="info-value">00314283318763162</div>
+      
+      <div class="info-label">Ngân hàng:</div>
+      <div class="info-value">Ngân hàng TMCP Công thương Việt Nam</div>
+      
+      <div class="info-label">Số tiền:</div>
+      <div class="info-value" id="qrAmount">0 VNĐ</div>
+      
+      <div class="info-label">Nội dung:</div>
+      <div class="info-value">THANH TOÁN - GOMXANH</div>
+    </div>
+
+    <div class="order-details-box">
+      <h2 class="section-heading">Chi tiết đơn hàng</h2>
+      <table class="order-table">
+        <thead>
+          <tr>
+            <th>Sản phẩm</th>
+            <th class="right">Tổng</th>
+          </tr>
+        </thead>
+        <tbody id="qrOrderItems">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div style="text-align: center; margin-top: 32px;">
+      <button id="finishPaymentBtn" class="btn-finish">Hoàn tất thanh toán</button>
+    </div>
+
+  </main>
+
+  <script src="../app.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var token = localStorage.getItem('gsx_token');
+      
+      var urlParams = new URLSearchParams(window.location.search);
+      var buyNow = urlParams.get('buyNow');
+      var buyNowProductId = urlParams.get('buyNow') === 'true' ? urlParams.get('productId') : null;
+      var buyNowQuantity = parseInt(urlParams.get('quantity')) || 1;
+
+      // 1. Lấy thông tin người dùng (Tên người mua)
+      if (token) {
+        fetch('http://localhost:8080/identity/users/my-infor', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => res.json())
+        .then(data => {
+          var user = data.result || data;
+          if (user && user.username) {
+            // Hiển thị tên người mua ở đâu đó? 
+            // Ta có thể đổi Nội dung chuyển khoản thành THANH TOÁN - [Tên]
+            document.querySelector('.info-list .info-value:nth-of-type(5)').textContent = 'THANH TOÁN - ' + user.username.toUpperCase();
+          }
+        });
+      }
+
+      // 2. Lấy thông tin đơn hàng (Giỏ hàng hoặc Mua ngay)
+      if (buyNow === 'true' && buyNowProductId) {
+        fetch('http://localhost:8080/product/products/' + buyNowProductId)
+        .then(res => res.json())
+        .then(data => {
+          var product = data.result || data;
+          if (data.code === 1000 && data.result) product = data.result;
+
+          var tbody = document.getElementById('qrOrderItems');
+          var totalPrice = (product.price || 0) * buyNowQuantity;
+          var shipFee = 30000;
+          var finalTotal = totalPrice + shipFee;
+          var finalTotalStr = new Intl.NumberFormat('vi-VN').format(finalTotal) + ' VNĐ';
+
+          document.getElementById('qrAmount').textContent = finalTotalStr;
+
+          var html = `
+            <tr>
+              <td>${product.name} (x${buyNowQuantity})</td>
+              <td class="right">${new Intl.NumberFormat('vi-VN').format(totalPrice)} VNĐ</td>
+            </tr>
+            <tr>
+              <td>Phí ship</td>
+              <td class="right">30.000 VNĐ</td>
+            </tr>
+            <tr>
+              <td>Phương thức thanh toán</td>
+              <td class="right" style="font-weight: 400;">Chuyển khoản ngân hàng</td>
+            </tr>
+            <tr class="total">
+              <td>Tổng cộng</td>
+              <td class="right">${finalTotalStr}</td>
+            </tr>
+          `;
+          tbody.innerHTML = html;
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById('qrOrderItems').innerHTML = '<tr><td colspan="2" style="color:red;text-align:center;">Lỗi tải thông tin sản phẩm.</td></tr>';
+        });
+      } else {
+        if (!token) {
+          window.location.href = 'dang-nhap_839-134.html';
+          return;
+        }
+        fetch('http://localhost:8080/order/cart', {
+          method: 'GET',
+          headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => res.json())
+        .then(data => {
+          var cart = data.result || data;
+          if (data.code === 1000 && data.result) cart = data.result;
+
+          var items = cart.cartItemsResponse || [];
+          var tbody = document.getElementById('qrOrderItems');
+          var totalPrice = cart.totalPrice || 0;
+          var shipFee = 30000;
+          var finalTotal = totalPrice + shipFee;
+          var finalTotalStr = new Intl.NumberFormat('vi-VN').format(finalTotal) + ' VNĐ';
+
+          document.getElementById('qrAmount').textContent = finalTotalStr;
+
+          var html = '';
+          items.forEach(item => {
+            html += `
+              <tr>
+                <td>${item.productName} (x${item.quantity})</td>
+                <td class="right">${new Intl.NumberFormat('vi-VN').format(item.subTotal)} VNĐ</td>
+              </tr>
+            `;
+          });
+          
+          html += `
+            <tr>
+              <td>Phí ship</td>
+              <td class="right">30.000 VNĐ</td>
+            </tr>
+            <tr>
+              <td>Phương thức thanh toán</td>
+              <td class="right" style="font-weight: 400;">Chuyển khoản ngân hàng</td>
+            </tr>
+            <tr class="total">
+              <td>Tổng cộng</td>
+              <td class="right">${finalTotalStr}</td>
+            </tr>
+          `;
+          
+          tbody.innerHTML = html;
+        })
+        .catch(console.error);
+      }
+
+      document.getElementById('finishPaymentBtn').addEventListener('click', function() {
+        this.textContent = 'Đang xử lý...';
+        // In a real app, we'd clear cart here, but for demo:
+        setTimeout(function() {
+          window.location.href = 'hoan-thanh-don-hang.html';
+        }, 800);
+      });
+    });
+  </script>
+</body>
+</html>

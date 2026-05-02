@@ -1,0 +1,566 @@
+/* ============================================================
+   styles-pages.css — Khớp theo Figma Prototype GỐM SỨ XANH
+   ============================================================ */
+/* Google Fonts — imported in styles.css, no duplicate needed */
+
+:root {
+  /* === Màu sắc chính xác từ Figma Style Guide === */
+  --clr-forest:     #1c3d1e;   /* Forest green - chữ chính, chữ tiêu đề */
+  --clr-moss:       #275129;   /* Moss - footer bg, primary button bg */
+  --clr-moss-dark:  #1e3d20;   /* Hover state for moss */
+  --clr-leaf:       #558b2f;   /* Active nav link, accents */
+  --clr-lime:       #8bca43;   /* Style Guide secondary — vibrant green */
+  --clr-sage:       #94b578;   /* Sage green - underlines */
+  --clr-mint:       #c5e1a5;   /* Mint - hero section BG, section bg */
+  --clr-hero-bg:    #b5d5a0;   /* Figma hero section background */
+  --clr-cream:      #fffdf5;   /* Style Guide primary — card backgrounds */
+  --clr-sand:       #f0ede2;   /* Page background */
+  --clr-clay:       #d4c5a9;   /* Input borders */
+  --clr-teal:       #2e7d60;   /* Accent, hover */
+  --clr-neutral:    #f6faf9;   /* Style Guide neutral — near white */
+  --clr-link:       #558b2f;   /* "Đọc tiếp >>" links */
+
+  /* Functional Colors — from Style Guide */
+  --clr-success:    #5eaf4c;
+  --clr-warning:    #ffb300;
+  --clr-error:      #d32f2f;
+  --clr-info:       rgba(182, 212, 85, .56);
+
+  /* Nav */
+  --nav-h: 70px;
+
+  /* Fonts */
+  --font-display:   'Anton', sans-serif;
+  --font-heading:   'Afacad', 'Arial', sans-serif;
+  --font-body:      'DM Sans', 'Segoe UI', sans-serif;
+
+  /* Shapes */
+  --radius:         16px;
+  --radius-pill:    100px;
+  --radius-organic: 33px 3px 33px 3px;  /* Style Guide signature shape */
+
+  /* Shadows */
+  --shadow-card:    0 4px 24px rgba(28,61,30,.10);
+  --shadow-btn:     0 4px 8px rgba(0, 0, 0, .15);  /* Style Guide button shadow */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+/* ===== BODY BASE ===== */
+body.gsxpage {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--clr-forest);
+  /* Paper texture - matches Figma background */
+  background-color: var(--clr-sand);
+  background-image: url('../assets/images/6799477a82bcda0f3d8ceb8313f7b1cef21ffdcd.png');
+  background-attachment: scroll; /* Changed from fixed — fixed bg causes constant repaints on scroll */
+  background-size: cover;
+  background-position: center;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ===== NAVBAR ===== */
+/* Figma: white/cream bg, logo + "GỐM SỨ XANH", links không bold,
+   active link xanh leaf, nút "Tài khoản" là outline box vuông */
+.gsx-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  height: var(--nav-h);
+  background: rgba(253, 248, 240, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(28, 61, 30, 0.10);
+}
+
+.gsx-nav-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 48px;
+  gap: 0;
+}
+
+/* Logo area */
+.gsx-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  flex-shrink: 0;
+  margin-right: auto;
+}
+.gsx-nav-brand img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+.gsx-nav-brand span {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--clr-forest);
+  letter-spacing: .05em;
+}
+
+/* Nav links */
+.gsx-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 24px;
+}
+
+.gsx-nav-link {
+  padding: 8px 16px;
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 400;    /* Figma: không bold mặc định */
+  color: var(--clr-forest);
+  border-radius: 6px;
+  transition: color .15s, background .15s;
+  white-space: nowrap;
+}
+.gsx-nav-link:hover { color: var(--clr-leaf); }
+.gsx-nav-link.is-active {
+  color: var(--clr-leaf);
+  font-weight: 500;
+}
+
+/* Nav actions */
+.gsx-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* "Tài khoản" button - Figma: outline, rounded-square border */
+.gsx-nav-btn {
+  padding: 7px 18px;
+  border: 1.5px solid var(--clr-forest);
+  border-radius: 8px;
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--clr-forest);
+  background: transparent;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.gsx-nav-btn:hover {
+  background: var(--clr-forest);
+  color: var(--clr-cream);
+}
+
+.gsx-nav-flag {
+  width: 28px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+/* ===== PAGE MAIN OFFSET ===== */
+.page-main { padding-top: var(--nav-h); }
+
+/* ===== SECTION TITLES =====
+   Figma: Anton font, uppercase, teal/moss color, centered */
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3.5vw, 32px);
+  font-weight: 400;
+  color: var(--clr-moss);
+  text-align: center;
+  margin: 0 0 12px;
+  letter-spacing: .01em;
+}
+.section-title.all-caps {
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+/* Underline accent below section title */
+.section-title-wrap {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.section-title-wrap::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 3px;
+  background: var(--clr-leaf);
+  margin: 8px auto 0;
+  border-radius: 2px;
+}
+
+/* ===== CARDS =====
+   Figma: cream white bg, rounded corners, subtle border, image on top */
+.gsx-card {
+  background: #fdf8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 181, 120, 0.4);
+  transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  height: 100%;
+  position: relative; /* Ensure child absolute links work */
+}
+.gsx-card-link-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  cursor: pointer;
+}
+.gsx-card .gsx-card-btn,
+.gsx-card .btn-outline-pill {
+  position: relative;
+  z-index: 2;
+}
+.gsx-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 32px rgba(28, 61, 30, 0.12);
+  border-color: var(--clr-leaf);
+}
+.gsx-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1.1;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+}
+.gsx-card:hover img {
+  transform: scale(1.05);
+}
+.gsx-card-body { 
+  padding: 24px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex-grow: 1;
+}
+.gsx-card-title {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--clr-teal);
+  margin: 0 0 12px;
+  line-height: 1.3;
+}
+.gsx-card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.gsx-card-price {
+  font-size: 16px;
+  color: var(--clr-forest);
+  margin: 0 0 24px;
+  font-weight: 500;
+}
+.gsx-card-btn {
+  display: inline-block;
+  padding: 8px 22px;
+  border: 1.5px solid var(--clr-moss);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--clr-moss);
+  text-decoration: none;
+  background: transparent;
+  transition: all .2s;
+  box-shadow: var(--shadow-btn);
+  letter-spacing: .02em;
+}
+.gsx-card-btn:hover {
+  background: var(--clr-moss);
+  color: var(--clr-cream);
+  transform: translateY(-2px);
+}
+
+/* ===== BUTTONS =====
+   Primary: dark moss green, pill shape - matches "Đăng ký ngay!" on homepage
+   Outline: transparent bg, moss border - matches workshop page button */
+.btn-primary {
+  display: inline-block;
+  padding: 13px 36px;
+  background: var(--clr-moss);
+  color: var(--clr-cream);
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .2s;
+  box-shadow: var(--shadow-btn);
+  letter-spacing: .02em;
+}
+.btn-primary:hover {
+  background: var(--clr-moss-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .2);
+}
+
+/* Outline button - Workshop "Đăng ký ngay!" style */
+.btn-outline {
+  display: inline-block;
+  padding: 13px 36px;
+  background: transparent;
+  color: var(--clr-moss);
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--clr-moss);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .2s;
+  box-shadow: var(--shadow-btn);
+  letter-spacing: .02em;
+}
+.btn-outline:hover {
+  background: var(--clr-moss);
+  color: var(--clr-cream);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .2);
+}
+
+/* ===== QUOTE SECTION ===== */
+.quote-block {
+  text-align: center;
+  padding: 56px 40px;
+  background: var(--clr-sand);
+}
+.quote-block .quote-mark {
+  font-family: Georgia, serif;
+  font-size: 80px;
+  color: var(--clr-moss);
+  line-height: 0.4;
+  vertical-align: -0.3em;
+  display: inline-block;
+}
+.quote-block .quote-text {
+  font-family: var(--font-heading);
+  font-size: clamp(18px, 2.5vw, 26px);
+  font-style: italic;
+  color: var(--clr-moss);
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.65;
+}
+
+/* ===== FOOTER =====
+   Figma: dark moss green (#275129) bg, cream/white text, 3 columns,
+   simple links, contact info with map image */
+.footer {
+  background: var(--clr-moss);
+  color: var(--clr-cream);
+  padding: 60px 48px 0;
+}
+
+.footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr;
+  gap: 48px;
+  padding-bottom: 48px;
+}
+
+.footer-col-title {
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--clr-cream);
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid rgba(255, 253, 246, 0.25);
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.footer-links a {
+  color: rgba(255, 253, 246, 0.8);
+  text-decoration: none;
+  font-size: 15px;
+  transition: color .15s;
+}
+.footer-links a:hover { color: var(--clr-cream); }
+
+.footer-contact-item {
+  font-size: 14px;
+  color: rgba(255, 253, 246, 0.85);
+  margin-bottom: 12px;
+  line-height: 1.55;
+}
+.footer-map {
+  width: 100%;
+  max-width: 240px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 12px;
+  border: 2px solid rgba(255,253,246,.15);
+}
+
+.footer-bottom-bar {
+  border-top: 1px solid rgba(255, 253, 246, 0.18);
+  padding: 18px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.footer-copy {
+  font-size: 13px;
+  color: rgba(255, 253, 246, 0.5);
+}
+
+.footer-bottom-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.footer-login-btn {
+  padding: 7px 16px;
+  border: 1.5px solid rgba(255,253,246,.6);
+  border-radius: 8px;
+  color: rgba(255,253,246,.9);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  transition: all .15s;
+}
+.footer-login-btn:hover {
+  background: rgba(255,253,246,.12);
+}
+
+.footer-social { display: flex; gap: 10px; }
+.footer-social a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,253,246,.12);
+  text-decoration: none;
+  font-size: 16px;
+  transition: background .15s;
+}
+.footer-social a:hover { background: rgba(255,253,246,.25); }
+
+/* ===== LAYOUT & COMPONENTS ===== */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* ===== HERO SECTION ===== */
+.hero-section {
+  position: relative;
+  height: 380px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(28, 61, 30, 0.2), rgba(28, 61, 30, 0.6));
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #fff;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 64px);
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 15px rgba(0,0,0,0.4);
+}
+
+/* ===== BUTTONS ===== */
+.btn-outline-pill {
+  display: inline-block;
+  padding: 10px 32px;
+  border: 2px solid var(--clr-leaf);
+  border-radius: var(--radius-pill);
+  color: var(--clr-leaf);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 18px;
+  background: var(--clr-cream);
+  box-shadow: var(--shadow-btn);
+  transition: all 0.25s;
+  cursor: pointer;
+  text-decoration: none;
+  letter-spacing: .02em;
+}
+.btn-outline-pill:hover {
+  background: var(--clr-leaf);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .2);
+}
+
+/* Legacy modal system removed to prevent conflicts with app.js modal */
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .gsx-nav-inner { padding: 0 20px; }
+  .gsx-nav-links { display: none; }
+  .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+  .footer { padding: 40px 20px 0; }
+  
+  .cards-grid { grid-template-columns: repeat(2, 1fr); }
+  .container { padding: 0 24px; }
+}
+@media (max-width: 768px) {
+  .cards-grid { grid-template-columns: 1fr; }
+  .hero-section { height: 300px; }
+}
+@media (max-width: 600px) {
+  .footer-bottom-bar { flex-direction: column; align-items: flex-start; }
+}

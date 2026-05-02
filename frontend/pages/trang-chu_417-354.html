@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trang chủ — Gốm Sứ Xanh</title>
+  <meta name="description" content="Gốm Sứ Xanh - Tái sinh nghệ thuật gốm sứ tái chế Bát Tràng. Workshop, sản phẩm độc đáo từ gốm phế liệu.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../styles-pages.css">
+  <style>
+    /* ===== HERO — matches Figma: mint green bg, cream card, Anton heading uppercase ===== */
+    .hero-section {
+      background: #b5d5a0; /* Figma mint/hero bg */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 40px;
+      min-height: calc(100vh - var(--nav-h));
+    }
+    .hero-card {
+      background: #fdf8f0; /* cream card */
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(28,61,30,.06);
+      max-width: 1180px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 480px;
+      overflow: hidden;
+    }
+    .hero-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      background: #fdf8f0;
+    }
+    .hero-img-main {
+      width: 100%;
+      max-width: 420px;
+      height: auto;
+      object-fit: contain;
+    }
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 72px 60px 0;
+      gap: 18px;
+    }
+    /* Figma: "VẺ ĐẸP TỪ NHỮNG ĐIỀU KHÔNG HOÀN HẢO" — Anton, uppercase, moss green */
+    .hero-heading {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(26px, 3.5vw, 40px);
+      font-weight: 400;
+      color: #275129; /* moss */
+      margin: 0;
+      line-height: 1.15;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+    }
+    .hero-text {
+      font-size: 16px;
+      color: #1c3d1e;
+      margin: 0;
+      line-height: 1.7;
+    }
+    /* Hero CTA — Standard pill shape */
+    .hero-cta {
+      align-self: flex-end;
+      padding: 13px 32px;
+      background: #275129;
+      color: #fffdf5;
+      border-radius: 100px;
+      text-decoration: none;
+      font-family: 'Afacad', Arial, sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      letter-spacing: .02em;
+      transition: all .25s;
+      box-shadow: 0 4px 8px rgba(0,0,0,.15);
+    }
+    .hero-cta:hover {
+      background: #1e3d20;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,.2);
+    }
+
+    /* ===== ABOUT — Figma: paper bg, Anton heading, left text / right round image ===== */
+    .about-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 88px 40px;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 72px;
+      align-items: center;
+    }
+    /* "GỐM SỨ XANH LÀ GÌ?" — Anton, uppercase, moss green */
+    .about-heading {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(22px, 3vw, 34px);
+      font-weight: 400;
+      color: #275129;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      margin: 0 0 20px;
+    }
+    .about-text {
+      font-size: 16px;
+      color: #1c3d1e;
+      line-height: 1.75;
+      margin: 0 0 20px;
+    }
+    /* "Đọc tiếp >>" — leaf green */
+    .about-link {
+      font-weight: 700;
+      color: #558b2f;
+      text-decoration: none;
+      font-size: 16px;
+    }
+    .about-link:hover { text-decoration: underline; }
+    .about-img {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    /* ===== QUOTE — Figma: paper bg, large italic text, big quote marks ===== */
+    .quote-section {
+      padding: 64px 40px;
+      text-align: center;
+    }
+    .quote-text {
+      font-family: 'Afacad', Arial, sans-serif;
+      font-size: clamp(18px, 2.5vw, 28px);
+      font-style: italic;
+      color: #275129;
+      max-width: 860px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .quote-mark {
+      font-family: Georgia, serif;
+      font-size: 80px;
+      color: #275129;
+      line-height: 0.5;
+      vertical-align: -0.3em;
+      display: inline;
+    }
+
+    /* ===== WORKSHOPS / CARDS ===== */
+    .cards-section {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 72px 40px;
+    }
+    .cards-section .section-title { margin-bottom: 36px; }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    /* ===== NEWS / BLOG ===== */
+    .news-section {
+      padding: 72px 40px;
+    }
+    .news-inner { max-width: 1160px; margin: 0 auto; }
+    .news-inner .section-title { margin-bottom: 36px; }
+    .news-list { display: flex; flex-direction: column; gap: 20px; }
+    .news-item {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 0;
+      background: #fdf8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(148,181,120,.2);
+    }
+    .news-img { width: 100%; height: 200px; object-fit: cover; display: block; }
+    .news-body {
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .news-title {
+      font-family: 'Afacad', Arial, sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #275129;
+      margin: 0 0 10px;
+      line-height: 1.35;
+    }
+    .news-excerpt { font-size: 15px; color: #1c3d1e; line-height: 1.7; margin: 0 0 16px; }
+    .news-link { font-weight: 700; color: #558b2f; text-decoration: none; font-size: 15px; }
+    .news-link:hover { text-decoration: underline; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 860px) {
+      .hero-card { grid-template-columns: 1fr; }
+      .hero-visual { min-height: 260px; }
+      .hero-content { padding: 32px; }
+      .hero-cta { align-self: flex-start; }
+      .about-section { grid-template-columns: 1fr; gap: 32px; }
+      .about-img { max-width: 260px; margin: 0 auto; display: block; }
+      .cards-grid { grid-template-columns: 1fr 1fr; }
+      .news-item { grid-template-columns: 1fr; }
+      .news-img { height: 180px; }
+    }
+    @media (max-width: 600px) {
+      .hero-section { padding: 32px 16px; }
+      .cards-section, .about-section, .news-section { padding: 48px 16px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .quote-section { padding: 48px 20px; }
+    }
+  </style>
+</head>
+<body class="gsxpage">
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="gsx-nav">
+    <div class="gsx-nav-inner">
+      <a class="gsx-nav-brand" href="trang-chu_417-354.html">
+        <img src="../assets/images/ea188f8baac92ab0012022a5ea61a0e65d086c2c.png" alt="Logo">
+        <span>GỐM SỨ XANH</span>
+      </a>
+      <div class="gsx-nav-links">
+        <a class="gsx-nav-link is-active" href="trang-chu_417-354.html">Trang chủ</a>
+        <a class="gsx-nav-link" href="ve-chung-toi_1662-3482.html">Về chúng tôi</a>
+        <a class="gsx-nav-link" href="trang-workshop-real_1719-3931.html">Workshop</a>
+        <a class="gsx-nav-link" href="trang-san-pham_945-1348.html">Sản phẩm</a>
+        <a class="gsx-nav-link" href="trang-blog_29-2.html">Blog</a>
+      </div>
+      <div class="gsx-nav-actions">
+        <a class="gsx-nav-btn" href="dang-nhap_839-134.html" id="navAccount" aria-label="Tài khoản" title="Tài khoản">Tài khoản</a>
+        <img class="gsx-nav-flag" src="../assets/images/9b34aad7bad2bbce2089b52760f4970386deffb6.png" alt="VN">
+        <img class="gsx-nav-flag" src="../assets/images/632be14a1b97bffb1dbc6c251283ddff51b3e613.png" alt="EN">
+      </div>
+    </div>
+  </nav>
+
+
+  <main class="page-main">
+
+    <!-- ===== HERO ===== -->
+    <section class="hero-section">
+      <div class="hero-card">
+        <div class="hero-visual">
+          <img class="hero-img-main" src="../assets/images/1a15d0ceffdb8a16aacb711397c1ef1d72113385.png" alt="Sản phẩm gốm sứ tái chế" decoding="async">
+        </div>
+        <div class="hero-content">
+          <h1 class="hero-heading">Vẻ đẹp từ những điều không hoàn hảo</h1>
+          <p class="hero-text">Khi được nâng niu đúng cách, bất kỳ mảnh ghép nào cũng có thể tỏa sáng. Đặt lịch workshop ngay và bắt đầu hành trình theo cách của bạn.</p>
+          <a class="hero-cta" href="trang-workshop-real_1719-3931.html">Đăng ký ngay!</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ABOUT ===== -->
+    <section class="about-section">
+      <div>
+        <h2 class="about-heading">Gốm Sứ Xanh là gì?</h2>
+        <p class="about-text">Gốm Sứ Xanh được thành lập năm 2023 bởi chị Lê Hà Phương và chị Vũ Thùy Trang, với mong muốn tạo nên một không gian sáng tạo và chữa lành dành cho những người yêu nghệ thuật và quan tâm đến môi trường.</p>
+        <p class="about-text">Xuất phát từ ý tưởng "tái sinh", Gốm Sứ Xanh hướng đến việc thu gom và tái chế gốm phế liệu từ Bát Tràng và cộng đồng, biến chúng thành những sản phẩm mới mang giá trị thẩm mỹ và ý nghĩa.</p>
+        <a class="about-link" href="ve-chung-toi_1662-3482.html">Đọc tiếp &gt;&gt;</a>
+      </div>
+      <img class="about-img" src="../assets/images/3881c02d09f19f051c98ad68b3b25157f434e7e3.png" alt="Gốm Sứ Xanh" loading="lazy" decoding="async">
+    </section>
+
+    <!-- ===== QUOTE ===== -->
+    <section class="quote-section">
+      <p class="quote-text">
+        <span class="quote-mark">"</span>
+        Điều gì sẽ xảy ra nếu những mảnh vỡ này... được trao cơ hội thứ hai?
+        <span class="quote-mark">"</span>
+      </p>
+    </section>
+
+    <!-- ===== WORKSHOPS NỔI BẬT ===== -->
+    <section class="cards-section">
+      <h2 class="section-title all-caps">Workshop nổi bật</h2>
+      <div class="cards-grid">
+        <a class="gsx-card" href="trang-workshop-real_1719-3931.html" style="text-decoration:none">
+          <img src="../assets/images/8162b2504c89400a58a317db7e01975fab0734a8.jpg" alt="Vẽ tranh gốm sứ tái chế" loading="lazy" decoding="async">
+          <div class="gsx-card-body">
+            <div class="gsx-card-title">Vẽ tranh gốm sứ tái chế</div>
+            <div class="gsx-card-price">Từ 50.000VNĐ / sản phẩm</div>
+            <span class="gsx-card-btn">Chi tiết</span>
+          </div>
+        </a>
+        <a class="gsx-card" href="trang-workshop-real_1719-3931.html" style="text-decoration:none">
+          <img src="../assets/images/d4d90d37e873d1163efcee80bd7f9faf7ad05d12.png" alt="Vẽ móc chìa khóa" loading="lazy" decoding="async">
+          <div class="gsx-card-body">
+            <div class="gsx-card-title">Vẽ móc chìa khóa</div>
+            <div class="gsx-card-price">Từ 40.000VNĐ / sản phẩm</div>
+            <span class="gsx-card-btn">Chi tiết</span>
+          </div>
+        </a>
+        <a class="gsx-card" href="trang-workshop-real_1719-3931.html" style="text-decoration:none">
+          <img src="../assets/images/a6999bec49da0eed15baef1fe8c4b77c7b636b49.jpg" alt="Vẽ fridge magnets" loading="lazy" decoding="async">
+          <div class="gsx-card-body">
+            <div class="gsx-card-title">Vẽ fridge magnets</div>
+            <div class="gsx-card-price">Từ 40.000VNĐ / sản phẩm</div>
+            <span class="gsx-card-btn">Chi tiết</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ===== SẢN PHẨM NỔI BẬT ===== -->
+    <section class="cards-section" style="background:var(--clr-sand); max-width:100%; padding:80px 40px;">
+      <div style="max-width:1200px; margin:0 auto;">
+        <h2 class="section-title all-caps">Sản phẩm nổi bật</h2>
+        <div class="cards-grid">
+          <a class="gsx-card" href="trang-san-pham_945-1348.html" style="text-decoration:none">
+            <img src="../assets/images/0b4db3fc90f2e86ecc2dabc1484c213072054b4c.jpg" alt="Bộ kit vẽ tranh gốm sứ" loading="lazy" decoding="async">
+            <div class="gsx-card-body">
+              <div class="gsx-card-title">Bộ kit vẽ tranh gốm sứ</div>
+              <div class="gsx-card-price">Từ 60.000VNĐ / sản phẩm</div>
+              <span class="gsx-card-btn">Chi tiết</span>
+            </div>
+          </a>
+          <a class="gsx-card" href="trang-san-pham_945-1348.html" style="text-decoration:none">
+            <img src="../assets/images/e9f274abe82185f29f7f9e9d201211645b0ebfc1.jpg" alt="Tranh Mèo đa sắc" loading="lazy" decoding="async">
+            <div class="gsx-card-body">
+              <div class="gsx-card-title">Tranh Mèo đa sắc</div>
+              <div class="gsx-card-price">Từ 100.000VNĐ / sản phẩm</div>
+              <span class="gsx-card-btn">Chi tiết</span>
+            </div>
+          </a>
+          <a class="gsx-card" href="trang-san-pham_945-1348.html" style="text-decoration:none">
+            <img src="../assets/images/acf1adfc9c44d707e39fade2f0936e22060b17da.jpg" alt="Móc khóa Bít tất" loading="lazy" decoding="async">
+            <div class="gsx-card-body">
+              <div class="gsx-card-title">Móc khóa Bít tất</div>
+              <div class="gsx-card-price">Từ 40.000VNĐ / sản phẩm</div>
+              <span class="gsx-card-btn">Chi tiết</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== GỐM SỨ XANH TRÊN BÁO ===== -->
+    <section class="news-section">
+      <div class="news-inner">
+        <h2 class="section-title all-caps">Gốm Sứ Xanh trên báo</h2>
+        <div class="news-list">
+          <div class="news-item">
+            <img class="news-img" src="../assets/images/c9f642d304451bb849048cb4ff638144f9b9d27c.jpg" alt="VOV Giao thông" loading="lazy" decoding="async">
+            <div class="news-body">
+              <div class="news-title">Gốm Sứ Xanh: Lan toả thông điệp tái chế vì môi trường | VOV Giao thông</div>
+              <p class="news-excerpt">Tận dụng lại những mảnh vỡ gốm tưởng chừng như không còn tác dụng, sau đó tô vẽ những màu sắc và ghép chúng thành những bức tranh, góp phần giảm một lượng rác thải rắn ra môi trường.</p>
+              <a class="news-link" href="https://vovgiaothong.vn/newsaudio/gom-su-xanh-lan-toa-thong-diep-tai-che-vi-moi-truong-d40576.html" target="_blank">Đọc tiếp &gt;&gt;</a>
+            </div>
+          </div>
+          <div class="news-item">
+            <img class="news-img" src="../assets/images/05bfba55dee7e04ce5d76ab6bb024b9302a8e9a7.png" alt="Lao động TV" loading="lazy" decoding="async">
+            <div class="news-body">
+              <div class="news-title">Khám phá nghệ thuật tái chế gốm sứ xanh tại Bát Tràng | Lao động TV</div>
+              <p class="news-excerpt">Gốm sứ xanh tại Bát Tràng, Hà Nội thu hút đông đảo bạn trẻ đến trải nghiệm tái chế gốm sứ cũ thành tác phẩm nghệ thuật độc đáo, kết hợp bảo vệ môi trường.</p>
+              <a class="news-link" href="https://laodong.vn/video/kham-pha-nghe-thuat-tai-che-gom-su-xanh-tai-bat-trang-1372521.ldo" target="_blank">Đọc tiếp &gt;&gt;</a>
+            </div>
+          </div>
+          <div class="news-item">
+            <img class="news-img" src="../assets/images/47b165071a6acd21620ae93ffbd9f67c3f64fde3.png" alt="Cafe Sáng VTV3" loading="lazy" decoding="async">
+            <div class="news-body">
+              <div class="news-title">"Gốm Sứ Xanh" - Sản phẩm gốm được tạo nên từ những mảnh vỡ | CAFE SÁNG VTV3</div>
+              <p class="news-excerpt">Tận dụng lại những mảnh vỡ gốm tưởng chừng như không còn tác dụng, sau đó tô vẽ những màu sắc và ghép chúng thành những bức tranh, lan tỏa thông điệp tái chế.</p>
+              <a class="news-link" href="https://www.youtube.com/watch?v=iooOkQp5uJU" target="_blank">Đọc tiếp &gt;&gt;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-col-title">Menu</div>
+        <ul class="footer-links">
+          <li><a href="trang-chu_417-354.html">Trang chủ</a></li>
+          <li><a href="ve-chung-toi_1662-3482.html">Về chúng tôi</a></li>
+          <li><a href="trang-workshop-real_1719-3931.html">Workshop</a></li>
+          <li><a href="trang-san-pham_945-1348.html">Sản phẩm</a></li>
+          <li><a href="trang-blog_29-2.html">Blog</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Hỗ trợ khách hàng</div>
+        <ul class="footer-links">
+          <li><a href="faqs_1458-3210.html">FAQ</a></li>
+          <li><a href="huong-dan_275-212.html">Hướng dẫn</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Liên hệ với chúng tôi</div>
+        <div class="footer-contact-item">Địa chỉ: Tầng 2, Hành lang bên phải, Bảo tàng Gốm Bát Tràng, 28 Đường Bát Tràng, Hà Nội.</div>
+        <div class="footer-contact-item">Hotline: 0945661984 - 0946542120</div>
+        <div class="footer-contact-item">Email: haphuongle@gmail.com</div>
+        <a href="https://maps.app.goo.gl/ssF1uQkJfW2vT8W16" target="_blank">
+          <img class="footer-map" src="../assets/images/5440ed20e1d2722f023f3fac0d4278ac34dfdb53.png" alt="Bản đồ" loading="lazy" decoding="async">
+        </a>
+      </div>
+    </div>
+    <div class="footer-bottom-bar">
+      <div class="footer-copy">Copyright © 2025 gomsuxanh.vn. All rights reserved.</div>
+      <div class="footer-bottom-actions">
+        <a class="footer-login-btn" href="dang-nhap_839-134.html">Register or login</a>
+        <div class="footer-social">
+          <a href="https://www.facebook.com/profile.php?id=100095447280090" target="_blank" title="Facebook">📘</a>
+          <a href="https://www.tiktok.com/@gomsuxanh" target="_blank" title="TikTok">🎵</a>
+          <a href="https://www.instagram.com/gomsuxanh/" target="_blank" title="Instagram">📷</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../app.js" defer></script>
+</body>
+</html>

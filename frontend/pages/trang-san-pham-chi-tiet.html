@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tranh Mèo đa sắc - Gốm Sứ Xanh</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../styles-pages.css">
+  <style>
+    .product-detail-page {
+      padding: 48px 24px 96px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .product-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      margin-bottom: 64px;
+      align-items: start;
+    }
+
+    .product-gallery img {
+      width: 100%;
+      border-radius: 24px;
+      object-fit: cover;
+      aspect-ratio: 4/3;
+      border: 1px solid rgba(148, 181, 120, 0.2);
+    }
+
+    .product-info h1 {
+      font-family: var(--font-heading);
+      font-size: 40px;
+      color: var(--clr-forest);
+      margin-bottom: 24px;
+    }
+    
+    .product-meta {
+      font-size: 16px;
+      color: var(--clr-forest);
+      margin-bottom: 32px;
+      line-height: 1.8;
+    }
+    .product-meta span {
+      display: inline-block;
+      width: 120px;
+      color: rgba(28, 61, 30, 0.7);
+    }
+
+    .product-price {
+      font-family: var(--font-heading);
+      font-size: 32px;
+      color: var(--clr-forest);
+      margin-bottom: 32px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid rgba(148, 181, 120, 0.4);
+    }
+
+    .product-related-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--clr-forest);
+      margin-bottom: 16px;
+    }
+
+    .related-thumbs {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .related-thumbs img {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .related-thumbs img:hover, .related-thumbs img.active {
+      border-color: var(--clr-leaf);
+    }
+
+    .product-actions {
+      display: flex;
+      gap: 16px;
+    }
+    .product-actions .btn-outline {
+      flex: 1;
+      padding: 16px;
+      font-size: 18px;
+      border-radius: var(--radius-pill);
+      border: 2px solid rgba(148, 181, 120, 0.6);
+      color: var(--clr-forest);
+      background: transparent;
+      cursor: pointer;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .product-actions .btn-outline:hover {
+      background: rgba(148, 181, 120, 0.1);
+      border-color: var(--clr-leaf);
+    }
+    .product-actions .btn-solid {
+      flex: 1;
+      padding: 16px;
+      font-size: 18px;
+      border-radius: var(--radius-pill);
+      background: var(--clr-forest);
+      color: var(--clr-cream);
+      text-decoration: none;
+      text-align: center;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .product-actions .btn-solid:hover {
+      background: var(--clr-leaf);
+    }
+
+    /* Tabs Section */
+    .tabs-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      margin-top: 64px;
+      border-top: 1px solid rgba(148, 181, 120, 0.2);
+      padding-top: 48px;
+    }
+
+    .tab-title {
+      font-family: var(--font-heading);
+      font-size: 24px;
+      color: var(--clr-forest);
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid rgba(148, 181, 120, 0.3);
+    }
+
+    .tab-content {
+      font-size: 16px;
+      color: var(--clr-forest);
+      line-height: 1.8;
+    }
+    .tab-content p {
+      margin-bottom: 16px;
+    }
+
+    /* Rating */
+    .rating-overview {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .rating-score {
+      text-align: center;
+    }
+    .rating-score .score {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--clr-forest);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .rating-score .score svg {
+      width: 40px;
+      height: 40px;
+      fill: #D4E157;
+    }
+    .rating-bars {
+      flex: 1;
+    }
+    .rating-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--clr-forest);
+    }
+    .rating-bar-row .stars {
+      color: #D4E157;
+      letter-spacing: 2px;
+      width: 70px;
+    }
+    .bar-bg {
+      flex: 1;
+      height: 8px;
+      background: rgba(148, 181, 120, 0.2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: #D4E157;
+      border-radius: 4px;
+    }
+
+    .rating-action {
+      text-align: center;
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(148, 181, 120, 0.2);
+    }
+    .rating-action p {
+      margin-bottom: 12px;
+      color: var(--clr-forest);
+    }
+
+    @media (max-width: 900px) {
+      .product-top, .tabs-section { grid-template-columns: 1fr; gap: 48px; }
+      .product-actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="container" style="padding-top: 24px;">
+    <a href="trang-san-pham_945-1348.html" style="color: var(--clr-forest); font-size: 16px; font-weight: 600; text-decoration: none;">&larr; Quay lại Sản phẩm</a>
+  </div>
+
+  <main class="product-detail-page">
+    
+    <div class="product-top">
+      <div class="product-gallery">
+        <img src="../assets/images/210a66c1f89c6255c597ab1a6024b5b799e14801.jpg" alt="Tranh Mèo đa sắc">
+      </div>
+      
+      <div class="product-info">
+        <h1>Tranh Mèo đa sắc</h1>
+        
+        <div class="product-meta">
+          <div><span>Mã sản phẩm:</span> HSA0041</div>
+          <div><span>Thương hiệu:</span> Gốm sứ xanh</div>
+          <div><span>Bộ sưu tập:</span> Muông thú</div>
+        </div>
+
+        <div class="product-price">100.000VNĐ</div>
+
+        <div class="product-related">
+          <div class="product-related-title">Các sản phẩm cùng bộ sưu tập</div>
+          <div class="related-thumbs">
+            <img src="../assets/images/210a66c1f89c6255c597ab1a6024b5b799e14801.jpg" class="active" alt="Related">
+            <img src="../assets/images/b37d3f4dc27b4a6396d94b223129a09a70b1c068.jpg" alt="Related">
+            <img src="../assets/images/8162b2504c89400a58a317db7e01975fab0734a8.jpg" alt="Related">
+            <img src="../assets/images/f8cc8de274ac8b78ca82ff93f37e638ef896a6db.jpg" alt="Related">
+          </div>
+        </div>
+
+        <div class="product-actions">
+          <button class="btn-outline" id="addToCartBtn">Thêm vào giỏ hàng</button>
+          <button class="btn-solid" id="buyNowBtn">Mua ngay</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs-section">
+      <div class="tab-pane">
+        <h2 class="tab-title">Mô tả chi tiết</h2>
+        <div class="tab-content">
+          <p>Chú mèo nhỏ hiện lên giữa bức tranh như được ghép từ những mảng màu vui tươi của cuộc sống. Từng mảng đỏ, xanh, vàng, nâu giao nhau tạo nên một tổng thể rực rỡ và dí dỏm như thể chú mèo đang mỉm cười giữa thế giới đầy sắc màu của riêng mình. Sự kết hợp giữa màu sắc mạnh mẽ và bố cục hình khối đa dạng mang lại cảm giác phóng khoáng, trẻ trung và tràn đầy năng lượng sáng tạo.</p>
+          <p>Sản phẩm được tạo tác từ gốm tái sinh thủ công. Mỗi mảnh gốm đều mang dấu vết riêng, kết hợp cùng kỹ thuật sắp đặt thủ công để tạo nên bề mặt độc bản và đầy chiều sâu. Các chi tiết vẽ tay được thực hiện bằng màu nước, giúp đường nét mềm mại và hài hòa với chất liệu.</p>
+          <p>Đằng sau mỗi chi tiết là tinh thần sống xanh: biến những điều tưởng chừng bỏ đi thành nghệ thuật. Tranh Mèo Đa Sắc không chỉ là một món decor độc đáo, mà còn là lời nhắc về sự tái sinh và giá trị của sự sáng tạo bền vững.</p>
+        </div>
+      </div>
+
+      <div class="tab-pane">
+        <h2 class="tab-title">Đánh giá</h2>
+        
+        <div class="rating-overview">
+          <div class="rating-score">
+            <div class="score">
+              <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+              5.0
+            </div>
+            <div style="font-size: 14px; color: var(--clr-forest);">100 đánh giá</div>
+          </div>
+          <div class="rating-bars">
+            <div class="rating-bar-row">
+              <div class="stars">★★★★★</div>
+              <div class="bar-bg"><div class="bar-fill" style="width: 100%;"></div></div>
+              <div style="width: 30px;">100</div>
+            </div>
+            <div class="rating-bar-row">
+              <div class="stars" style="color:rgba(148, 181, 120, 0.4)">★★★★☆</div>
+              <div class="bar-bg"><div class="bar-fill" style="width: 0%;"></div></div>
+              <div style="width: 30px;">0</div>
+            </div>
+            <div class="rating-bar-row">
+              <div class="stars" style="color:rgba(148, 181, 120, 0.4)">★★★☆☆</div>
+              <div class="bar-bg"><div class="bar-fill" style="width: 0%;"></div></div>
+              <div style="width: 30px;">0</div>
+            </div>
+            <div class="rating-bar-row">
+              <div class="stars" style="color:rgba(148, 181, 120, 0.4)">★★☆☆☆</div>
+              <div class="bar-bg"><div class="bar-fill" style="width: 0%;"></div></div>
+              <div style="width: 30px;">0</div>
+            </div>
+            <div class="rating-bar-row">
+              <div class="stars" style="color:rgba(148, 181, 120, 0.4)">★☆☆☆☆</div>
+              <div class="bar-bg"><div class="bar-fill" style="width: 0%;"></div></div>
+              <div style="width: 30px;">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rating-action">
+          <p>Đánh giá sản phẩm</p>
+          <div style="color:rgba(148, 181, 120, 0.5); font-size: 24px; letter-spacing: 4px; margin-bottom: 8px;">☆ ☆ ☆ ☆ ☆</div>
+          <div style="font-size: 12px; color: var(--clr-forest);">Bạn cần đăng nhập để đánh giá sản phẩm</div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+  
+  <!-- Add the site footer using JS like other pages -->
+  <script src="../app.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get slug from URL
+      var params = new URLSearchParams(window.location.search);
+      var slug = params.get('slug');
+
+      if (!slug) {
+        document.querySelector('.product-detail-page').innerHTML = '<div style="text-align:center; padding: 100px;"><h2>Không tìm thấy sản phẩm</h2><p>Vui lòng chọn sản phẩm từ trang danh sách.</p></div>';
+        return;
+      }
+
+      // Fetch product detail
+      fetch('http://localhost:8080/product/products/detail/' + slug)
+        .then(res => res.json())
+        .then(data => {
+          var product = data.result || data; // depending on ApiResponse wrapper format
+          if (data.code === 1000 && data.result) product = data.result;
+
+          if (!product || !product.id) {
+            document.querySelector('.product-detail-page').innerHTML = '<div style="text-align:center; padding: 100px;"><h2>Sản phẩm không tồn tại</h2></div>';
+            return;
+          }
+
+          // Update Document Title
+          document.title = product.name + ' - Gốm Sứ Xanh';
+
+          // Update Gallery Image
+          var mainImage = (product.imageUrls && product.imageUrls.length > 0) ? product.imageUrls[0] : '../assets/images/placeholder.jpg';
+          var galleryContainer = document.querySelector('.product-gallery');
+          galleryContainer.innerHTML = '<img src="' + mainImage + '" alt="' + product.name + '">';
+
+          // Update Info
+          document.querySelector('.product-info h1').textContent = product.name;
+          
+          var priceStr = new Intl.NumberFormat('vi-VN').format(product.price || 0) + 'VNĐ';
+          document.querySelector('.product-price').textContent = priceStr;
+
+          // Update Meta
+          var metaHtml = '<div><span>Mã sản phẩm:</span> HSA' + String(product.id).padStart(4, '0') + '</div>';
+          if (product.brand) metaHtml += '<div><span>Thương hiệu:</span> ' + product.brand + '</div>';
+          if (product.categoryName) metaHtml += '<div><span>Danh mục:</span> ' + product.categoryName + '</div>';
+          if (product.stockQuantity !== undefined) metaHtml += '<div><span>Tồn kho:</span> ' + product.stockQuantity + '</div>';
+          
+          document.querySelector('.product-meta').innerHTML = metaHtml;
+
+          // Update Description
+          document.querySelector('.tab-content').innerHTML = product.description || '<p>Đang cập nhật mô tả...</p>';
+
+          // Related Thumbs - Just show the image array if available
+          var thumbsContainer = document.querySelector('.related-thumbs');
+          thumbsContainer.innerHTML = '';
+          if (product.imageUrls && product.imageUrls.length > 0) {
+            product.imageUrls.forEach((url, idx) => {
+              var img = document.createElement('img');
+              img.src = url;
+              if (idx === 0) img.className = 'active';
+              img.addEventListener('click', function() {
+                galleryContainer.innerHTML = '<img src="' + url + '" alt="Hình ' + (idx + 1) + '">';
+                thumbsContainer.querySelectorAll('img').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+              });
+              thumbsContainer.appendChild(img);
+            });
+          }
+
+          // Setup "Add to Cart" and "Buy Now" - using backend API
+          var addToCartBtn = document.getElementById('addToCartBtn');
+          addToCartBtn.addEventListener('click', function() {
+            var token = localStorage.getItem('gsx_token');
+            if (!token) {
+              alert('Bạn cần đăng nhập để thêm vào giỏ hàng.');
+              window.location.href = 'dang-nhap_839-134.html';
+              return;
+            }
+
+            var btnOriginalText = this.textContent;
+            this.textContent = 'Đang thêm...';
+            this.disabled = true;
+
+            console.log('Adding to cart, product data:', product);
+            
+            if (!product || !product.id) {
+              alert('Không tìm thấy thông tin sản phẩm (ID). Vui lòng tải lại trang.');
+              this.textContent = btnOriginalText;
+              this.disabled = false;
+              return;
+            }
+
+            var formData = new URLSearchParams();
+            formData.append('productId', product.id);
+            formData.append('quantity', 1);
+
+            console.log('Adding to cart, productId:', product.id);
+
+            fetch('http://localhost:8080/order/cart/add', {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              body: formData
+            })
+            .then(res => {
+              console.log('Add to cart response status:', res.status);
+              if (res.status === 401 || res.status === 403) {
+                alert('Phiên đăng nhập hết hạn, vui lòng đăng nhập lại.');
+                window.location.href = 'dang-nhap_839-134.html';
+                throw new Error('Unauthorized');
+              }
+              if (!res.ok) {
+                var clone = res.clone();
+                return res.json().then(errData => {
+                  throw new Error(errData.message || 'Lỗi từ máy chủ: ' + res.status);
+                }).catch(() => {
+                  return clone.text().then(text => {
+                    throw new Error('Lỗi từ máy chủ (' + res.status + '): ' + text);
+                  });
+                });
+              }
+              return res.json();
+            })
+            .then(data => {
+              console.log('Add to cart success data:', data);
+              if (data.code && data.code !== 1000) {
+                throw new Error(data.message || 'Lỗi thêm vào giỏ hàng');
+              }
+              alert('Đã thêm "' + product.name + '" vào giỏ hàng!');
+              this.textContent = btnOriginalText;
+              this.disabled = false;
+              window.location.href = 'ho-so-ca-nhan_147-86.html#cart';
+            })
+            .catch(err => {
+              console.error('Add to cart error:', err);
+              alert(err.message || 'Đã có lỗi xảy ra');
+              this.textContent = btnOriginalText;
+              this.disabled = false;
+            });
+          });
+
+          var buyNowBtn = document.getElementById('buyNowBtn');
+          buyNowBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var token = localStorage.getItem('gsx_token');
+            if (!token) {
+              alert('Bạn cần đăng nhập để mua hàng.');
+              window.location.href = 'dang-nhap_839-134.html';
+              return;
+            }
+            
+            if (!product || !product.id) {
+              alert('Không tìm thấy thông tin sản phẩm (ID). Vui lòng tải lại trang.');
+              return;
+            }
+
+            // Mua ngay: Chuyển thẳng đến thanh toán với thông tin sản phẩm này
+            // Không thêm vào giỏ hàng chung để tách biệt luồng
+            window.location.href = 'thanh-toan.html?buyNow=true&productId=' + product.id + '&quantity=1';
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          document.querySelector('.product-detail-page').innerHTML = '<div style="text-align:center; padding: 100px;"><h2>Lỗi tải dữ liệu sản phẩm</h2></div>';
+        });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gốm Sứ Xanh: Lan toả thông điệp tái chế vì môi trường</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../styles-pages.css">
+  <style>
+    .blog-detail-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 64px 24px 100px;
+    }
+    
+    .blog-breadcrumb {
+      display: block;
+      color: var(--clr-forest);
+      font-weight: 700;
+      text-decoration: none;
+      margin-bottom: 24px;
+      font-size: 18px;
+      text-align: center;
+    }
+    .blog-breadcrumb:hover {
+      color: var(--clr-teal);
+    }
+
+    .blog-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .blog-tag {
+      display: inline-block;
+      background: var(--clr-mint);
+      color: var(--clr-forest);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .blog-title {
+      font-family: var(--font-heading);
+      font-size: clamp(32px, 5vw, 48px);
+      color: var(--clr-forest);
+      line-height: 1.3;
+      margin-bottom: 24px;
+    }
+    .blog-meta {
+      font-size: 16px;
+      color: var(--clr-forest);
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .blog-audio-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--clr-forest);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 0.3s;
+      cursor: pointer;
+      border: none;
+    }
+    .blog-audio-btn:hover {
+      background: var(--clr-teal);
+    }
+    .blog-audio-icon {
+      width: 14px;
+      height: 14px;
+      background: white;
+      border-radius: 50%;
+      position: relative;
+    }
+    .blog-audio-icon::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 5px;
+      border-left: 5px solid var(--clr-forest);
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+    }
+
+    .blog-hero-img {
+      width: 100%;
+      height: auto;
+      border-radius: 24px;
+      margin-bottom: 48px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .blog-content {
+      font-size: 20px;
+      line-height: 1.8;
+      color: var(--clr-forest);
+      text-align: justify;
+    }
+    .blog-content p {
+      margin-bottom: 24px;
+    }
+    .blog-content strong {
+      color: var(--clr-teal);
+    }
+    .blog-content img {
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      margin: 40px 0;
+    }
+
+    .blog-qna {
+      background: rgba(254, 252, 245, 1);
+      border-left: 4px solid var(--clr-teal);
+      padding: 24px 32px;
+      margin: 40px 0;
+      border-radius: 0 16px 16px 0;
+    }
+    .blog-qna p {
+      margin-bottom: 16px;
+    }
+    .blog-qna p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Comment Section */
+    .comment-section {
+      margin-top: 80px;
+      border-top: 1px solid rgba(148, 181, 120, 0.3);
+      padding-top: 48px;
+    }
+    .comment-title {
+      font-family: var(--font-heading);
+      font-size: 28px;
+      color: var(--clr-forest);
+      margin-bottom: 24px;
+    }
+    .comment-form {
+      display: flex;
+      gap: 16px;
+    }
+    .comment-input {
+      flex: 1;
+      padding: 16px 24px;
+      border: 1px solid var(--clr-forest);
+      border-radius: 12px;
+      font-size: 18px;
+      background: rgba(254, 252, 245, 1);
+      color: var(--clr-forest);
+      outline: none;
+    }
+    .comment-input:focus {
+      border-color: var(--clr-teal);
+    }
+    .comment-btn {
+      padding: 16px 32px;
+      background: var(--clr-forest);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .comment-btn:hover {
+      background: var(--clr-teal);
+    }
+
+    @media (max-width: 768px) {
+      .comment-form { flex-direction: column; }
+      .blog-qna { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-main">
+    <div class="blog-detail-container">
+      
+      <a href="trang-blog_29-2.html" class="blog-breadcrumb">&larr; Blog Gốm Sứ Xanh</a>
+      
+      <header class="blog-header">
+        <span class="blog-tag">#Workshop hàng tuần</span>
+        <h1 class="blog-title">Gốm Sứ Xanh: Lan toả thông điệp tái chế vì môi trường</h1>
+        <div class="blog-meta">
+          <span>Phát hành: Ngày 27 tháng 7 năm 2023</span>
+          <button class="blog-audio-btn">
+            <span class="blog-audio-icon"></span> Nghe thuyết minh
+          </button>
+        </div>
+      </header>
+
+      <img src="../assets/images/1e4603d1d1d276314b835aa80e1df10dc7b5c26e.png" alt="Hero Blog" class="blog-hero-img">
+
+      <div class="blog-content">
+        <p>Tận dụng lại những mảnh vỡ gốm tưởng chừng như không còn tác dụng, sau đó tô vẽ những màu sắc và ghép chúng thành những bức tranh, góp phần giảm một lượng rác thải rắn ra môi trường, lan tỏa thông điệp tái chế vì một môi trường xanh đến cộng đồng.</p>
+        <p>Đó là hoạt động của dự án Gốm Sứ Xanh tại Bát Tràng, Hà Nội hiện nay, thu hút đông đảo mọi người đến trải nghiệm và yêu thích.</p>
+        
+        <img src="../assets/images/f899cfc9151a7758e9edbf8dab7b866cbc3d23e7.jpg" alt="Workshop">
+
+        <div class="blog-qna">
+          <p><strong>PV: Xin chào bà Lê Hà Phương - Nhà sáng lập Gốm Sứ Xanh. Gốm Sứ Xanh ra đời từ khi nào và sứ mệnh là gì?</strong></p>
+          <p><strong>Bà Lê Hà Phương:</strong> Gốm Sứ Xanh chỉ mới thành lập được khoảng 1 năm nay thôi. Gốm Sứ Xanh được ra đời với khao khát trở thành nơi phân loại gốm sứ tại nguồn. Sẽ là nơi thu gom toàn bộ rác thải gốm từ làng Bát Tràng nói riêng cũng như gốm sứ phế loại từ cộng đồng nói chung và “biến” những rác thải này các sản phẩm có ích trong cuộc sống.</p>
+        </div>
+
+        <div class="blog-qna">
+          <p><strong>PV: Hiện trong không gian của Gốm Sứ Xanh có những hoạt động và sản phẩm gì?</strong></p>
+          <p><strong>Bà Lê Hà Phương:</strong> Trong không gian của Gốm Sứ Xanh hiện nay có 4 sản phẩm chính. Đầu tiên là vẽ tranh gốm sứ tái chế; thứ 2 là làm Fridge magnet, tức là các sản phẩm mảnh gốm sứ gắn nam châm để trang trí tủ lạnh; thứ 3 là vẽ Dot painting, tức là vẽ các họa tiết lên các đĩa gốm bị sứt mẻ, bị lỗi một chút; cuối cùng là sửa gốm theo phương pháp kintsugi…</p>
+          <p>Cả 4 sản phẩm này sẽ hoạt dựa trên 2 hoạt động chính của workshop, thứ nhất là hoạt động cho khách lẻ hàng ngày gồm: khách đoàn gia đình, các bạn trẻ đến tham quan…hoạt động thứ 2 là diễn ra cho các đoàn trải nghiệm gồm: đoàn học sinh, sinh viên đến từ các trường.</p>
+        </div>
+
+        <img src="../assets/images/3b640b21a1636fcfa4704bfc2a5285ebb4431e39.png" alt="Trải nghiệm">
+
+        <div class="blog-qna">
+          <p><strong>PV: Vận hành Gốm Sứ Xanh cho đến nay thì đã gặp những khó khăn gì?</strong></p>
+          <p><strong>Bà Lê Hà Phương:</strong> Từ khi thành lập Gốm Sứ Xanh đến nay thì khó khăn đầu tiên là về nguồn nguyên vật liệu. Dù nguyên vật liệu có rất nhiều nhưng ban đầu thì chưa ai biết đến Gốm Sứ Xanh nên là chẳng biết phải làm như thế nào để thu gom mãnh vở về để thực hiện.</p>
+          <p>Tuy nhiên sau đó thì mình đã vượt qua được khó khăn về nguyên vật liệu, bởi vì dần dần cứ làm, cứ lan tỏa thế là nguồn nguyên vật liệu tự tìm đến. Sau khi vượt qua được khó khăn về nguyên vật liệu thì đến khó khăn về xử lý những nguyên vật liệu đó.</p>
+          <p>Vì nhìn thì thấy đơn giản thế thôi như là mấy mảnh gốm bỏ đi rồi, không có giá trị gì nhưng để “biến” chúng thành có giá trị thì phải đưa sức người vào rất nhiều.</p>
+          <p>Ví dụ như phải có một nơi để thu gom gốm, sau đó xử lý đập ra nhưng không phải đập ngẫu nhiên đâu mà mình sẽ phải tạo hình cho những viên gốm lỗi đó. Đập ra, tạo hình, rửa gốm, phân loại… nói chung tốn rất nhiều công sức vào những mảnh gốm đấy. Thế nên tưởng chừng như những mảnh gốm đấy bỏ đi, không có giá trị nhưng thực sự thì có rất nhiều giá trị.</p>
+        </div>
+
+        <div class="blog-qna">
+          <p><strong>PV: Gốm Sứ Xanh muốn lan tỏa điều gì đến với cộng đồng?</strong></p>
+          <p><strong>Bà Lê Hà Phương:</strong> Gốm Sứ Xanh có hai điều muốn lan tỏa đến cộng đồng. Đầu tiên là ý thức bảo vệ môi trường từ việc mình sẽ phân loại rác tại nguồn, phân loại những rác thải rắn. Bởi vì rác thải rắn chiếm rất nhiều diện tích trong môi trường, làm giảm diện tích trồng trọt, giảm diện tích chăn nuôi và giảm diện tích sống của con người.</p>
+          <p>Thậm chí khi rác thải gốm xả ra ngoài ao hồ, sông suối thì sẽ gây ách tắc nguồn nước, gây mất cân bằng hệ sinh thái trong môi trường nước và dẫn tới nhiều dịch bệnh. Thế nên cần bảo vệ môi trường từ việc giảm rác thải rắn ra môi trường.</p>
+          <p>Điều cuối cùng mà chúng tôi muốn lan tỏa là những mảnh gốm vô tri này bị vỡ rồi, tưởng như bỏ đi rồi nhưng nếu mình biết trân trọng, biết sử dụng và tái tạo lại thì những mảnh vỡ này sẽ được “tái sinh” thêm một vòng đời mới và mang lại những điều đẹp, có ý nghĩa cho bản thân và cho cộng đồng.</p>
+        </div>
+      </div>
+
+      <!-- Comment Section -->
+      <div class="comment-section">
+        <h3 class="comment-title">Bình luận</h3>
+        <form class="comment-form">
+          <input type="text" class="comment-input" placeholder="Để lại suy nghĩ của bạn...">
+          <button type="button" class="comment-btn">Gửi</button>
+        </form>
+      </div>
+
+    </div>
+  </main>
+  <script src="../app.js" defer></script>
+</body>
+</html>

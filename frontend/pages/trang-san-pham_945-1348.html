@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sản phẩm - Gốm Sứ Xanh</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../styles-pages.css">
+  <style>
+    .category-scroll {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      padding: 20px 48px;
+      margin-bottom: 40px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      max-width: 1280px;
+      margin: 0 auto 40px;
+    }
+    .category-scroll::-webkit-scrollbar { display: none; }
+    .category-card {
+      position: relative;
+      flex: 0 0 220px;
+      height: 320px;
+      border-radius: 12px;
+      overflow: hidden;
+      scroll-snap-align: start;
+      text-decoration: none;
+      display: block;
+      border: 1px solid rgba(148,181,120,.3);
+      box-shadow: 0 4px 20px rgba(28,61,30,.08);
+      transition: transform 0.3s ease;
+    }
+    .category-card:hover { transform: translateY(-4px); }
+    .category-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .category-card .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(28,61,30,0.8) 0%, rgba(28,61,30,0.2) 100%);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 24px;
+    }
+    .category-card h3 {
+      color: var(--clr-cream);
+      font-family: var(--font-heading);
+      font-size: 22px;
+      margin: 0;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .products-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      max-width: 1160px;
+      margin: 0 auto 32px;
+      padding: 0 40px;
+    }
+    .product-count {
+      color: var(--clr-forest);
+      font-size: 16px;
+      opacity: 0.8;
+      margin-bottom: 6px;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 64px;
+      padding-bottom: 80px;
+    }
+    .page-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      color: var(--clr-forest);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .page-btn:hover { background: rgba(148,181,120,.2); }
+    .page-btn.is-active {
+      background: var(--clr-moss);
+      color: var(--clr-cream);
+    }
+    .page-next { width: auto; padding: 0 16px; }
+  </style>
+</head>
+<body>
+
+  <main class="page-main">
+    
+    <!-- Categories -->
+    <div class="category-scroll">
+      <a href="trang-san-pham_945-1348.html" class="category-card">
+        <img src="../assets/images/3838a9d43772b2011d5823350fb83965460ef7e7.jpg" alt="Fridge magnet">
+        <div class="overlay"><h3>Fridge<br>magnet</h3></div>
+      </a>
+      <a href="trang-san-pham_945-1348.html" class="category-card">
+        <img src="../assets/images/4f104504f6e60a16bf34ab9632875014e953e479.jpg" alt="Móc khóa">
+        <div class="overlay"><h3>Móc<br>khóa</h3></div>
+      </a>
+      <a href="trang-san-pham_945-1348.html" class="category-card">
+        <img src="../assets/images/5671cbed570674bbb8b7a8070ed765851887e396.jpg" alt="Tranh gốm tái chế">
+        <div class="overlay"><h3>Tranh gốm<br>tái chế</h3></div>
+      </a>
+      <a href="trang-san-pham_945-1348.html" class="category-card">
+        <img src="../assets/images/be2e3a2e3c83489a5a3914bd568b06c5c09930d2.jpg" alt="Bộ kit thủ công">
+        <div class="overlay"><h3>Bộ kit<br>thủ công</h3></div>
+      </a>
+      <a href="trang-san-pham_945-1348.html" class="category-card">
+        <img src="../assets/images/95624edfa4edfccd25b11e43ac08e222708024d5.jpg" alt="Sản phẩm Kintsugi">
+        <div class="overlay"><h3>Sản phẩm<br>Kintsugi</h3></div>
+      </a>
+    </div>
+
+    <!-- Products Header -->
+    <div class="products-header">
+      <div class="product-count" id="productCount">Đang tải...</div>
+      <h1 class="section-title all-caps" style="margin:0">SẢN PHẨM TỪ GỐM SỨ XANH</h1>
+      <div style="width: 180px;"></div> <!-- spacer for centering -->
+    </div>
+
+    <!-- Products Grid -->
+    <div class="cards-section" style="padding-top: 0;">
+      <div class="cards-grid" id="productsGrid">
+        <!-- Products will be injected here via JS -->
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="productsPagination">
+        <!-- Pagination will be injected here via JS -->
+      </div>
+    </div>
+  </main>
+
+  <script src="../app.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var currentPage = 0;
+      var pageSize = 15;
+
+      function loadProducts(page) {
+        fetch('http://localhost:8080/product/products/all?page=' + page + '&size=' + pageSize)
+          .then(res => res.json())
+          .then(data => {
+            // Spring Data JPA Page format
+            var pageData = data.data || data; // depending on ApiResponse wrapper
+            if (data.code === 1000 && data.result) {
+              pageData = data.result;
+            }
+            
+            var content = pageData.content || [];
+            var totalElements = pageData.totalElements || 0;
+            var totalPages = pageData.totalPages || 0;
+            
+            // Update Header
+            var fromItem = page * pageSize + 1;
+            var toItem = Math.min((page + 1) * pageSize, totalElements);
+            if (totalElements === 0) {
+              document.getElementById('productCount').textContent = 'Không có sản phẩm nào.';
+            } else {
+              document.getElementById('productCount').textContent = 'Hiển thị ' + fromItem + '-' + toItem + ' / ' + totalElements + ' sản phẩm';
+            }
+
+            // Render Products
+            var grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+            content.forEach(p => {
+              var imageUrl = (p.imageUrls && p.imageUrls.length > 0) ? p.imageUrls[0] : '../assets/images/placeholder.jpg';
+              var priceStr = new Intl.NumberFormat('vi-VN').format(p.price || 0) + 'VNĐ';
+              var detailUrl = 'trang-san-pham-chi-tiet.html?slug=' + (p.slug || p.id);
+              
+              var card = document.createElement('div');
+              card.className = 'gsx-card';
+              card.innerHTML = `
+                <a href="${detailUrl}" class="gsx-card-link-mask"></a>
+                <img src="${imageUrl}" alt="${p.name}">
+                <div class="gsx-card-body">
+                  <h3 class="gsx-card-title">${p.name}</h3>
+                  <p class="gsx-card-price">${priceStr}</p>
+                  <a href="${detailUrl}" class="gsx-card-btn">Mua ngay</a>
+                </div>
+              `;
+              grid.appendChild(card);
+            });
+
+            // Render Pagination
+            var pagination = document.getElementById('productsPagination');
+            pagination.innerHTML = '';
+            if (totalPages > 1) {
+              for (let i = 0; i < totalPages; i++) {
+                let btn = document.createElement('a');
+                btn.href = '#';
+                btn.className = 'page-btn' + (i === page ? ' is-active' : '');
+                btn.textContent = i + 1;
+                btn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  currentPage = i;
+                  loadProducts(currentPage);
+                  window.scrollTo({ top: 300, behavior: 'smooth' });
+                });
+                pagination.appendChild(btn);
+              }
+            }
+          })
+          .catch(err => {
+            console.error('Lỗi khi tải sản phẩm:', err);
+            document.getElementById('productCount').textContent = 'Lỗi kết nối máy chủ.';
+          });
+      }
+
+      loadProducts(currentPage);
+    });
+  </script>
+</body>
+</html>
