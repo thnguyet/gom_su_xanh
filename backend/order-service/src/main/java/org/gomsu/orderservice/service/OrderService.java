@@ -176,8 +176,8 @@ public class OrderService {
         // 11. Dọn dẹp các món đã mua khỏi giỏ hàng
         cartRepository.deleteSelectedItems(cart.getId(), orderRequest.getSelectedCartItemIds());
 
-        // 12. Trả về Response (Hàm toOrderResponse đã có sẵn createdAt/updatedAt)
-        return toOrderResponse(savedOrder);
+        // 12. Trả về Response
+        return toOrderResponse(savedOrder, user.getUsername());
     }
 
     public record RestockMessage(Long orderId, List<ProductRestockRequest> requests) {}
@@ -216,7 +216,7 @@ public class OrderService {
                 new RestockMessage(orderId, restockRequests)
         );
 
-        return toOrderResponse(updatedOrder);
+        return toOrderResponse(updatedOrder, null);
     }
 
     // 1. Tạo một hàm dùng chung để khởi tạo Pageable (Helper method)
@@ -235,7 +235,7 @@ public class OrderService {
 
         Pageable pageable = createPageable(page, size, sortBy, sortDir);
         return orderRepository.findAllOrdersForAdmin(customerId, status, startDate, endDate, pageable)
-                .map(this::toOrderResponse);
+                .map(order -> toOrderResponse(order, null));
     }
 
     // 3. Hàm cho User: Tái sử dụng luôn hàm của Admin, cực gọn!
@@ -264,22 +264,25 @@ public class OrderService {
         order.setStatus(newStatus);
         Order updatedOrder = orderRepository.save(order);
 
-        return toOrderResponse(updatedOrder);
+        return toOrderResponse(updatedOrder, null);
     }
 
     public OrderResponse getOrderById(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng ID: " + orderId));
-        return toOrderResponse(order);
+        return toOrderResponse(order, null);
     }
 
-    private OrderResponse toOrderResponse(Order order) {
-        String customerName = "N/A";
-        try {
-            UserResponse user = userClient.getUserById(order.getCustomerId());
-            if (user != null) customerName = user.getUsername();
-        } catch (Exception e) {
-            // Log error or ignore
+    private OrderResponse toOrderResponse(Order order, String providedCustomerName) {
+        String customerName = providedCustomerName;
+        if (customerName == null) {
+            customerName = "N/A";
+            try {
+                UserResponse user = userClient.getUserById(order.getCustomerId());
+                if (user != null) customerName = user.getUsername();
+            } catch (Exception e) {
+                // Log error or ignore
+            }
         }
 
         List<OrderResponse.OrderDetailResponse> detailsResponse = order.getOrderDetails().stream()
@@ -306,6 +309,8 @@ public class OrderService {
                         order.getPaymentMethod().getName() : "N/A")
                 .shippingMethod(order.getShippingMethod() != null ?
                         order.getShippingMethod().getName() : "N/A")
+                .shippingFee(order.getShippingMethod() != null ?
+                        order.getShippingMethod().getShippingFee() : 0.0)
                 .orderDetails(detailsResponse)
                 .build();
     }

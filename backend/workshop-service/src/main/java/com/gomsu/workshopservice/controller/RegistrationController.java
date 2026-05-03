@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
+import org.springframework.format.annotation.DateTimeFormat;
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/regis-workshops")
 @RequiredArgsConstructor
@@ -30,12 +33,14 @@ public class RegistrationController {
             @AuthenticationPrincipal Jwt jwt, // Lấy trực tiếp từ Token JWT
             @RequestParam Long workshopId,
             @RequestParam Integer quantity,
-            @RequestParam(required = false) String note) {
+            @RequestParam(required = false) String note,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate participationDate,
+            @RequestParam String participationTime) {
 
         // Giả sử trong Token Nguyệt lưu userId vào claim tên là "id"
         Long userId = Long.valueOf(jwt.getClaim("userId").toString());
 
-        RegistrationResponse response = registerWorkshop.registerWorkshop(userId, workshopId, quantity, note);
+        RegistrationResponse response = registerWorkshop.registerWorkshop(userId, workshopId, quantity, note, participationDate, participationTime);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -82,6 +87,13 @@ public class RegistrationController {
                 status, keyword, fromDate, toDate, page, size, sortBy, sortDir);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<RegistrationResponse> getRegistrationById(@PathVariable Long id) {
+        log.info("Lấy chi tiết đơn đăng ký Workshop ID: {}", id);
+        return ResponseEntity.ok(registerWorkshop.getRegistrationById(id));
     }
 
     // Checkin don dang ky

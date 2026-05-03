@@ -33,9 +33,16 @@ public class WorkshopRequest {
     @Min(value = 1, message = "Số lượng người tham gia tối thiểu là 1")
     private Integer maxParticipants;
 
+    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime startDate;
+
+    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endDate;
+
+    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime registrationStartDate;
+
+    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime registrationEndDate;
 
     // --- Thông tin bổ sung cho trang chi tiết ---

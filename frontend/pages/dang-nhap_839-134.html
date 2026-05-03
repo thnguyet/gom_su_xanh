@@ -207,6 +207,13 @@
 
   <script src="../app.js" defer></script>
   <script>
+    // Ensure clean state when on login page
+    (function() {
+      localStorage.removeItem('gsx_logged_in');
+      localStorage.removeItem('gsx_token');
+      localStorage.removeItem('adm_token');
+    })();
+
     // Login button — unified flow with exception for hardcoded admin
     document.getElementById('loginBtn').addEventListener('click', function () {
       var email = document.getElementById('login-email').value.trim();
@@ -256,11 +263,11 @@
               localStorage.setItem('adm_token', tkn);
               window.location.href = '../admin/index.html';
             } else {
-              window.location.href = 'ho-so-ca-nhan_147-86.html';
+              window.location.href = 'ho-so-ca-nhan_147-86#profile';
             }
           })
           .catch(function() {
-            window.location.href = 'ho-so-ca-nhan_147-86.html';
+            window.location.href = 'ho-so-ca-nhan_147-86#profile';
           });
         } else {
           // Xử lý lỗi validate từ backend (ví dụ: mật khẩu ko đúng định dạng)

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +36,7 @@ public class RegistrationService {
     private final RabbitTemplate rabbitTemplate;
 
     @Transactional
-    public RegistrationResponse registerWorkshop(Long userId, Long workshopId, Integer quantity, String note) {
+    public RegistrationResponse registerWorkshop(Long userId, Long workshopId, Integer quantity, String note, LocalDate participationDate, String participationTime) {
         log.info("Bắt đầu đăng ký Workshop ID: {} cho User ID: {}", workshopId, userId);
 
         // 1. Tìm Workshop
@@ -72,6 +73,8 @@ public class RegistrationService {
                 .customerName(user.getUsername())
                 .ticketQuantity(quantity)
                 .note(note)
+                .participationDate(participationDate)
+                .participationTime(participationTime)
                 .status(RegistrationStatus.CONFIRMED)
                 .build();
 
@@ -204,6 +207,13 @@ public class RegistrationService {
 
     }
 
+    @Transactional(readOnly = true)
+    public RegistrationResponse getRegistrationById(Long registrationId) {
+        WorkshopRegistration registration = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đăng ký ID: " + registrationId));
+        return toResponse(registration, null);
+    }
+
     private RegistrationResponse toResponse(WorkshopRegistration registration, UserResponse user) {
         // Cách hay dùng nhất: Nếu không có ảnh thì trả về null để FE tự xử lý
         String workshopImg = registration.getWorkshop().getImages().stream()
@@ -229,6 +239,8 @@ public class RegistrationService {
 
                 .status(registration.getStatus().name())
                 .registrationDate(registration.getRegistrationDate())
+                .participationDate(registration.getParticipationDate())
+                .participationTime(registration.getParticipationTime())
                 .note(registration.getNote())
                 .message("Chào " + (user != null ? user.getUsername() : registration.getCustomerName()) + ", đơn đăng ký của bạn đã được tiếp nhận thành công!")
                 .build();

@@ -26,7 +26,7 @@ public class Product extends BaseEntity{
     @Column(name = "slug", unique = true, nullable = false) // BẮT BUỘC THÊM
     private String slug;
 
-    @Column(name = "brand")
+    @Column(name = "brand", nullable = false)
     private String brand;
 
     @Column(name = "price", nullable = false)
@@ -38,9 +38,11 @@ public class Product extends BaseEntity{
     @Column(name = "stock_quantity", nullable = false)
     private Integer stockQuantity;
 
+    @Builder.Default
     @Column(name = "average_rating")
     private Double averageRating = 0.0;
 
+    @Builder.Default
     @Column(name = "review_count")
     private Long reviewCount = 0L;
 

@@ -345,8 +345,16 @@ public class ProductService {
                 productId, averageRating, reviewCount);
     }
 
-    private ProductResponse toProductResponse(Product product)
-    {
+    private ProductResponse toProductResponse(Product product) {
+        List<ProductResponse.ImageInfo> imagesInfo = (product.getProductImages() != null)
+                ? product.getProductImages().stream()
+                .map(img -> ProductResponse.ImageInfo.builder()
+                        .id(img.getId())
+                        .url(img.getImageUrl())
+                        .build())
+                .toList()
+                : new ArrayList<>();
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -356,13 +364,11 @@ public class ProductService {
                 .brand(product.getBrand())
                 .stockQuantity(product.getStockQuantity())
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
-                .imageUrls(product.getProductImages() != null ?
-                        product.getProductImages().stream()
-                            .map(ProductImage::getImageUrl)
-                            .toList() : null)
+                .imageUrls(imagesInfo.stream().map(ProductResponse.ImageInfo::getUrl).toList())
+                .imagesInfo(imagesInfo)
                 .discountPercentage(calculateBestDiscount(product))
-                .createdAt(product.getCreatedAt()) // Lấy từ BaseEntity
-                .updatedAt(product.getUpdatedAt()) // Lấy từ BaseEntity
+                .createdAt(product.getCreatedAt())
+                .updatedAt(product.getUpdatedAt())
                 .averageRating(product.getAverageRating() != null ? product.getAverageRating() : 0.0)
                 .reviewCount(product.getReviewCount() != null ? product.getReviewCount() : 0)
                 .build();

@@ -35,5 +35,15 @@ public class WorkshopResponse {
 
     private String mainImage;
     private List<String> allImages;
+    private List<ImageInfo> imagesInfo; // Thêm trường này để trả về cả ID và URL
     private Boolean active;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ImageInfo {
+        private Long id;
+        private String url;
+    }
 }

@@ -27,6 +27,7 @@ public class OrderResponse {
     private String note;
     private String paymentMethod;
     private String shippingMethod;
+    private Double shippingFee;
     private List<OrderDetailResponse> orderDetails;
 
     @Data

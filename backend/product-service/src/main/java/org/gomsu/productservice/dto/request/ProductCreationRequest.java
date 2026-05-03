@@ -19,6 +19,7 @@ public class ProductCreationRequest {
 
     private String description;
 
+    @NotBlank(message = "Thương hiệu không được để trống!")
     private String brand;
 
     @NotNull(message = "Số lượng không được để trống!")

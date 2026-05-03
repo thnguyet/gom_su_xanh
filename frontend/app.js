@@ -20,6 +20,31 @@
     logout:      'ho-so-ca-nhan_147-86.html#logout'
   };
 
+  /* ===== AUTH CHECK (Run early) ===== */
+  (function () {
+    function check() {
+      var publicPages = [pages.login, pages.register, 'index.html'];
+      var isPublic = false;
+      publicPages.forEach(function(p) {
+        if (file === p || (p === 'index.html' && file === '')) isPublic = true;
+      });
+
+      if (!isPublic) {
+        var loggedIn = false;
+        try {
+          var raw = localStorage.getItem('gsx_logged_in');
+          loggedIn = raw ? JSON.parse(raw) === true : false;
+        } catch(e) {}
+        var token = localStorage.getItem('gsx_token');
+
+        if (!loggedIn || !token) {
+          location.href = (location.pathname.indexOf('/pages/') === -1 ? 'pages/' : '') + pages.login;
+        }
+      }
+    }
+    check();
+  })();
+
   /* ===== HELPERS ===== */
   function isPage(name) {
     return file === name;
@@ -162,7 +187,9 @@
   }
 
   function isLoggedIn() {
-    return load('gsx_logged_in', false) === true;
+    var loggedIn = load('gsx_logged_in', false) === true;
+    var token = localStorage.getItem('gsx_token');
+    return loggedIn && token;
   }
 
   /* ============================================================
@@ -504,7 +531,8 @@
     { id: 'reg-address',  label: 'Địa chỉ',                      type: 'text', placeholder: 'Số nhà, đường, quận…', icon: '📍', required: true },
     { id: 'reg-qty',      label: 'Số lượng người tham gia',       type: 'number', placeholder: '1',               icon: '👥', required: true },
     { id: 'reg-date',     label: 'Ngày tham gia',                 type: 'date', placeholder: '',                    icon: '📅', required: true },
-    { id: 'reg-time',     label: 'Thời gian tham gia',            type: 'text', placeholder: '8h30 – 12h',          icon: '⏰', required: false }
+    { id: 'reg-time',     label: 'Thời gian tham gia',            type: 'text', placeholder: '8h30 – 12h',          icon: '⏰', required: false },
+    { id: 'reg-note',     label: 'Ghi chú',                      type: 'text', placeholder: 'Yêu cầu đặc biệt (nếu có)', icon: '📝', required: false }
   ];
 
   function buildModalHTML() {
@@ -732,7 +760,7 @@
         var qty = modal.querySelector('#reg-qty').value;
         var dateVal = modal.querySelector('#reg-date').value;
         var timeVal = modal.querySelector('#reg-time').value;
-        var note = 'Ngày: ' + dateVal + ', Giờ: ' + timeVal;
+        var note = modal.querySelector('#reg-note').value;
 
         var wsId = window.gsxCurrentWorkshopId || 1;
         if (!wsId || wsId === 'undefined') {
@@ -745,6 +773,8 @@
         var formData = new URLSearchParams();
         formData.append('workshopId', wsId);
         formData.append('quantity', qty);
+        formData.append('participationDate', dateVal);
+        formData.append('participationTime', timeVal);
         formData.append('note', note);
 
         fetch('http://localhost:8080/workshop/regis-workshops/register', {

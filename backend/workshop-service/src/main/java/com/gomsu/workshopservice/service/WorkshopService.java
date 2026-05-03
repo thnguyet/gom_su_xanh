@@ -123,25 +123,12 @@ public class WorkshopService {
     public WorkshopResponse getWorkshopById(Long id) {
         Workshop workshop = workshopRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Workshop!"));
-
-        // Bổ sung: Nếu không phải Admin mà cố tình vào Workshop đã ẩn qua ID thì chặn luôn
-        if (Boolean.FALSE.equals(workshop.getActive())) {
-            throw new RuntimeException("Workshop này hiện không còn hoạt động!");
-        }
-
         return toWorkshopResponse(workshop);
     }
 
     public WorkshopResponse getWorkshopBySlug(String slug) {
         Workshop workshop = workshopRepository.findBySlug(slug)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Workshop!"));
-
-        // Nếu không phải Admin mà xem Workshop đã ẩn thì báo lỗi luôn
-        // (Giả sử Nguyệt truyền thêm isAdmin vào hàm này)
-        if (Boolean.FALSE.equals(workshop.getActive())) {
-            throw new RuntimeException("Workshop này hiện không còn hoạt động!");
-        }
-
         return toWorkshopResponse(workshop);
     }
 
@@ -212,6 +199,7 @@ public class WorkshopService {
         // 3. Cập nhật thông tin chi tiết
         if (workshopUpdateRequest.getBenefits() != null) workshop.setBenefits(workshopUpdateRequest.getBenefits());
         if (workshopUpdateRequest.getTools() != null) workshop.setTools(workshopUpdateRequest.getTools());
+        if (workshopUpdateRequest.getTargetAudience() != null) workshop.setTargetAudience(workshopUpdateRequest.getTargetAudience());
 
         // Them anh
         if (images != null && !images.isEmpty()) {
@@ -251,16 +239,20 @@ public class WorkshopService {
         Workshop workshop = workshopRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Workshop!"));
 
-        // Vẫn nên giữ logic chặn nếu đang có người tham gia thực tế
-        if (workshop.getCurrentParticipants() != null && workshop.getCurrentParticipants() > 0) {
-            throw new RuntimeException("Không thể xóa (ẩn) Workshop vì đang có khách đăng ký tham gia!");
+        // Xóa tất cả ảnh trên Cloudinary trước
+        if (workshop.getImages() != null) {
+            for (WorkshopImage img : workshop.getImages()) {
+                try {
+                    cloudinaryService.deleteImage(img.getImageUrl());
+                } catch (IOException e) {
+                    log.error("Cảnh báo: Không thể xóa ảnh trên mây của Workshop {}: {}", id, e.getMessage());
+                }
+            }
         }
 
-        // Thực hiện "Xóa mềm"
-        workshop.setActive(false);
-        workshopRepository.save(workshop);
-
-        log.info(">>> Đã ẩn Workshop ID: {} thành công.", id);
+        // Thực hiện xóa vĩnh viễn khỏi Database
+        workshopRepository.delete(workshop);
+        log.info(">>> Đã xóa vĩnh viễn Workshop ID: {} khỏi Database.", id);
     }
 
     // Xem so luong nguoi tham gia cua 1 workshop
@@ -303,11 +295,16 @@ public class WorkshopService {
 
     private WorkshopResponse toWorkshopResponse(Workshop workshop) {
         // 1. Kiểm tra danh sách images từ Entity tránh bị Null
-        List<String> imageUrls = (workshop.getImages() != null)
+        List<WorkshopResponse.ImageInfo> imagesInfo = (workshop.getImages() != null)
                 ? workshop.getImages().stream()
-                .map(WorkshopImage::getImageUrl)
+                .map(img -> WorkshopResponse.ImageInfo.builder()
+                        .id(img.getId())
+                        .url(img.getImageUrl())
+                        .build())
                 .toList()
-                : new ArrayList<>(); // Trả về list rỗng thay vì null để FE đỡ bị lỗi map()
+                : new ArrayList<>();
+
+        List<String> imageUrls = imagesInfo.stream().map(WorkshopResponse.ImageInfo::getUrl).toList();
 
         // Dùng orElse(null) thay vì .get() để an toàn hơn Nguyệt nhé
         String mainImg = imageUrls.stream().findFirst().orElse(null);
@@ -331,6 +328,7 @@ public class WorkshopService {
                 .benefits(workshop.getBenefits())             // <--- THÊM DÒNG NÀY
                 .mainImage(mainImg)
                 .allImages(imageUrls)
+                .imagesInfo(imagesInfo)
                 .active(workshop.getActive())
                 .build();
     }

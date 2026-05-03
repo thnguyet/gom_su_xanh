@@ -37,4 +37,14 @@ public class ProductResponse {
     private Double averageRating; // Điểm sao trung bình (VD: 4.5)
     private Long reviewCount;     // Tổng số lượt đánh giá (VD: 120)
 
+    private List<ImageInfo> imagesInfo; // Trả về cả ID và URL để xóa
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ImageInfo {
+        private Long id;
+        private String url;
+    }
 }

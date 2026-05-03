@@ -214,8 +214,14 @@ a{color:var(--adm-accent2);text-decoration:none;}
 .adm-btn--primary:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(46,125,96,.35);}
 .adm-btn--outline{border:1.5px solid var(--adm-border-h);color:var(--adm-text2);}
 .adm-btn--outline:hover{background:rgba(255,255,255,.04);color:var(--adm-text);}
-.adm-btn--danger{background:rgba(232,93,93,.12);color:var(--adm-danger);border:1px solid rgba(232,93,93,.2);}
+.adm-btn--danger{background:rgba(232,93,93,.12);color:var(--adm-danger);border:1px solid rgba(232,93,93,.3);}
 .adm-btn--danger:hover{background:rgba(232,93,93,.2);}
+.adm-btn--info{background:rgba(91,163,217,.12);color:var(--adm-info);border:1px solid rgba(91,163,217,.4);}
+.adm-btn--info:hover{background:rgba(91,163,217,.2);}
+.adm-btn--warning{background:rgba(240,160,48,.12);color:var(--adm-warning);border:1px solid rgba(240,160,48,.4);}
+.adm-btn--warning:hover{background:rgba(240,160,48,.2);}
+.adm-btn--success{background:rgba(76,175,80,.12);color:var(--adm-success);border:1px solid rgba(76,175,80,.4);}
+.adm-btn--success:hover{background:rgba(76,175,80,.2);}
 .adm-btn--sm{padding:7px 14px;font-size:12px;}
 
 /* Search */

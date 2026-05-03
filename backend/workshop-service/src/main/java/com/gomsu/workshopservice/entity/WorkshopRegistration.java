@@ -43,6 +43,9 @@ public class WorkshopRegistration {
     @Column(columnDefinition = "TEXT")
     private String note;
 
+    private java.time.LocalDate participationDate;
+    private String participationTime;
+
     @PrePersist
     protected void onCreate() {
         this.registrationDate = LocalDateTime.now();

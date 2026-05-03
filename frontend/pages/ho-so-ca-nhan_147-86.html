@@ -239,7 +239,7 @@
             <div class="content-header"><h3>Lịch sử đăng ký Workshop</h3></div>
             <div class="history-table-wrapper">
               <table class="history-table">
-                <thead><tr><th>Tên workshop</th><th>Họ và tên</th><th>Số lượng</th><th>Thời gian</th><th>Thời gian thanh toán</th><th>Thao tác</th></tr></thead>
+                <thead><tr><th>Tên đơn</th><th>Tên workshop</th><th>Họ và tên</th><th>Số lượng</th><th>Thời gian đăng ký</th><th>Thao tác</th></tr></thead>
                 <tbody id="profileHistoryBody">
                   <tr><td colspan="6" style="text-align:center;padding:24px;">Đang tải dữ liệu...</td></tr>
                 </tbody>
@@ -335,6 +335,61 @@
       <div style="margin-top: 32px; padding-top: 16px; border-top: 2px solid var(--clr-moss); display: flex; justify-content: space-between; align-items: center;">
         <span style="font-size: 18px; font-weight: 700; color: var(--clr-forest);">TỔNG CỘNG</span>
         <span id="modalOrderTotal" style="font-size: 24px; font-weight: 700; color: var(--clr-teal);">...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Chi tiết Đăng ký Workshop -->
+  <div id="workshopRegistrationDetailModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeWorkshopModal()">&times;</span>
+      <h2 class="modal-title">Chi tiết đăng ký workshop <span id="modalWsRegId"></span></h2>
+      
+      <div class="detail-grid">
+        <div style="grid-column: span 2;">
+          <div class="detail-item-label">Tên Workshop</div>
+          <div class="detail-item-value" style="font-weight:700;color:var(--clr-forest);font-size:18px;" id="modalWsName">...</div>
+        </div>
+        <div>
+          <div class="detail-item-label">Ngày đăng ký</div>
+          <div class="detail-item-value" id="modalWsRegDate">...</div>
+        </div>
+        <div>
+          <div class="detail-item-label">Khách hàng</div>
+          <div class="detail-item-value" id="modalWsCustomer">...</div>
+        </div>
+        <div>
+          <div class="detail-item-label">Số lượng vé</div>
+          <div class="detail-item-value" id="modalWsQty">...</div>
+        </div>
+        <div>
+          <div class="detail-item-label">Trạng thái</div>
+          <div class="detail-item-value" id="modalWsStatus">...</div>
+        </div>
+        <div>
+          <div class="detail-item-label">Ngày tham gia</div>
+          <div class="detail-item-value" id="modalWsPartDate" style="font-weight:700;color:var(--clr-leaf);">...</div>
+        </div>
+        <div>
+          <div class="detail-item-label">Giờ tham gia</div>
+          <div class="detail-item-value" id="modalWsPartTime" style="font-weight:700;color:var(--clr-leaf);">...</div>
+        </div>
+        <div>
+          <div class="detail-item-label">Địa điểm</div>
+          <div class="detail-item-value" id="modalWsLocation">...</div>
+        </div>
+        <div>
+          <div class="detail-item-label">Tổng tiền</div>
+          <div class="detail-item-value" style="font-weight:700;font-size:20px;color:var(--clr-forest);" id="modalWsTotal">...</div>
+        </div>
+        <div style="grid-column: span 2;">
+          <div class="detail-item-label">Ghi chú</div>
+          <div class="detail-item-value" id="modalWsNote" style="background:#f9f9f9;padding:10px;border-radius:4px;min-height:40px;">...</div>
+        </div>
+      </div>
+      
+      <div style="margin-top:24px;text-align:right;">
+        <button class="btn-primary" onclick="closeWorkshopModal()" style="padding:10px 32px;border-radius:100px;">Đóng</button>
       </div>
     </div>
   </div>
@@ -526,29 +581,33 @@
         }
         var html = '';
         registrations.forEach(function(reg) {
-          var startDate = new Date(reg.workshopStartDate);
           var regDate = new Date(reg.registrationDate);
-          
-          var startDateStr = startDate.toLocaleDateString('vi-VN') + '<br>' + startDate.getHours() + 'h - ' + new Date(reg.workshopEndDate).getHours() + 'h';
-          var regDateStr = regDate.toLocaleDateString('vi-VN') + '<br>' + regDate.getHours() + 'h' + regDate.getMinutes();
+          var regDateStr = regDate.toLocaleDateString('vi-VN') + '<br>' + regDate.getHours() + 'h' + (regDate.getMinutes()<10?'0':'') + regDate.getMinutes();
+
+          // Lấy thông tin ngày giờ tham gia từ các trường mới
+          var partDate = reg.participationDate ? new Date(reg.participationDate).toLocaleDateString('vi-VN') : 'N/A';
+          var partTime = reg.participationTime || 'N/A';
+          var partDateTimeStr = partDate + '<br>' + partTime;
 
           var actions = '';
           if (reg.status === 'PENDING') {
-            actions = '<a href="thanh-toan-workshop_1917-3719.html?regId=' + reg.id + '" class="action-btn" style="background:var(--clr-leaf);color:#fff;border:none;margin-right:4px;">Thanh toán</a>'
-                    + '<button class="action-btn btn-cancel-reg" data-id="' + reg.id + '" style="background:#f44336;color:#fff;border:none;">Hủy</button>';
-          } else {
-            actions = '<span style="color:var(--text-muted);font-size:12px;">N/A</span>';
+            actions = '<a href="thanh-toan-workshop_1917-3719.html?regId=' + reg.id + '" class="action-btn" style="background:var(--clr-leaf);color:#fff;border:none;margin-right:4px;">Thanh toán</a>';
+          }
+          if (reg.status === 'CONFIRMED') {
+            actions += '<button class="action-btn btn-cancel-reg" data-id="' + reg.id + '" style="background:#f44336;color:#fff;border:none;">Hủy</button>';
           }
 
           html += '<tr>'
+            + '<td style="font-weight:700;"><a href="#" onclick="event.preventDefault(); viewWorkshopDetails(' + reg.id + ')" style="color:var(--clr-forest);text-decoration:none;">' + reg.id + '</a></td>'
             + '<td style="font-weight:700;">' + reg.workshopName + '</td>'
             + '<td>' + reg.customerName + '</td>'
             + '<td style="text-align:center;">' + reg.ticketQuantity + '</td>'
-            + '<td>' + startDateStr + '</td>'
             + '<td>' + regDateStr + '</td>'
             + '<td style="text-align:center;">'
             + '  <div style="margin-bottom:8px;"><span class="status-badge ' + reg.status.toLowerCase() + '">' + reg.status + '</span></div>'
-            + '  <div>' + actions + '</div>'
+            + '  <div style="display:flex;gap:4px;justify-content:center;">' 
+            +      actions 
+            + '  </div>'
             + '</td>'
             + '</tr>';
         });
@@ -568,10 +627,20 @@
                   alert('Đã hủy đăng ký thành công.');
                   loadProfileHistory();
                 } else {
-                  alert('Không thể hủy đăng ký. Vui lòng thử lại sau.');
+                  return res.text().then(function(text) {
+                    // Workshop service might return plain text or JSON
+                    try {
+                      var data = JSON.parse(text);
+                      alert('Lỗi: ' + (data.message || 'Không thể hủy đăng ký.'));
+                    } catch(e) {
+                      alert('Lỗi: ' + text);
+                    }
+                  });
                 }
               })
-              .catch(console.error);
+              .catch(function(err) {
+                alert('Lỗi kết nối: ' + err.message);
+              });
             }
           });
         });
@@ -616,12 +685,19 @@
           };
           var st = statusMap[o.status] || { label: o.status, class: '' };
           
+          var actionsHTML = `<button onclick="viewOrderDetails(${o.id})" class="action-btn" style="border:none;cursor:pointer;margin-right:4px;">Chi tiết</button>`;
+          if (o.status !== 'CANCELLED') {
+            var isDisabled = (o.status !== 'PENDING' && o.status !== 'CONFIRMED');
+            var disabledStyle = isDisabled ? 'opacity:0.5;cursor:not-allowed;background:#ccc;' : 'background:#d32f2f;cursor:pointer;';
+            actionsHTML += `<button onclick="${isDisabled ? '' : `cancelOrder(${o.id})`}" class="action-btn" style="border:none;color:#fff;${disabledStyle}" ${isDisabled ? 'disabled' : ''}>Hủy</button>`;
+          }
+
           html += '<tr>'
             + '<td style="font-weight:700;">#' + o.id + '</td>'
             + '<td>' + date + '</td>'
             + '<td style="font-weight:700;color:var(--clr-forest);">' + total + '</td>'
             + '<td><span class="status-badge ' + st.class + '">' + st.label + '</span></td>'
-            + '<td><button onclick="viewOrderDetails(' + o.id + ')" class="action-btn" style="border:none;cursor:pointer;">Chi tiết</button></td>'
+            + '<td>' + actionsHTML + '</td>'
             + '</tr>';
         });
         tbody.innerHTML = html;
@@ -647,6 +723,60 @@
         console.error(err);
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red;padding:24px;">Lỗi tải lịch sử đơn hàng.</td></tr>';
       });
+    }
+
+    window.cancelOrder = function(orderId) {
+        if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) return;
+        
+        fetch('http://localhost:8080/order/orders/' + orderId + '/cancel', {
+            method: 'PUT',
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => {
+            if (res.ok) {
+                alert('Đã hủy đơn hàng thành công.');
+                loadProfileOrders(0);
+            } else {
+                return res.json().then(data => {
+                    throw new Error(data.message || 'Không thể hủy đơn hàng.');
+                });
+            }
+        })
+        .catch(err => {
+            alert('Lỗi: ' + err.message);
+        });
+    }
+
+    window.viewWorkshopDetails = function(regId) {
+        var modal = document.getElementById('workshopRegistrationDetailModal');
+        modal.classList.add('is-active');
+        document.getElementById('modalWsRegId').textContent = regId;
+        
+        fetch('http://localhost:8080/workshop/regis-workshops/' + regId, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => res.json())
+        .then(data => {
+            var reg = data.result || data;
+            document.getElementById('modalWsName').textContent = reg.workshopName;
+            document.getElementById('modalWsRegDate').textContent = new Date(reg.registrationDate).toLocaleString('vi-VN');
+            document.getElementById('modalWsCustomer').textContent = reg.customerName;
+            document.getElementById('modalWsQty').textContent = reg.ticketQuantity;
+            document.getElementById('modalWsStatus').textContent = reg.status;
+            document.getElementById('modalWsPartDate').textContent = reg.participationDate ? new Date(reg.participationDate).toLocaleDateString('vi-VN') : 'N/A';
+            document.getElementById('modalWsPartTime').textContent = reg.participationTime || 'N/A';
+            document.getElementById('modalWsLocation').textContent = reg.location || 'Bảo tàng Gốm Bát Tràng';
+            document.getElementById('modalWsTotal').textContent = new Intl.NumberFormat('vi-VN').format(reg.totalPrice) + ' VNĐ';
+            document.getElementById('modalWsNote').textContent = reg.note || 'Không có ghi chú.';
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Lỗi khi tải chi tiết đăng ký.');
+        });
+    }
+
+    window.closeWorkshopModal = function() {
+        document.getElementById('workshopRegistrationDetailModal').classList.remove('is-active');
     }
 
     window.viewOrderDetails = function(orderId) {

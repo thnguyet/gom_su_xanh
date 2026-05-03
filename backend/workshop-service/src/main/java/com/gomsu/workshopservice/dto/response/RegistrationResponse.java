@@ -2,6 +2,7 @@ package com.gomsu.workshopservice.dto.response;
 
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -32,6 +33,8 @@ public class RegistrationResponse {
 
     // --- BỔ SUNG TRƯỜNG NOTE ---
     private String note; // Hiển thị lại ghi chú mà khách đã nhập
+    private LocalDate participationDate;
+    private String participationTime;
 
     private String message;
 }

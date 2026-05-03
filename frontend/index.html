@@ -292,6 +292,30 @@
   <!-- Back to Top -->
   <button class="back-to-top" id="backToTop" aria-label="Về đầu trang" title="Về đầu trang">↑</button>
 
+  <script>
+    // Force start from login screen
+    (function() {
+      // Clear legacy/fake account data to ensure a clean start
+      var hasInitiated = sessionStorage.getItem('gsx_app_initiated');
+      if (!hasInitiated) {
+        localStorage.removeItem('gsx_logged_in');
+        localStorage.removeItem('gsx_token');
+        localStorage.removeItem('adm_token');
+        sessionStorage.setItem('gsx_app_initiated', 'true');
+      }
+
+      var loggedIn = false;
+      try {
+        var raw = localStorage.getItem('gsx_logged_in');
+        loggedIn = raw ? JSON.parse(raw) === true : false;
+      } catch(e) {}
+      var token = localStorage.getItem('gsx_token');
+      
+      if (!loggedIn || !token) {
+        location.href = 'pages/dang-nhap_839-134.html';
+      }
+    })();
+  </script>
   <script src="app.js" defer></script>
 </body>
 </html>
