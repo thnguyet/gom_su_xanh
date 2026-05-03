@@ -361,9 +361,13 @@
               var slotsLeft = (ws.maxParticipants || 0) - (ws.currentParticipants || 0);
               var slotsText = slotsLeft > 0 ? `Còn ${slotsLeft}/${ws.maxParticipants} chỗ` : 'Đã hết chỗ';
               var slotsColor = slotsLeft <= 3 ? '#d32f2f' : 'var(--clr-forest)';
+              
+              var isFull = slotsLeft <= 0;
+              var btnStyle = isFull ? 'background: #ccc; color: #666; border-color: #ccc; cursor: not-allowed; pointer-events: none;' : 'display:inline-block; padding: 12px 32px;';
+              var btnText = isFull ? 'Đã hết chỗ' : 'Đăng ký ngay';
 
               html += `
-                <div class="workshop-item">
+                <div class="workshop-item" id="workshop-${ws.id}">
                   <img src="${img}" alt="${ws.name}" class="ws-img">
                   <div class="ws-content">
                     ${ws.targetAudience ? `<span class="ws-badge">${ws.targetAudience}</span>` : ''}
@@ -381,12 +385,28 @@
                       <div class="ws-time">${timeStr}</div>
                       <div class="ws-price">Từ ${priceStr}/người</div>
                     </div>
-                    <a href="#" data-id="${ws.id}" class="btn-outline gsx-reg-btn" style="display:inline-block; padding: 12px 32px;">Đăng ký ngay</a>
+                    <a href="#" data-id="${ws.id}" class="btn-outline gsx-reg-btn" style="${btnStyle}">${btnText}</a>
                   </div>
                 </div>
               `;
             });
             list.innerHTML = html;
+
+            // Kiểm tra và cuộn đến workshop nếu có ID trong URL
+            var urlParams = new URLSearchParams(window.location.search);
+            var targetId = urlParams.get('id');
+            if (targetId) {
+              setTimeout(() => {
+                var element = document.getElementById('workshop-' + targetId);
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  // Highlight nhẹ để user nhận biết
+                  element.style.outline = '2px solid var(--clr-leaf)';
+                  element.style.transition = 'outline 0.5s';
+                  setTimeout(() => { element.style.outline = 'none'; }, 2000);
+                }
+              }, 300);
+            }
 
             // Re-attach registration modal events
             list.querySelectorAll('.gsx-reg-btn').forEach(btn => {

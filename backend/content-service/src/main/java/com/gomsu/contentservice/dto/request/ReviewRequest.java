@@ -22,8 +22,4 @@ public class ReviewRequest {
     @NotBlank(message = "Nội dung đánh giá không được để trống")
     @Size(max = 1000, message = "Nội dung đánh giá không quá 1000 ký tự")
     private String comment;
-
-    private String title; // Tiêu đề đánh giá
-    private Long orderId; // Để xác định Verified Purchase
-    private String imageReview; // URL ảnh
 }

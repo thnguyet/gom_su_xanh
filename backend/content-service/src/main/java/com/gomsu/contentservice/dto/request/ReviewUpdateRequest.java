@@ -19,9 +19,6 @@ public class ReviewUpdateRequest {
     @Size(max = 1000, message = "Nội dung đánh giá không quá 1000 ký tự")
     private String comment; // Có thể null nếu không đổi nội dung
 
-    private String title;
-    private String imageReview;
-
     // Lưu ý: productId và orderId KHÔNG nên cho update
     // vì đánh giá đã gắn chặt với sản phẩm và đơn hàng đó rồi.
 }

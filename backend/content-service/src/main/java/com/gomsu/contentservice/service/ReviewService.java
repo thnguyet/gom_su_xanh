@@ -35,62 +35,38 @@ public class ReviewService {
     private final OrderClient orderClient;
 
     // --- 1. LẤY ĐÁNH GIÁ THEO SẢN PHẨM (Sửa để hết lỗi đỏ ở Controller) ---
-    @Transactional(readOnly = true)
     public Page<ReviewResponse> getReviewsByProduct(Long productId, boolean isAdmin, Pageable pageable) {
-        // Lấy tên SP 1 lần duy nhất để tránh lỗi N+1 (gọi API liên tục trong vòng lặp)
         String productName = getProductName(productId);
-
-        Page<Review> reviews;
-        if (isAdmin) {
-            // Admin thấy cả đánh giá chờ duyệt nhưng chưa xóa
-            reviews = reviewRepository.findByProductIdAndIsDeletedFalse(productId, pageable);
-        } else {
-            // Khách chỉ thấy đánh giá đã duyệt và chưa xóa
-            reviews = reviewRepository.findByProductIdAndIsApprovedTrueAndIsDeletedFalse(productId, pageable);
-        }
+        Page<Review> reviews = reviewRepository.findByProductIdAndIsDeletedFalse(productId, pageable);
 
         return reviews.map(review -> toResponse(review, productName));
+    }
+
+    @Transactional(readOnly = true)
+    public ReviewResponse getUserReviewForProduct(Long productId, Long userId) {
+        return reviewRepository.findByProductIdAndUserIdAndIsDeletedFalse(productId, userId)
+                .map(review -> toResponse(review, getProductName(productId)))
+                .orElse(null);
     }
 
     // --- 2. USER TẠO ĐÁNH GIÁ ---
     @Transactional
     public ReviewResponse createReview(ReviewRequest request, Long userId, String username) {
-        // 1. Kiểm tra đơn hàng thông qua FeignClient
-        if (request.getOrderId() != null) {
-            try {
-                OrderDTO order = orderClient.getOrderById(request.getOrderId());
-
-                // Chỉ cho phép review nếu đơn hàng đã hoàn tất (COMPLETED)
-                if (!"COMPLETED".equalsIgnoreCase(order.getStatus())) {
-                    throw new RuntimeException("Đơn hàng chưa hoàn tất. Bạn cần nhận hàng trước khi đánh giá!");
-                }
-
-                // Bảo mật: Đơn hàng phải thuộc về người đang đăng nhập
-                if (!order.getCustomerId().equals(userId)) {
-                    throw new RuntimeException("Đơn hàng này không thuộc về bạn!");
-                }
-            } catch (Exception e) {
-                log.error("Lỗi xác thực đơn hàng: {}", e.getMessage());
-                throw new RuntimeException("Không thể xác minh thông tin mua hàng.");
-            }
-        }
+        // Logic kiểm tra đơn hàng đã được loại bỏ theo yêu cầu tinh giản ReviewRequest
 
         // 2. Chặn trùng (Mỗi user chỉ review 1 sản phẩm 1 lần)
         if (reviewRepository.existsByProductIdAndUserIdAndIsDeletedFalse(request.getProductId(), userId)) {
             throw new RuntimeException("Bạn đã đánh giá sản phẩm này rồi!");
         }
 
-        // 3. Map dữ liệu vào Entity (Giữ String imageReview)
+        // 3. Map dữ liệu vào Entity
         Review review = Review.builder()
                 .productId(request.getProductId())
                 .userId(userId)
                 .username(username)
                 .rating(request.getRating())
-                .title(request.getTitle())
                 .comment(request.getComment())
-                .imageReview(request.getImageReview()) // Vẫn dùng String
-                .orderId(request.getOrderId())
-                .isApproved(true) // Có Order ID hợp lệ thì mặc định duyệt
+                .isApproved(true) // Mặc định duyệt để hiển thị ngay
                 .build();
 
         Review saved = reviewRepository.save(review);
@@ -118,12 +94,6 @@ public class ReviewService {
         }
         if (request.getComment() != null && !request.getComment().isBlank()) {
             review.setComment(request.getComment());
-        }
-        if (request.getTitle() != null) {
-            review.setTitle(request.getTitle());
-        }
-        if (request.getImageReview() != null) {
-            review.setImageReview(request.getImageReview());
         }
 
         Review updated = reviewRepository.save(review);
@@ -161,7 +131,7 @@ public class ReviewService {
         return toResponse(reviewRepository.save(review), getProductName(review.getProductId()));
     }
 
-    // --- 7. XÓA MỀM ---
+    // --- 7. XÓA MỀM (USER) ---
     @Transactional
     public void deleteReview(Long reviewId, Long userId) {
         Review review = reviewRepository.findById(reviewId)
@@ -176,11 +146,22 @@ public class ReviewService {
         syncProductRating(review.getProductId());
     }
 
+    // --- 8. XÓA MỀM (ADMIN) ---
+    @Transactional
+    public void deleteReviewByAdmin(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Đánh giá không tồn tại"));
+
+        review.setDeleted(true);
+        reviewRepository.save(review);
+        syncProductRating(review.getProductId());
+    }
+
     // --- PRIVATE HELPERS ---
 
     private void syncProductRating(Long productId) {
         Double avg = reviewRepository.getAverageRatingByProductId(productId);
-        Long count = reviewRepository.countByProductIdAndIsApprovedTrueAndIsDeletedFalse(productId);
+        Long count = reviewRepository.countByProductIdAndIsDeletedFalse(productId);
 
         ReviewUpdateEvent event = new ReviewUpdateEvent(productId, avg != null ? avg : 0.0, count);
         rabbitTemplate.convertAndSend(RabbitMQConfig.REVIEW_EXCHANGE, RabbitMQConfig.REVIEW_ROUTING_KEY, event);

@@ -2,7 +2,7 @@
   'use strict';
   var API = 'http://localhost:8080';
   var token = localStorage.getItem('adm_token') || '';
-  
+
   // Early Auth Check
   if (!token) {
     location.href = '../pages/dang-nhap_839-134.html';
@@ -95,7 +95,7 @@
     currentSection = section;
     var items = document.querySelectorAll('.adm-nav-item[data-section]');
     items.forEach(function (it) { it.classList.toggle('is-active', it.dataset.section === section); });
-    var titles = { dashboard: 'Tổng quan', products: 'Sản phẩm', orders: 'Đơn hàng', workshops: 'Workshop', workshopRegs: 'ĐK Workshop', posts: 'Bài viết', reviews: 'Đánh giá', users: 'Người dùng', promotions: 'Khuyến mãi' };
+    var titles = { dashboard: 'Tổng quan', products: 'Sản phẩm', orders: 'Đơn hàng', workshops: 'Workshop', workshopRegs: 'ĐK Workshop', posts: 'Bài viết', reviews: 'Đánh giá', users: 'Người dùng' };
     $('admTopTitle').textContent = titles[section] || section;
     pageState = { page: 0, size: 10, keyword: '' };
     renderSection(section);
@@ -103,7 +103,7 @@
 
   function renderSection(s) {
     var c = $('admContent');
-    var fn = { dashboard: renderDashboard, products: renderProducts, orders: renderOrders, workshops: renderWorkshops, workshopRegs: renderWorkshopRegs, posts: renderPosts, reviews: renderReviews, users: renderUsers, promotions: renderPromotions };
+    var fn = { dashboard: renderDashboard, products: renderProducts, orders: renderOrders, workshops: renderWorkshops, workshopRegs: renderWorkshopRegs, posts: renderPosts, reviews: renderReviews, users: renderUsers };
     if (fn[s]) fn[s](c); else c.innerHTML = '<div class="adm-empty"><div class="adm-empty-icon">🚧</div><p>Đang phát triển...</p></div>';
   }
 
@@ -225,10 +225,10 @@
     api('/content/api/v1/reviews/admin/all?page=0&size=20').then(function (data) {
       var rows = data.content || [];
       if (!rows.length) { $('admRevTable').innerHTML = emptyMsg('Chưa có đánh giá'); return; }
-      $('admRevTable').innerHTML = tableWrap(['Sản phẩm', 'Người dùng', 'Sao', 'Nội dung', 'Trạng thái', 'Ngày'], rows.map(function (r) {
+      $('admRevTable').innerHTML = tableWrap(['Sản phẩm', 'Người dùng', 'Sao', 'Nội dung', 'Ngày', 'Thao tác'], rows.map(function (r) {
         var stars = '⭐'.repeat(r.rating || 0);
-        var badge = r.isApproved ? '<span class="adm-badge adm-badge--success">Duyệt</span>' : '<span class="adm-badge adm-badge--warning">Chờ</span>';
-        return '<tr><td>' + esc(r.productName || 'SP-' + r.productId) + '</td><td>' + esc(r.username || '—') + '</td><td>' + stars + '</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.comment || '—') + '</td><td>' + badge + '</td><td>' + fmtDate(r.createdAt) + '</td></tr>';
+        var acts = '<button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delReview(' + r.id + ')">Xóa</button>';
+        return '<tr><td>' + esc(r.productName || 'SP-' + r.productId) + '</td><td>' + esc(r.username || '—') + '</td><td>' + stars + '</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.comment || '—') + '</td><td>' + fmtDate(r.createdAt) + '</td><td>' + acts + '</td></tr>';
       }).join(''));
     }).catch(function () { $('admRevTable').innerHTML = emptyMsg('Lỗi tải đánh giá'); });
   }
@@ -246,24 +246,6 @@
     }).catch(function () { $('admUserTable').innerHTML = emptyMsg('Lỗi tải người dùng'); });
   }
 
-  /* ===== PROMOTIONS ===== */
-  function renderPromotions(c) {
-    c.innerHTML = sectionHeader('Khuyến mãi', 'promotions') + '<div id="admPromoTable">' + skeleton(5) + '</div><div id="admPromoPage"></div>';
-    bindSearch('promotions'); loadPromotions();
-  }
-  function loadPromotions() {
-    var p = pageState; var q = p.keyword ? '&keyword=' + encodeURIComponent(p.keyword) : '';
-    api('/product/promotions?page=' + p.page + '&size=' + p.size + q).then(function (data) {
-      var rows = data.content || [];
-      if (!rows.length) { $('admPromoTable').innerHTML = emptyMsg('Chưa có khuyến mãi'); $('admPromoPage').innerHTML = ''; return; }
-      $('admPromoTable').innerHTML = tableWrap(['Tên', 'Bắt đầu', 'Kết thúc', 'Trạng thái', 'SP áp dụng', 'Thao tác'], rows.map(function (pr) {
-        var badge = pr.active || pr.isActive ? '<span class="adm-badge adm-badge--success">Đang chạy</span>' : '<span class="adm-badge adm-badge--neutral">Tạm dừng</span>';
-        var items = pr.items ? pr.items.length : 0;
-        return '<tr><td style="font-weight:600;color:var(--adm-text)">' + esc(pr.name) + '</td><td>' + fmtDate(pr.startDate) + '</td><td>' + fmtDate(pr.endDate) + '</td><td>' + badge + '</td><td>' + items + ' sản phẩm</td><td><button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delPromo(' + pr.id + ')">Xóa</button> <button class="adm-btn adm-btn--outline adm-btn--sm" onclick="ADM.stopPromo(' + pr.id + ')">Dừng</button></td></tr>';
-      }).join(''));
-      $('admPromoPage').innerHTML = paginate(data);
-    }).catch(function () { $('admPromoTable').innerHTML = emptyMsg('Lỗi tải khuyến mãi'); });
-  }
 
   /* ===== WORKSHOP REGISTRATIONS ===== */
   function renderWorkshopRegs(c) {
@@ -300,8 +282,7 @@
     delWorkshop: function (id) { if (confirm('Xóa workshop #' + id + '?')) api('/workshop/workshops/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa workshop'); loadWorkshops(); }).catch(function () { toast('Lỗi xóa workshop'); }); },
     delPost: function (id) { if (confirm('Xóa bài viết #' + id + '?')) api('/content/posts/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa bài viết'); loadPosts(); }).catch(function () { toast('Lỗi xóa bài viết'); }); },
     delUser: function (id) { if (confirm('Xóa người dùng #' + id + '?')) api('/identity/users/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa người dùng'); renderUsers($('admContent')); }).catch(function () { toast('Lỗi xóa người dùng'); }); },
-    delPromo: function (id) { if (confirm('Xóa khuyến mãi #' + id + '?')) api('/product/promotions/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa'); loadPromotions(); }).catch(function () { toast('Lỗi xóa'); }); },
-    stopPromo: function (id) { if (confirm('Dừng khuyến mãi #' + id + '?')) api('/product/promotions/' + id + '/stop', { method: 'PATCH' }).then(function () { toast('Đã dừng'); loadPromotions(); }).catch(function () { toast('Lỗi'); }); },
+    delReview: function (id) { if (confirm('Xóa đánh giá #' + id + '?')) api('/content/api/v1/reviews/admin/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa đánh giá'); renderReviews($('admContent')); }).catch(function () { toast('Lỗi xóa đánh giá'); }); },
     updateOrder: function (id, status) { if (!status) return; if (confirm('Cập nhật đơn #' + id + ' → ' + status + '?')) api('/order/orders/' + id + '/status?status=' + status, { method: 'PATCH' }).then(function () { toast('Đã cập nhật'); loadOrders(); }).catch(function () { toast('Lỗi cập nhật'); }); },
     checkInWorkshop: function (id) { if (confirm('Xác nhận khách hàng đã tham gia workshop?')) api('/workshop/regis-workshops/' + id, { method: 'PUT' }).then(function () { toast('Đã check-in thành công'); loadWorkshopRegs(); }).catch(function (e) { toast('Lỗi check-in: ' + e.message); }); },
     cancelWorkshopReg: function (id) { if (confirm('Hủy đơn đăng ký này?')) api('/workshop/regis-workshops/' + id + '/cancel', { method: 'PATCH' }).then(function () { toast('Đã hủy đăng ký'); loadWorkshopRegs(); }).catch(function (e) { toast('Lỗi hủy đăng ký: ' + e.message); }); },
@@ -424,7 +405,7 @@
     openProductDetailModal: function (id) {
       api('/product/products/' + id).then(function (p) {
         var imagesHTML = (p.imageUrls || []).map(img => `<img src="${img}" style="width:100px;height:100px;object-fit:cover;border-radius:8px;margin-right:8px;margin-bottom:8px;border:1px solid var(--adm-border)">`).join('');
-        
+
         showModal('Chi tiết sản phẩm #' + id, `
           <div class="adm-detail">
             <div style="display:flex;gap:24px;margin-bottom:24px;flex-wrap:wrap">
@@ -462,7 +443,7 @@
         toast('Không thể tải thông tin chi tiết sản phẩm');
       });
     },
-    
+
     openAddWorkshopModal: function () {
       showModal('Thêm Workshop mới', `
         <form class="adm-form" id="addWorkshopForm">
@@ -552,17 +533,17 @@
 
         obj.price = parseFloat(obj.price);
         obj.maxParticipants = parseInt(obj.maxParticipants);
-        
+
         // Xử lý ngày tháng: Nếu trống thì gửi null
-        if(!obj.startDate) obj.startDate = null;
-        if(!obj.endDate) obj.endDate = null;
-        if(!obj.registrationStartDate) obj.registrationStartDate = null;
-        if(!obj.registrationEndDate) obj.registrationEndDate = null;
-        
+        if (!obj.startDate) obj.startDate = null;
+        if (!obj.endDate) obj.endDate = null;
+        if (!obj.registrationStartDate) obj.registrationStartDate = null;
+        if (!obj.registrationEndDate) obj.registrationEndDate = null;
+
         // Xử lý các trường không bắt buộc
-        if(!obj.targetAudience) obj.targetAudience = null;
-        if(!obj.tools) obj.tools = null;
-        if(!obj.benefits) obj.benefits = null;
+        if (!obj.targetAudience) obj.targetAudience = null;
+        if (!obj.tools) obj.tools = null;
+        if (!obj.benefits) obj.benefits = null;
 
         var finalFd = new FormData();
         finalFd.append('workshop', new Blob([JSON.stringify(obj)], { type: 'application/json' }));
@@ -593,7 +574,7 @@
     openWorkshopDetailModal: function (id) {
       api('/workshop/workshops/' + id).then(function (w) {
         var imagesHTML = (w.allImages || []).map(img => `<img src="${img}" class="adm-detail-img" style="width:100px;height:100px;object-fit:cover;border-radius:4px;margin-right:8px;margin-bottom:8px">`).join('');
-        
+
         showModal('Chi tiết Workshop #' + id, `
           <div class="adm-detail">
             <div class="adm-detail-section">
@@ -645,7 +626,7 @@
         var deletedImageIds = [];
         // Format ISO date for input datetime-local
         var fd = (d) => d ? d.substring(0, 16) : '';
-        
+
         showModal('Chỉnh sửa Workshop #' + id, `
           <form class="adm-form" id="editWorkshopForm">
             <div class="adm-form-group">
@@ -751,11 +732,11 @@
 
           obj.price = parseFloat(obj.price) || 0;
           obj.maxParticipants = parseInt(obj.maxParticipants) || 0;
-          
-          if(!obj.startDate) obj.startDate = null;
-          if(!obj.endDate) obj.endDate = null;
-          if(!obj.registrationStartDate) obj.registrationStartDate = null;
-          if(!obj.registrationEndDate) obj.registrationEndDate = null;
+
+          if (!obj.startDate) obj.startDate = null;
+          if (!obj.endDate) obj.endDate = null;
+          if (!obj.registrationStartDate) obj.registrationStartDate = null;
+          if (!obj.registrationEndDate) obj.registrationEndDate = null;
 
           var finalFd = new FormData();
           finalFd.append('request', new Blob([JSON.stringify(obj)], { type: 'application/json' }));
@@ -837,13 +818,13 @@
         var obj = Object.fromEntries(fd.entries());
 
         // --- VALIDATION TẠI FRONTEND ---
-        if(!obj.name || !obj.name.trim()) { toast('Tên sản phẩm không được để trống!'); return; }
-        if(!obj.brand || !obj.brand.trim()) { toast('Thương hiệu không được để trống!'); return; }
-        if(!obj.price || isNaN(parseFloat(obj.price))) { toast('Giá không được để trống!'); return; }
-        if(parseFloat(obj.price) < 0) { toast('Giá sản phẩm phải lớn hơn hoặc bằng 0'); return; }
-        if(!obj.stockQuantity || isNaN(parseInt(obj.stockQuantity))) { toast('Số lượng không được để trống!'); return; }
-        if(parseInt(obj.stockQuantity) < 0) { toast('Số lượng tồn kho không hợp lệ'); return; }
-        if(!obj.categoryId) { toast('Mã danh mục không được để trống!'); return; }
+        if (!obj.name || !obj.name.trim()) { toast('Tên sản phẩm không được để trống!'); return; }
+        if (!obj.brand || !obj.brand.trim()) { toast('Thương hiệu không được để trống!'); return; }
+        if (!obj.price || isNaN(parseFloat(obj.price))) { toast('Giá không được để trống!'); return; }
+        if (parseFloat(obj.price) < 0) { toast('Giá sản phẩm phải lớn hơn hoặc bằng 0'); return; }
+        if (!obj.stockQuantity || isNaN(parseInt(obj.stockQuantity))) { toast('Số lượng không được để trống!'); return; }
+        if (parseInt(obj.stockQuantity) < 0) { toast('Số lượng tồn kho không hợp lệ'); return; }
+        if (!obj.categoryId) { toast('Mã danh mục không được để trống!'); return; }
 
         obj.price = parseFloat(obj.price);
         obj.stockQuantity = parseInt(obj.stockQuantity);
@@ -944,13 +925,13 @@
           var obj = Object.fromEntries(fd.entries());
 
           // --- VALIDATION TẠI FRONTEND ---
-          if(!obj.name || !obj.name.trim()) { toast('Tên sản phẩm không được để trống!'); return; }
-          if(!obj.brand || !obj.brand.trim()) { toast('Thương hiệu không được để trống!'); return; }
-          if(!obj.price || isNaN(parseFloat(obj.price))) { toast('Giá không được để trống!'); return; }
-          if(parseFloat(obj.price) < 0) { toast('Giá sản phẩm phải lớn hơn hoặc bằng 0'); return; }
-          if(!obj.stockQuantity || isNaN(parseInt(obj.stockQuantity))) { toast('Số lượng không được để trống!'); return; }
-          if(parseInt(obj.stockQuantity) < 0) { toast('Số lượng tồn kho không hợp lệ'); return; }
-          
+          if (!obj.name || !obj.name.trim()) { toast('Tên sản phẩm không được để trống!'); return; }
+          if (!obj.brand || !obj.brand.trim()) { toast('Thương hiệu không được để trống!'); return; }
+          if (!obj.price || isNaN(parseFloat(obj.price))) { toast('Giá không được để trống!'); return; }
+          if (parseFloat(obj.price) < 0) { toast('Giá sản phẩm phải lớn hơn hoặc bằng 0'); return; }
+          if (!obj.stockQuantity || isNaN(parseInt(obj.stockQuantity))) { toast('Số lượng không được để trống!'); return; }
+          if (parseInt(obj.stockQuantity) < 0) { toast('Số lượng tồn kho không hợp lệ'); return; }
+
           // Lấy danh sách ID ảnh cần xóa
           var delIds = [];
           document.querySelectorAll('.ws-img-edit-item.to-delete').forEach(el => {

@@ -56,6 +56,12 @@ public class PostController {
         return ResponseEntity.ok(postService.getPostBySlug(slug));
     }
 
+    // Lấy chi tiết bài viết theo ID
+    @GetMapping("/{id}")
+    public ResponseEntity<PostResponse> getPostById(@PathVariable Long id) {
+        return ResponseEntity.ok(postService.getPostById(id));
+    }
+
     @GetMapping
     public ResponseEntity<Page<PostResponse>> getAllPosts(
             @RequestParam(required = false) String keyword,

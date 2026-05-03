@@ -8,25 +8,25 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    // 1. Khách xem tại trang sản phẩm: Chỉ thấy hàng ĐÃ DUYỆT & CHƯA XÓA
-    Page<Review> findByProductIdAndIsApprovedTrueAndIsDeletedFalse(Long productId, Pageable pageable);
-
-    // 2. Admin xem tại một sản phẩm cụ thể: Thấy cả hàng chờ duyệt nhưng chưa bị xóa
+    // 1. Khách xem tại trang sản phẩm: Thấy hàng CHƯA XÓA (Tạm bỏ qua duyệt để hiển thị dữ liệu cũ)
     Page<Review> findByProductIdAndIsDeletedFalse(Long productId, Pageable pageable);
 
     // 3. Chặn spam: Kiểm tra User đã đánh giá sản phẩm này chưa
     boolean existsByProductIdAndUserIdAndIsDeletedFalse(Long productId, Long userId);
 
+    Optional<Review> findByProductIdAndUserIdAndIsDeletedFalse(Long productId, Long userId);
+
     // 4. Tính toán thống kê Rating: Chỉ tính hàng "sạch" đã duyệt
-    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.productId = :productId AND r.isApproved = true AND r.isDeleted = false")
+    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.productId = :productId AND r.isDeleted = false")
     Double getAverageRatingByProductId(Long productId);
 
-    Long countByProductIdAndIsApprovedTrueAndIsDeletedFalse(Long productId);
+    Long countByProductIdAndIsDeletedFalse(Long productId);
 
-    Long countByProductIdAndRatingAndIsApprovedTrueAndIsDeletedFalse(Long productId, Integer rating);
+    Long countByProductIdAndRatingAndIsDeletedFalse(Long productId, Integer rating);
 
     // --- BỔ SUNG THÊM CHO NGHIỆP VỤ MỚI ---
 
@@ -44,7 +44,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     }
 
     @Query("SELECT r.rating as rating, COUNT(r) as count FROM Review r " +
-            "WHERE r.productId = :productId AND r.isApproved = true AND r.isDeleted = false " +
+            "WHERE r.productId = :productId AND r.isDeleted = false " +
             "GROUP BY r.rating")
     List<RatingCount> countStarsByGroup(Long productId);
 }

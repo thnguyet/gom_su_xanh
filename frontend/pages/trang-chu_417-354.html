@@ -282,34 +282,10 @@
       </p>
     </section>
 
-    <!-- ===== WORKSHOPS NỔI BẬT ===== -->
     <section class="cards-section">
-      <h2 class="section-title all-caps">Workshop nổi bật</h2>
-      <div class="cards-grid">
-        <a class="gsx-card" href="trang-workshop-real_1719-3931.html" style="text-decoration:none">
-          <img src="../assets/images/8162b2504c89400a58a317db7e01975fab0734a8.jpg" alt="Vẽ tranh gốm sứ tái chế" loading="lazy" decoding="async">
-          <div class="gsx-card-body">
-            <div class="gsx-card-title">Vẽ tranh gốm sứ tái chế</div>
-            <div class="gsx-card-price">Từ 50.000VNĐ / sản phẩm</div>
-            <span class="gsx-card-btn">Chi tiết</span>
-          </div>
-        </a>
-        <a class="gsx-card" href="trang-workshop-real_1719-3931.html" style="text-decoration:none">
-          <img src="../assets/images/d4d90d37e873d1163efcee80bd7f9faf7ad05d12.png" alt="Vẽ móc chìa khóa" loading="lazy" decoding="async">
-          <div class="gsx-card-body">
-            <div class="gsx-card-title">Vẽ móc chìa khóa</div>
-            <div class="gsx-card-price">Từ 40.000VNĐ / sản phẩm</div>
-            <span class="gsx-card-btn">Chi tiết</span>
-          </div>
-        </a>
-        <a class="gsx-card" href="trang-workshop-real_1719-3931.html" style="text-decoration:none">
-          <img src="../assets/images/a6999bec49da0eed15baef1fe8c4b77c7b636b49.jpg" alt="Vẽ fridge magnets" loading="lazy" decoding="async">
-          <div class="gsx-card-body">
-            <div class="gsx-card-title">Vẽ fridge magnets</div>
-            <div class="gsx-card-price">Từ 40.000VNĐ / sản phẩm</div>
-            <span class="gsx-card-btn">Chi tiết</span>
-          </div>
-        </a>
+      <h2 class="section-title all-caps">Workshop được yêu thích nhất</h2>
+      <div class="cards-grid" id="featuredWorkshopsGrid">
+        <!-- Dữ liệu từ DB sẽ đổ vào đây -->
       </div>
     </section>
 
@@ -317,31 +293,8 @@
     <section class="cards-section" style="background:var(--clr-sand); max-width:100%; padding:80px 40px;">
       <div style="max-width:1200px; margin:0 auto;">
         <h2 class="section-title all-caps">Sản phẩm nổi bật</h2>
-        <div class="cards-grid">
-          <a class="gsx-card" href="trang-san-pham_945-1348.html" style="text-decoration:none">
-            <img src="../assets/images/0b4db3fc90f2e86ecc2dabc1484c213072054b4c.jpg" alt="Bộ kit vẽ tranh gốm sứ" loading="lazy" decoding="async">
-            <div class="gsx-card-body">
-              <div class="gsx-card-title">Bộ kit vẽ tranh gốm sứ</div>
-              <div class="gsx-card-price">Từ 60.000VNĐ / sản phẩm</div>
-              <span class="gsx-card-btn">Chi tiết</span>
-            </div>
-          </a>
-          <a class="gsx-card" href="trang-san-pham_945-1348.html" style="text-decoration:none">
-            <img src="../assets/images/e9f274abe82185f29f7f9e9d201211645b0ebfc1.jpg" alt="Tranh Mèo đa sắc" loading="lazy" decoding="async">
-            <div class="gsx-card-body">
-              <div class="gsx-card-title">Tranh Mèo đa sắc</div>
-              <div class="gsx-card-price">Từ 100.000VNĐ / sản phẩm</div>
-              <span class="gsx-card-btn">Chi tiết</span>
-            </div>
-          </a>
-          <a class="gsx-card" href="trang-san-pham_945-1348.html" style="text-decoration:none">
-            <img src="../assets/images/acf1adfc9c44d707e39fade2f0936e22060b17da.jpg" alt="Móc khóa Bít tất" loading="lazy" decoding="async">
-            <div class="gsx-card-body">
-              <div class="gsx-card-title">Móc khóa Bít tất</div>
-              <div class="gsx-card-price">Từ 40.000VNĐ / sản phẩm</div>
-              <span class="gsx-card-btn">Chi tiết</span>
-            </div>
-          </a>
+        <div class="cards-grid" id="featuredProductsGrid">
+          <!-- Dữ liệu từ DB sẽ đổ vào đây -->
         </div>
       </div>
     </section>
@@ -425,5 +378,62 @@
   </footer>
 
   <script src="../app.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fetch 3 workshop có nhiều người đăng ký nhất
+      fetch('http://localhost:8080/workshop/workshops/all?page=0&size=3&sortBy=currentParticipants&sortDir=DESC')
+        .then(res => res.json())
+        .then(data => {
+          var workshops = data.content || [];
+          var html = '';
+          workshops.forEach(w => {
+            var img = w.mainImage || '../assets/images/placeholder.png';
+            html += `
+              <a class="gsx-card" href="trang-workshop-real_1719-3931.html?id=${w.id}" style="text-decoration:none">
+                <img src="${img}" alt="${w.name}" loading="lazy" decoding="async">
+                <div class="gsx-card-body">
+                  <div class="gsx-card-title">${w.name}</div>
+                  <div class="gsx-card-price">Từ ${new Intl.NumberFormat('vi-VN').format(w.price)}đ / vé</div>
+                  <span class="gsx-card-btn">Chi tiết</span>
+                </div>
+              </a>
+            `;
+          });
+          document.getElementById('featuredWorkshopsGrid').innerHTML = html || '<p>Đang cập nhật workshop...</p>';
+        })
+        .catch(err => console.error('Lỗi tải workshop:', err));
+
+      // Fetch 3 sản phẩm có số lượng nhiều nhất
+      fetch('http://localhost:8080/product/products/all?page=0&size=3&sortBy=stockQuantity&sortDir=DESC')
+        .then(res => res.json())
+        .then(data => {
+          var products = [];
+          if (data.code === 1000 && data.result) {
+            products = data.result.content || [];
+          } else {
+            products = data.content || [];
+          }
+          
+          var html = '';
+          products.forEach(p => {
+            var img = (p.imageUrls && p.imageUrls.length > 0) ? p.imageUrls[0] : '../assets/images/placeholder.jpg';
+            var priceStr = new Intl.NumberFormat('vi-VN').format(p.price || 0) + 'đ';
+            var detailUrl = 'trang-san-pham-chi-tiet.html?slug=' + (p.slug || p.id);
+            html += `
+              <a class="gsx-card" href="${detailUrl}" style="text-decoration:none">
+                <img src="${img}" alt="${p.name}" loading="lazy" decoding="async">
+                <div class="gsx-card-body">
+                  <div class="gsx-card-title">${p.name}</div>
+                  <div class="gsx-card-price">${priceStr}</div>
+                  <span class="gsx-card-btn">Chi tiết</span>
+                </div>
+              </a>
+            `;
+          });
+          document.getElementById('featuredProductsGrid').innerHTML = html || '<p>Đang cập nhật sản phẩm...</p>';
+        })
+        .catch(err => console.error('Lỗi tải sản phẩm:', err));
+    });
+  </script>
 </body>
 </html>

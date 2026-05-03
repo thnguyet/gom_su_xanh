@@ -92,10 +92,17 @@ public class PostService {
         return toPostResponse(postRepository.save(post));
     }
 
-    // 1. Lấy chi tiết bài viết
+    // 1. Lấy chi tiết bài viết theo Slug
     public PostResponse getPostBySlug(String slug) {
         Post post = postRepository.findBySlug(slug)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết " + slug));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết với slug: " + slug));
+        return toPostResponse(post);
+    }
+
+    // 1b. Lấy chi tiết bài viết theo ID
+    public PostResponse getPostById(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết với ID: " + id));
         return toPostResponse(post);
     }
 

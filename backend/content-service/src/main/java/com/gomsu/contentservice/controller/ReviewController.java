@@ -88,6 +88,14 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.replyReview(id, replyRequest));
     }
 
+    // 7. ADMIN: Xóa đánh giá
+    @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteByAdmin(@PathVariable Long id) {
+        reviewService.deleteReviewByAdmin(id);
+        return ResponseEntity.noContent().build();
+    }
+
     // 7. PUBLIC/ADMIN: Xem đánh giá của sản phẩm (ĐÃ SỬA LOGIC CHECK ADMIN)
     @GetMapping("/product/{productId}")
     public ResponseEntity<Page<ReviewResponse>> getProductReviews(
@@ -107,6 +115,15 @@ public class ReviewController {
     @GetMapping("/product/{productId}/stats")
     public ResponseEntity<Map<String, Object>> getProductReviewStats(@PathVariable Long productId) {
         return ResponseEntity.ok(reviewService.getReviewStats(productId));
+    }
+
+    @GetMapping("/my-review/{productId}")
+    public ResponseEntity<ReviewResponse> getMyReview(@PathVariable Long productId,
+                                                       @AuthenticationPrincipal Jwt jwt) {
+        if (jwt == null) return ResponseEntity.status(401).build();
+        Long userId = extractUserId(jwt);
+        ReviewResponse review = reviewService.getUserReviewForProduct(productId, userId);
+        return ResponseEntity.ok(review);
     }
 
     private Long extractUserId(Jwt jwt) {
