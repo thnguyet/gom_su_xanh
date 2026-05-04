@@ -65,7 +65,8 @@ public class PostController {
     @GetMapping
     public ResponseEntity<Page<PostResponse>> getAllPosts(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String category, // Nhận String để User dùng slug "am-chen", Admin dùng ID "1"
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Boolean published,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
             @RequestParam(defaultValue = "0") int page,
@@ -79,7 +80,7 @@ public class PostController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
         return ResponseEntity.ok(postService.getPosts(
-                keyword, category, fromDate, toDate,
+                keyword, category, fromDate, toDate, published,
                 isAdmin, page, size, sortBy, sortDir));
     }
 

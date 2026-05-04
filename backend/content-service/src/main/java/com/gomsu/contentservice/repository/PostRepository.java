@@ -16,13 +16,14 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     Optional<Post> findBySlug(String slug);
 
     @Query("SELECT p FROM Post p WHERE " +
-            "(:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+            "(:keyword IS NULL OR :keyword = '' OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR CONCAT(p.id, '') LIKE CONCAT('%', :keyword, '%')) AND " +
             "(:category IS NULL OR " +
-            "  (CAST(p.category.id AS string) = :category OR p.category.slug = :category)) AND " +
+            "  (CONCAT(p.category.id, '') = :category OR p.category.slug = :category)) AND " +
             "(:fromDate IS NULL OR p.createdAt >= :fromDate) AND " +
             "(:toDate IS NULL OR p.createdAt <= :toDate) AND " +
+            "(:published IS NULL OR p.published = :published) AND " +
             "(:isAdmin = true OR p.published = true)")
     Page<Post> searchPosts(String keyword, String category,
                            LocalDateTime fromDate, LocalDateTime toDate,
-                           boolean isAdmin, Pageable pageable);
+                           Boolean published, boolean isAdmin, Pageable pageable);
 }

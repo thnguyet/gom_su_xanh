@@ -18,7 +18,7 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     Optional<Product> findBySlug(String slug);
 
     @Query("SELECT p FROM Product p WHERE " +
-            "(:keyword IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+            "(:keyword IS NULL OR :keyword = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR CONCAT(p.id, '') LIKE CONCAT('%', :keyword, '%')) AND " +
             "(:categoryId IS NULL OR p.category.id = :categoryId) AND " +
             "(:fromDate IS NULL OR p.createdAt >= :fromDate) AND " +
             "(:toDate IS NULL OR p.createdAt <= :toDate)")

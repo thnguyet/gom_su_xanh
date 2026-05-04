@@ -19,12 +19,12 @@ public interface RegistrationRepository extends JpaRepository<WorkshopRegistrati
     @Query(value = "SELECT r FROM WorkshopRegistration r " +
             "JOIN FETCH r.workshop w " +
             "WHERE (:status IS NULL OR r.status = :status) " +
-            "AND (:keyword IS NULL OR LOWER(w.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND (:keyword IS NULL OR :keyword = '' OR LOWER(w.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(r.customerName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR CONCAT(r.id, '') LIKE CONCAT('%', :keyword, '%')) " +
             "AND (:fromDate IS NULL OR r.registrationDate >= :fromDate) " +
             "AND (:toDate IS NULL OR r.registrationDate <= :toDate)",
             countQuery = "SELECT COUNT(r) FROM WorkshopRegistration r JOIN r.workshop w " +
                     "WHERE (:status IS NULL OR r.status = :status) " +
-                    "AND (:keyword IS NULL OR LOWER(w.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+                    "AND (:keyword IS NULL OR :keyword = '' OR LOWER(w.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(r.customerName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR CONCAT(r.id, '') LIKE CONCAT('%', :keyword, '%')) " +
                     "AND (:fromDate IS NULL OR r.registrationDate >= :fromDate) " +
                     "AND (:toDate IS NULL OR r.registrationDate <= :toDate)")
     Page<WorkshopRegistration> findAllAdminByFilter(
@@ -39,7 +39,7 @@ public interface RegistrationRepository extends JpaRepository<WorkshopRegistrati
             "LEFT JOIN FETCH w.images " +
             "WHERE r.customerId = :userId " +
             "AND (:status IS NULL OR r.status = :status) " +
-            "AND (:keyword IS NULL OR LOWER(w.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND (:keyword IS NULL OR :keyword = '' OR LOWER(w.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(r.customerName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR CONCAT(r.id, '') LIKE CONCAT('%', :keyword, '%')) " +
             "AND (:fromDate IS NULL OR r.registrationDate >= :fromDate) " +
             "AND (:toDate IS NULL OR r.registrationDate <= :toDate)")
     Page<WorkshopRegistration> findAllByFilter(

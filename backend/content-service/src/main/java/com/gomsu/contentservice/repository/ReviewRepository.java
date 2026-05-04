@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -34,7 +35,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findByUserIdAndIsDeletedFalse(Long userId, Pageable pageable);
 
     // 6. Admin quản lý toàn bộ đánh giá của hệ thống (Trang Dashboard Admin)
-    // Lấy tất cả đánh giá chưa bị xóa vĩnh viễn để Admin duyệt hoặc phản hồi
+    @Query("SELECT r FROM Review r WHERE r.isDeleted = false AND " +
+            "(:keyword IS NULL OR :keyword = '' OR CONCAT(r.id, '') LIKE CONCAT('%', :keyword, '%') OR LOWER(r.productName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Review> searchReviews(@Param("keyword") String keyword, Pageable pageable);
+
     Page<Review> findByIsDeletedFalse(Pageable pageable);
 
     // Projection để hứng dữ liệu Group By

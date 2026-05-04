@@ -70,13 +70,14 @@ public class OrderController {
         // Gọi hàm getAllOrdersForAdmin nhưng truyền customerId của chính mình vào
         // Như vậy người dùng sẽ lọc được cả ngày tháng luôn!
         Page<OrderResponse> orders = orderService.getAllOrdersForAdmin(
-                customerId, status, startDate, endDate, page, size, sortBy, sortDir);
+                null, customerId, status, startDate, endDate, page, size, sortBy, sortDir);
 
         return ResponseEntity.ok(orders);
     }
 
     @GetMapping("/all-orders")
     public ResponseEntity<Page<OrderResponse>> getAllOrdersForAdmin(
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long customerId,
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
@@ -87,6 +88,7 @@ public class OrderController {
             @RequestParam(defaultValue = "desc") String sortDir
     ) {
         Page<OrderResponse> orders = orderService.getAllOrdersForAdmin(
+                keyword,
                 customerId,
                 status,
                 startDate,

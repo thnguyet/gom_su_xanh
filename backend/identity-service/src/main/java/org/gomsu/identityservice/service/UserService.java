@@ -46,10 +46,20 @@ public class UserService {
         return toUserResponse(userRepository.save(user));
     }
 
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(this::toUserResponse) // bien doi tu entity -> response
-                .collect(Collectors.toList()); // gop lai thanh 1 list
+    public List<UserResponse> getAllUsers(String keyword, String role) {
+        List<User> users;
+        RoleName roleName = null;
+        if (role != null && !role.isBlank()) {
+            try { roleName = RoleName.valueOf(role.toUpperCase()); } catch (Exception e) {}
+        }
+        if ((keyword != null && !keyword.isBlank()) || roleName != null) {
+            users = userRepository.searchUsers(keyword, roleName);
+        } else {
+            users = userRepository.findAll();
+        }
+        return users.stream()
+                .map(this::toUserResponse)
+                .collect(Collectors.toList());
     }
 
     public UserResponse getUserById(Long id) {

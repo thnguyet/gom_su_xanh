@@ -108,8 +108,8 @@ public class PostService {
 
     // Lay danh sach bai viet
     public Page<PostResponse> getPosts(
-            String keyword, String category, // Đổi từ Long sang String
-            LocalDateTime fromDate, LocalDateTime toDate,
+            String keyword, String category,
+            LocalDateTime fromDate, LocalDateTime toDate, Boolean published,
             boolean isAdmin, int page, int size, String sortBy, String sortDir) {
 
         Sort sort = sortDir.equalsIgnoreCase("ASC") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -117,7 +117,7 @@ public class PostService {
 
         // Truyền category (dạng String) xuống Repository
         Page<Post> posts = postRepository.searchPosts(
-                keyword, category, fromDate, toDate, isAdmin, pageable);
+                keyword, category, fromDate, toDate, published, isAdmin, pageable);
 
         return posts.map(this::toPostResponse);
     }
@@ -259,6 +259,14 @@ public class PostService {
                         .map(PostImage::getImageUrl)
                         .toList() : new ArrayList<>();
 
+        List<PostResponse.ImageInfo> imagesInfo = post.getImages() != null ?
+                post.getImages().stream()
+                        .map(img -> PostResponse.ImageInfo.builder()
+                                .id(img.getId())
+                                .url(img.getImageUrl())
+                                .build())
+                        .toList() : new ArrayList<>();
+
         return PostResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -268,6 +276,7 @@ public class PostService {
                 .thumbnail(post.getThumbnail() != null ? post.getThumbnail() :
                         (!imageUrls.isEmpty() ? imageUrls.get(0) : null))
                 .images(imageUrls) // Gán danh sách ảnh vào đây
+                .imagesInfo(imagesInfo)
                 .createdAt(post.getCreatedAt())
                 .category(categoryResponse)
                 .authorId(post.getAuthorId())

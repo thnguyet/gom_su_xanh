@@ -33,6 +33,9 @@ public class Order extends BaseEntity{
     @Column(name = "customer_id")
     private Long customerId;
 
+    @Column(name = "customer_name")
+    private String customerName;
+
     @Column(name = "total_amount")
     private Double totalAmount;
 

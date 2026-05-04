@@ -62,6 +62,7 @@ public class ReviewService {
         // 3. Map dữ liệu vào Entity
         Review review = Review.builder()
                 .productId(request.getProductId())
+                .productName(getProductName(request.getProductId())) // Lưu tên SP
                 .userId(userId)
                 .username(username)
                 .rating(request.getRating())
@@ -114,9 +115,17 @@ public class ReviewService {
 
     // --- 5. ADMIN LẤY TẤT CẢ ---
     @Transactional(readOnly = true)
-    public Page<ReviewResponse> getAllReviewsForAdmin(Pageable pageable) {
-        return reviewRepository.findByIsDeletedFalse(pageable)
-                .map(review -> toResponse(review, getProductName(review.getProductId())));
+    public Page<ReviewResponse> getAllReviewsForAdmin(String keyword, Pageable pageable) {
+        return reviewRepository.searchReviews(keyword, pageable)
+                .map(review -> {
+                    String pName = review.getProductName();
+                    if (pName == null) {
+                        pName = getProductName(review.getProductId());
+                        review.setProductName(pName);
+                        reviewRepository.save(review);
+                    }
+                    return toResponse(review, pName);
+                });
     }
 
     // --- 6. ADMIN PHẢN HỒI ---

@@ -25,6 +25,14 @@ public class PostResponse {
     private Long authorId;
     private LocalDateTime createdAt; // Để hiện "Đăng ngày 23/04/2026"
 
-    @JsonProperty("isPublished")
     private boolean published;
+
+    private List<ImageInfo> imagesInfo;
+
+    @Data
+    @Builder
+    public static class ImageInfo {
+        private Long id;
+        private String url;
+    }
 }

@@ -95,7 +95,7 @@
     currentSection = section;
     var items = document.querySelectorAll('.adm-nav-item[data-section]');
     items.forEach(function (it) { it.classList.toggle('is-active', it.dataset.section === section); });
-    var titles = { dashboard: 'Tổng quan', products: 'Sản phẩm', orders: 'Đơn hàng', workshops: 'Workshop', workshopRegs: 'ĐK Workshop', posts: 'Bài viết', reviews: 'Đánh giá', users: 'Người dùng' };
+    var titles = { dashboard: 'Tổng quan', products: 'Sản phẩm', orders: 'Đơn hàng', shipping: 'Vận chuyển', payments: 'Thanh toán', workshops: 'Workshop', workshopRegs: 'ĐK Workshop', posts: 'Bài viết', reviews: 'Đánh giá', users: 'Người dùng' };
     $('admTopTitle').textContent = titles[section] || section;
     pageState = { page: 0, size: 10, keyword: '' };
     renderSection(section);
@@ -103,13 +103,16 @@
 
   function renderSection(s) {
     var c = $('admContent');
-    var fn = { dashboard: renderDashboard, products: renderProducts, orders: renderOrders, workshops: renderWorkshops, workshopRegs: renderWorkshopRegs, posts: renderPosts, reviews: renderReviews, users: renderUsers };
+    var fn = { dashboard: renderDashboard, products: renderProducts, orders: renderOrders, shipping: renderShipping, payments: renderPayments, workshops: renderWorkshops, workshopRegs: renderWorkshopRegs, posts: renderPosts, reviews: renderReviews, users: renderUsers };
     if (fn[s]) fn[s](c); else c.innerHTML = '<div class="adm-empty"><div class="adm-empty-icon">🚧</div><p>Đang phát triển...</p></div>';
   }
 
   /* ===== DASHBOARD ===== */
   function renderDashboard(c) {
-    c.innerHTML = '<div class="adm-stats" id="admStats">' + skeleton(4) + '</div><div class="adm-section"><div class="adm-section-header"><h3 class="adm-section-title">📦 Đơn hàng gần đây</h3></div><div id="admRecentOrders">' + skeleton(3) + '</div></div>';
+    c.innerHTML = '<div class="adm-stats" id="admStats">' + skeleton(4) + '</div>' + 
+                  '<div class="adm-section"><div class="adm-section-header"><h3 class="adm-section-title">📈 Doanh thu 7 ngày qua</h3></div><div style="background:var(--adm-surface);padding:1.5rem;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.03);margin-bottom:2rem;"><canvas id="admRevenueChart" style="width:100%;height:350px;"></canvas></div></div>' +
+                  '<div class="adm-section"><div class="adm-section-header"><h3 class="adm-section-title">📦 Đơn hàng gần đây</h3></div><div id="admRecentOrders">' + skeleton(3) + '</div></div>';
+    
     // Load stats
     Promise.all([
       api('/product/products/all?page=0&size=1').catch(function () { return { totalElements: 0 }; }),
@@ -127,6 +130,96 @@
         return '<div class="adm-stat"><div class="adm-stat-icon">' + s.icon + '</div><div class="adm-stat-value">' + s.value + '</div><div class="adm-stat-label">' + s.label + '</div></div>';
       }).join('');
     });
+
+    // Load Chart Data
+    Promise.all([
+      api('/order/orders/all-orders?size=500&sortBy=createdAt&sortDir=desc').catch(() => ({ content: [] })),
+      api('/workshop/regis-workshops/all?size=500&sortBy=registrationDate&sortDir=desc').catch(() => ({ content: [] }))
+    ]).then(function(res) {
+      var orders = res[0].content || [];
+      var workshops = res[1].content || [];
+      
+      // Generate last 7 days array
+      var dates = [];
+      var orderData = [];
+      var wsData = [];
+      
+      for (var i = 6; i >= 0; i--) {
+        var d = new Date();
+        d.setDate(d.getDate() - i);
+        var dateStr = d.toISOString().split('T')[0]; // YYYY-MM-DD
+        dates.push(d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }));
+        
+        // Sum order revenue for this day (exclude cancelled)
+        var sumOrder = orders.filter(function(o) {
+          return o.status !== 'CANCELLED' && o.createdAt && o.createdAt.startsWith(dateStr);
+        }).reduce(function(sum, o) { return sum + (o.totalAmount || 0); }, 0);
+        
+        // Sum workshop revenue for this day (exclude cancelled)
+        var sumWs = workshops.filter(function(w) {
+          return w.status !== 'CANCELLED' && w.registrationDate && w.registrationDate.startsWith(dateStr);
+        }).reduce(function(sum, w) { return sum + (w.totalPrice || 0); }, 0);
+        
+        orderData.push(sumOrder);
+        wsData.push(sumWs);
+      }
+      
+      // Draw Chart
+      var ctx = document.getElementById('admRevenueChart');
+      if (ctx && window.Chart) {
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: dates,
+            datasets: [
+              {
+                label: 'Đơn hàng (VNĐ)',
+                data: orderData,
+                borderColor: '#1e3a8a',
+                backgroundColor: 'rgba(30, 58, 138, 0.1)',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true
+              },
+              {
+                label: 'Workshop (VNĐ)',
+                data: wsData,
+                borderColor: '#059669',
+                backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top' },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return context.dataset.label + ': ' + new Intl.NumberFormat('vi-VN').format(context.parsed.y) + 'đ';
+                  }
+                }
+              }
+            },
+            scales: {
+              y: { 
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return new Intl.NumberFormat('vi-VN', { notation: "compact", compactDisplay: "short" }).format(value);
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+    });
+
     // Recent orders
     api('/order/orders/all-orders?page=0&size=5&sortBy=createdAt&sortDir=desc').then(function (data) {
       var rows = (data.content || []);
@@ -148,10 +241,10 @@
     api('/product/products/all?page=' + p.page + '&size=' + p.size + q).then(function (data) {
       var rows = data.content || [];
       if (!rows.length) { $('admProdTable').innerHTML = emptyMsg('Không tìm thấy sản phẩm'); $('admProdPage').innerHTML = ''; return; }
-      $('admProdTable').innerHTML = tableWrap(['Ảnh', 'Tên sản phẩm', 'Thương hiệu', 'Giá', 'Kho', 'Thao tác'], rows.map(function (p) {
+      $('admProdTable').innerHTML = tableWrap(['ID', 'Ảnh', 'Tên sản phẩm', 'Thương hiệu', 'Giá', 'Kho', 'Thao tác'], rows.map(function (p) {
         var img = (p.imageUrls && p.imageUrls.length) ? '<img class="adm-thumb" src="' + p.imageUrls[0] + '" alt="">' : '—';
         var nameLink = `<a href="javascript:void(0)" onclick="ADM.openProductDetailModal(${p.id})" style="font-weight:600;color:var(--adm-accent2);text-decoration:none">${esc(p.name)}</a>`;
-        return '<tr><td>' + img + '</td><td>' + nameLink + '</td><td>' + esc(p.brand || '—') + '</td><td>' + fmtMoney(p.price) + '</td><td>' + p.stockQuantity + '</td><td><button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delProduct(' + p.id + ')">Xóa</button></td></tr>';
+        return '<tr><td>#' + p.id + '</td><td>' + img + '</td><td>' + nameLink + '</td><td>' + esc(p.brand || '—') + '</td><td>' + fmtMoney(p.price) + '</td><td>' + p.stockQuantity + '</td><td><button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delProduct(' + p.id + ')">Xóa</button></td></tr>';
       }).join(''));
       $('admProdPage').innerHTML = paginate(data);
     }).catch(function () { $('admProdTable').innerHTML = emptyMsg('Lỗi tải sản phẩm'); });
@@ -164,8 +257,10 @@
     bindSearch('orders'); loadOrders();
   }
   function loadOrders() {
-    var p = pageState; var statusQ = p.status ? '&status=' + p.status : '';
-    api('/order/orders/all-orders?page=' + p.page + '&size=' + p.size + statusQ + '&sortBy=createdAt&sortDir=desc').then(function (data) {
+    var p = pageState; 
+    var statusQ = p.status ? '&status=' + p.status : '';
+    var q = p.keyword ? '&keyword=' + encodeURIComponent(p.keyword) : '';
+    api('/order/orders/all-orders?page=' + p.page + '&size=' + p.size + statusQ + q + '&sortBy=createdAt&sortDir=desc').then(function (data) {
       var rows = data.content || [];
       if (!rows.length) { $('admOrdTable').innerHTML = emptyMsg('Không có đơn hàng'); $('admOrdPage').innerHTML = ''; return; }
       $('admOrdTable').innerHTML = tableWrap(['ID', 'Khách', 'Tổng tiền', 'Thanh toán', 'Trạng thái', 'Ngày', 'Thao tác'], rows.map(function (o) {
@@ -175,6 +270,52 @@
       }).join(''));
       $('admOrdPage').innerHTML = paginate(data);
     }).catch(function () { $('admOrdTable').innerHTML = emptyMsg('Lỗi tải đơn hàng'); });
+  }
+
+  /* ===== SHIPPING METHODS ===== */
+  function renderShipping(c) {
+    c.innerHTML = '<div class="adm-quick-actions"><select class="adm-select" id="admShipFilter"><option value="">Tất cả trạng thái</option><option value="true">Đang hoạt động</option><option value="false">Tạm dừng</option></select></div>' + sectionHeader('Đơn vị vận chuyển', 'shipping', '<button class="adm-btn adm-btn--primary" onclick="ADM.openAddShippingModal()">+ Thêm đơn vị</button>') + '<div id="admShipTable">' + skeleton(5) + '</div><div id="admShipPage"></div>';
+    $('admShipFilter').addEventListener('change', function () { pageState.active = this.value; pageState.page = 0; loadShipping(); });
+    bindSearch('shipping'); loadShipping();
+  }
+  function loadShipping() {
+    var p = pageState;
+    var q = (p.keyword ? '&keyword=' + encodeURIComponent(p.keyword) : '') + (p.active ? '&active=' + p.active : '');
+    api('/order/shipping-methods/search?page=' + p.page + '&size=' + p.size + q).then(function (data) {
+      var rows = data.content || [];
+      if (!rows.length) { $('admShipTable').innerHTML = emptyMsg('Không tìm thấy đơn vị vận chuyển'); $('admShipPage').innerHTML = ''; return; }
+      $('admShipTable').innerHTML = tableWrap(['ID', 'Tên đơn vị', 'Phí vận chuyển', 'Trạng thái', 'Thao tác'], rows.map(function (s) {
+        var badge = s.active ? '<span class="adm-badge adm-badge--success">Hoạt động</span>' : '<span class="adm-badge adm-badge--neutral">Tạm dừng</span>';
+        var toggleBtn = s.active ? '<button class="adm-btn adm-btn--warning adm-btn--sm" onclick="ADM.toggleShippingStatus(' + s.id + ',true)">Tạm dừng</button>' : '<button class="adm-btn adm-btn--success adm-btn--sm" onclick="ADM.toggleShippingStatus(' + s.id + ',false)">Mở lại</button>';
+        var editBtn = '<button class="adm-btn adm-btn--info adm-btn--sm" onclick="ADM.openEditShippingModal(' + s.id + ')">Sửa</button>';
+        var delBtn = '<button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delShipping(' + s.id + ')">Xóa</button>';
+        return '<tr><td>#' + s.id + '</td><td style="font-weight:600">' + esc(s.name) + '</td><td>' + fmtMoney(s.shippingFee) + '</td><td>' + badge + '</td><td><div class="adm-table-actions">' + editBtn + ' ' + toggleBtn + ' ' + delBtn + '</div></td></tr>';
+      }).join(''));
+      $('admShipPage').innerHTML = paginate(data);
+    }).catch(function () { $('admShipTable').innerHTML = emptyMsg('Lỗi tải đơn vị vận chuyển'); });
+  }
+
+  /* ===== PAYMENT METHODS ===== */
+  function renderPayments(c) {
+    c.innerHTML = '<div class="adm-quick-actions"><select class="adm-select" id="admPayFilter"><option value="">Tất cả trạng thái</option><option value="true">Đang hoạt động</option><option value="false">Tạm dừng</option></select></div>' + sectionHeader('Phương thức thanh toán', 'payments', '<button class="adm-btn adm-btn--primary" onclick="ADM.openAddPaymentModal()">+ Thêm phương thức</button>') + '<div id="admPayTable">' + skeleton(5) + '</div><div id="admPayPage"></div>';
+    $('admPayFilter').addEventListener('change', function () { pageState.active = this.value; pageState.page = 0; loadPayments(); });
+    bindSearch('payments'); loadPayments();
+  }
+  function loadPayments() {
+    var p = pageState;
+    var q = (p.keyword ? '&keyword=' + encodeURIComponent(p.keyword) : '') + (p.active ? '&active=' + p.active : '');
+    api('/order/payment-methods/search?page=' + p.page + '&size=' + p.size + q).then(function (data) {
+      var rows = data.content || [];
+      if (!rows.length) { $('admPayTable').innerHTML = emptyMsg('Không tìm thấy phương thức thanh toán'); $('admPayPage').innerHTML = ''; return; }
+      $('admPayTable').innerHTML = tableWrap(['ID', 'Tên phương thức', 'Trạng thái', 'Thao tác'], rows.map(function (p) {
+        var badge = p.active ? '<span class="adm-badge adm-badge--success">Hoạt động</span>' : '<span class="adm-badge adm-badge--neutral">Tạm dừng</span>';
+        var toggleBtn = p.active ? '<button class="adm-btn adm-btn--warning adm-btn--sm" onclick="ADM.togglePaymentStatus(' + p.id + ',true)">Tạm dừng</button>' : '<button class="adm-btn adm-btn--success adm-btn--sm" onclick="ADM.togglePaymentStatus(' + p.id + ',false)">Mở lại</button>';
+        var editBtn = '<button class="adm-btn adm-btn--info adm-btn--sm" onclick="ADM.openEditPaymentModal(' + p.id + ')">Sửa</button>';
+        var delBtn = '<button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delPayment(' + p.id + ')">Xóa</button>';
+        return '<tr><td>#' + p.id + '</td><td style="font-weight:600">' + esc(p.name) + '</td><td>' + badge + '</td><td><div class="adm-table-actions">' + editBtn + ' ' + toggleBtn + ' ' + delBtn + '</div></td></tr>';
+      }).join(''));
+      $('admPayPage').innerHTML = paginate(data);
+    }).catch(function () { $('admPayTable').innerHTML = emptyMsg('Lỗi tải phương thức thanh toán'); });
   }
 
   /* ===== WORKSHOPS ===== */
@@ -189,12 +330,12 @@
     api('/workshop/workshops/all?page=' + p.page + '&size=' + p.size + q).then(function (data) {
       var rows = data.content || [];
       if (!rows.length) { $('admWsTable').innerHTML = emptyMsg('Không có workshop'); $('admWsPage').innerHTML = ''; return; }
-      $('admWsTable').innerHTML = tableWrap(['Ảnh', 'Tên', 'Địa điểm', 'Giá', 'Số người', 'Trạng thái', 'Thao tác'], rows.map(function (w) {
+      $('admWsTable').innerHTML = tableWrap(['ID', 'Ảnh', 'Tên', 'Địa điểm', 'Giá', 'Số người', 'Trạng thái', 'Thao tác'], rows.map(function (w) {
         var img = w.mainImage ? '<img class="adm-thumb" src="' + w.mainImage + '" alt="">' : '—';
         var badge = w.active ? '<span class="adm-badge adm-badge--success">Hoạt động</span>' : '<span class="adm-badge adm-badge--neutral">Tạm dừng</span>';
         var toggleBtn = w.active ? '<button class="adm-btn adm-btn--warning adm-btn--sm" onclick="ADM.toggleWorkshopStatus(' + w.id + ',true)">Tạm dừng</button>' : '<button class="adm-btn adm-btn--success adm-btn--sm" onclick="ADM.toggleWorkshopStatus(' + w.id + ',false)">Hoạt động</button>';
         var nameLink = `<a href="javascript:void(0)" onclick="ADM.openWorkshopDetailModal(${w.id})" style="font-weight:600;color:var(--adm-accent2);text-decoration:none">${esc(w.name)}</a>`;
-        return '<tr><td>' + img + '</td><td>' + nameLink + '</td><td>' + esc(w.location || '—') + '</td><td>' + fmtMoney(w.price) + '</td><td>' + ((w.currentParticipants || 0) + '/' + (w.maxParticipants || 0)) + '</td><td>' + badge + '</td><td><div class="adm-table-actions">' + toggleBtn + ' <button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delWorkshop(' + w.id + ')">Xóa</button></div></td></tr>';
+        return '<tr><td>#' + w.id + '</td><td>' + img + '</td><td>' + nameLink + '</td><td>' + esc(w.location || '—') + '</td><td>' + fmtMoney(w.price) + '</td><td>' + ((w.currentParticipants || 0) + '/' + (w.maxParticipants || 0)) + '</td><td>' + badge + '</td><td><div class="adm-table-actions">' + toggleBtn + ' <button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delWorkshop(' + w.id + ')">Xóa</button></div></td></tr>';
       }).join(''));
       $('admWsPage').innerHTML = paginate(data);
     }).catch(function () { $('admWsTable').innerHTML = emptyMsg('Lỗi tải workshop'); });
@@ -202,18 +343,22 @@
 
   /* ===== POSTS ===== */
   function renderPosts(c) {
-    c.innerHTML = sectionHeader('Bài viết', 'posts') + '<div id="admPostTable">' + skeleton(5) + '</div><div id="admPostPage"></div>';
+    c.innerHTML = '<div class="adm-quick-actions"><select class="adm-select" id="admPostFilter"><option value="">Tất cả trạng thái</option><option value="true">Đã đăng</option><option value="false">Bản nháp</option></select></div>' + sectionHeader('Bài viết', 'posts', '<button class="adm-btn adm-btn--primary" onclick="ADM.openAddPostModal()">+ Thêm bài viết</button>') + '<div id="admPostTable">' + skeleton(5) + '</div><div id="admPostPage"></div>';
+    $('admPostFilter').addEventListener('change', function () { pageState.published = this.value; pageState.page = 0; loadPosts(); });
     bindSearch('posts'); loadPosts();
   }
   function loadPosts() {
-    var p = pageState; var q = p.keyword ? '&keyword=' + encodeURIComponent(p.keyword) : '';
+    var p = pageState;
+    var q = (p.keyword ? '&keyword=' + encodeURIComponent(p.keyword) : '') + (p.published ? '&published=' + p.published : '');
     api('/content/posts?page=' + p.page + '&size=' + p.size + q).then(function (data) {
       var rows = data.content || [];
       if (!rows.length) { $('admPostTable').innerHTML = emptyMsg('Không có bài viết'); $('admPostPage').innerHTML = ''; return; }
-      $('admPostTable').innerHTML = tableWrap(['Ảnh', 'Tiêu đề', 'Danh mục', 'Trạng thái', 'Ngày tạo', 'Thao tác'], rows.map(function (p) {
+      $('admPostTable').innerHTML = tableWrap(['ID', 'Ảnh', 'Tiêu đề', 'Danh mục', 'Trạng thái', 'Ngày tạo', 'Thao tác'], rows.map(function (p) {
         var img = p.thumbnail ? '<img class="adm-thumb" src="' + p.thumbnail + '" alt="">' : '—';
         var pub = p.published ? '<span class="adm-badge adm-badge--success">Đã đăng</span>' : '<span class="adm-badge adm-badge--warning">Nháp</span>';
-        return '<tr><td>' + img + '</td><td style="font-weight:600;color:var(--adm-text)">' + esc(p.title) + '</td><td>' + esc(p.category ? p.category.name : '—') + '</td><td>' + pub + '</td><td>' + fmtDate(p.createdAt) + '</td><td><button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delPost(' + p.id + ')">Xóa</button></td></tr>';
+        var toggleBtn = p.published ? '<button class="adm-btn adm-btn--warning adm-btn--sm" onclick="ADM.togglePostStatus(' + p.id + ',true)">Gỡ bài</button>' : '<button class="adm-btn adm-btn--success adm-btn--sm" onclick="ADM.togglePostStatus(' + p.id + ',false)">Đăng bài</button>';
+        var titleLink = `<a href="javascript:void(0)" onclick="ADM.openPostDetailModal(${p.id})" style="font-weight:600;color:var(--adm-accent2);text-decoration:none;border-bottom:none">${esc(p.title)}</a>`;
+        return '<tr><td>#' + p.id + '</td><td>' + img + '</td><td>' + titleLink + '</td><td>' + esc(p.category ? p.category.name : '—') + '</td><td>' + pub + '</td><td>' + fmtDate(p.createdAt) + '</td><td><div class="adm-table-actions">' + toggleBtn + ' <button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delPost(' + p.id + ')">Xóa</button></div></td></tr>';
       }).join(''));
       $('admPostPage').innerHTML = paginate(data);
     }).catch(function () { $('admPostTable').innerHTML = emptyMsg('Lỗi tải bài viết'); });
@@ -221,24 +366,36 @@
 
   /* ===== REVIEWS ===== */
   function renderReviews(c) {
-    c.innerHTML = '<div class="adm-section"><div class="adm-section-header"><h3 class="adm-section-title">⭐ Đánh giá sản phẩm</h3></div><div id="admRevTable">' + skeleton(5) + '</div><div id="admRevPage"></div></div>';
-    api('/content/api/v1/reviews/admin/all?page=0&size=20').then(function (data) {
+    c.innerHTML = sectionHeader('⭐ Đánh giá sản phẩm', 'reviews') + '<div id="admRevTable">' + skeleton(5) + '</div><div id="admRevPage"></div>';
+    bindSearch('reviews'); loadReviews();
+  }
+  function loadReviews() {
+    var p = pageState; 
+    var q = p.keyword ? '&keyword=' + encodeURIComponent(p.keyword) : '';
+    api('/content/api/v1/reviews/admin/all?page=' + p.page + '&size=' + p.size + q).then(function (data) {
       var rows = data.content || [];
-      if (!rows.length) { $('admRevTable').innerHTML = emptyMsg('Chưa có đánh giá'); return; }
-      $('admRevTable').innerHTML = tableWrap(['Sản phẩm', 'Người dùng', 'Sao', 'Nội dung', 'Ngày', 'Thao tác'], rows.map(function (r) {
+      if (!rows.length) { $('admRevTable').innerHTML = emptyMsg('Chưa có đánh giá'); $('admRevPage').innerHTML = ''; return; }
+      $('admRevTable').innerHTML = tableWrap(['ID', 'Sản phẩm', 'Người dùng', 'Sao', 'Nội dung', 'Ngày', 'Thao tác'], rows.map(function (r) {
         var stars = '⭐'.repeat(r.rating || 0);
         var acts = '<button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delReview(' + r.id + ')">Xóa</button>';
-        return '<tr><td>' + esc(r.productName || 'SP-' + r.productId) + '</td><td>' + esc(r.username || '—') + '</td><td>' + stars + '</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.comment || '—') + '</td><td>' + fmtDate(r.createdAt) + '</td><td>' + acts + '</td></tr>';
+        return '<tr><td>#' + r.id + '</td><td>' + esc(r.productName || 'SP-' + r.productId) + '</td><td>' + esc(r.username || '—') + '</td><td>' + stars + '</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.comment || '—') + '</td><td>' + fmtDate(r.createdAt) + '</td><td>' + acts + '</td></tr>';
       }).join(''));
+      $('admRevPage').innerHTML = paginate(data);
     }).catch(function () { $('admRevTable').innerHTML = emptyMsg('Lỗi tải đánh giá'); });
   }
 
   /* ===== USERS ===== */
   function renderUsers(c) {
-    c.innerHTML = '<div class="adm-section"><div class="adm-section-header"><h3 class="adm-section-title">👥 Danh sách người dùng</h3></div><div id="admUserTable">' + skeleton(5) + '</div></div>';
-    api('/identity/users').then(function (data) {
+    c.innerHTML = '<div class="adm-quick-actions"><select class="adm-select" id="admUserFilter"><option value="">Tất cả vai trò</option><option value="ADMIN">Admin</option><option value="USER">User</option></select></div>' + sectionHeader('👥 Danh sách người dùng', 'users') + '<div id="admUserTable">' + skeleton(5) + '</div>';
+    $('admUserFilter').addEventListener('change', function () { pageState.role = this.value; loadUsers(); });
+    bindSearch('users'); loadUsers();
+  }
+  function loadUsers() {
+    var p = pageState;
+    var q = (p.keyword ? '?keyword=' + encodeURIComponent(p.keyword) : '') + (p.role ? (p.keyword ? '&' : '?') + 'role=' + p.role : '');
+    api('/identity/users' + q).then(function (data) {
       var rows = Array.isArray(data) ? data : [];
-      if (!rows.length) { $('admUserTable').innerHTML = emptyMsg('Chưa có người dùng'); return; }
+      if (!rows.length) { $('admUserTable').innerHTML = emptyMsg('Không tìm thấy người dùng'); return; }
       $('admUserTable').innerHTML = tableWrap(['ID', 'Tên', 'Email', 'SĐT', 'Vai trò', 'Thao tác'], rows.map(function (u) {
         var badge = u.roles === 'ADMIN' ? '<span class="adm-badge adm-badge--info">Admin</span>' : '<span class="adm-badge adm-badge--neutral">User</span>';
         return '<tr><td>#' + u.id + '</td><td style="font-weight:600;color:var(--adm-text)">' + esc(u.username || '—') + '</td><td>' + esc(u.email || '—') + '</td><td>' + esc(u.phone || '—') + '</td><td>' + badge + '</td><td><button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delUser(' + u.id + ')">Xóa</button></td></tr>';
@@ -283,6 +440,8 @@
     delPost: function (id) { if (confirm('Xóa bài viết #' + id + '?')) api('/content/posts/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa bài viết'); loadPosts(); }).catch(function () { toast('Lỗi xóa bài viết'); }); },
     delUser: function (id) { if (confirm('Xóa người dùng #' + id + '?')) api('/identity/users/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa người dùng'); renderUsers($('admContent')); }).catch(function () { toast('Lỗi xóa người dùng'); }); },
     delReview: function (id) { if (confirm('Xóa đánh giá #' + id + '?')) api('/content/api/v1/reviews/admin/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa đánh giá'); renderReviews($('admContent')); }).catch(function () { toast('Lỗi xóa đánh giá'); }); },
+    delShipping: function (id) { if (confirm('Xóa đơn vị vận chuyển #' + id + '?')) api('/order/shipping-methods/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa đơn vị vận chuyển'); loadShipping(); }).catch(function () { toast('Lỗi xóa'); }); },
+    delPayment: function (id) { if (confirm('Xóa phương thức thanh toán #' + id + '?')) api('/order/payment-methods/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa phương thức thanh toán'); loadPayments(); }).catch(function () { toast('Lỗi xóa'); }); },
     updateOrder: function (id, status) { if (!status) return; if (confirm('Cập nhật đơn #' + id + ' → ' + status + '?')) api('/order/orders/' + id + '/status?status=' + status, { method: 'PATCH' }).then(function () { toast('Đã cập nhật'); loadOrders(); }).catch(function () { toast('Lỗi cập nhật'); }); },
     checkInWorkshop: function (id) { if (confirm('Xác nhận khách hàng đã tham gia workshop?')) api('/workshop/regis-workshops/' + id, { method: 'PUT' }).then(function () { toast('Đã check-in thành công'); loadWorkshopRegs(); }).catch(function (e) { toast('Lỗi check-in: ' + e.message); }); },
     cancelWorkshopReg: function (id) { if (confirm('Hủy đơn đăng ký này?')) api('/workshop/regis-workshops/' + id + '/cancel', { method: 'PATCH' }).then(function () { toast('Đã hủy đăng ký'); loadWorkshopRegs(); }).catch(function (e) { toast('Lỗi hủy đăng ký: ' + e.message); }); },
@@ -292,6 +451,126 @@
         fd.append("request", new Blob([JSON.stringify({ active: !currentActive })], { type: "application/json" }));
         api('/workshop/workshops/' + id, { method: 'PUT', body: fd, formData: true }).then(function () { toast('Đã cập nhật trạng thái'); loadWorkshops(); }).catch(function () { toast('Lỗi cập nhật'); });
       }
+    },
+    togglePostStatus: function (id, currentPublished) {
+      if (confirm(currentPublished ? 'Gỡ bài viết này xuống bản nháp?' : 'Công khai bài viết này?')) {
+        var fd = new FormData();
+        fd.append("request", new Blob([JSON.stringify({ published: !currentPublished })], { type: "application/json" }));
+        api('/content/posts/' + id, { method: 'PUT', body: fd, formData: true }).then(function () { toast('Đã cập nhật trạng thái bài viết'); loadPosts(); }).catch(function () { toast('Lỗi cập nhật'); });
+      }
+    },
+    toggleShippingStatus: function (id, currentActive) {
+      if (confirm(currentActive ? 'Tạm dừng đơn vị vận chuyển này?' : 'Mở lại đơn vị vận chuyển này?')) {
+        api('/order/shipping-methods/' + id + '/status?active=' + !currentActive, { method: 'PATCH' }).then(function () { toast('Đã cập nhật trạng thái'); loadShipping(); }).catch(function () { toast('Lỗi cập nhật'); });
+      }
+    },
+    togglePaymentStatus: function (id, currentActive) {
+      if (confirm(currentActive ? 'Tạm dừng phương thức thanh toán này?' : 'Mở lại phương thức thanh toán này?')) {
+        api('/order/payment-methods/' + id + '/status?active=' + !currentActive, { method: 'PATCH' }).then(function () { toast('Đã cập nhật trạng thái'); loadPayments(); }).catch(function () { toast('Lỗi cập nhật'); });
+      }
+    },
+    openAddShippingModal: function () {
+      showModal('Thêm đơn vị vận chuyển', `
+        <form class="adm-form" id="addShipForm">
+          <div class="adm-form-group">
+            <label>Tên đơn vị</label>
+            <input type="text" name="name" placeholder="Ví dụ: Giao Hàng Nhanh">
+          </div>
+          <div class="adm-form-group">
+            <label>Phí vận chuyển (VNĐ)</label>
+            <input type="number" name="shippingFee" placeholder="Ví dụ: 30000">
+          </div>
+          <div class="adm-form-actions">
+            <button type="button" class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Hủy</button>
+            <button type="submit" class="adm-btn adm-btn--primary">Lưu đơn vị</button>
+          </div>
+        </form>
+      `);
+      $('addShipForm').onsubmit = function (e) {
+        e.preventDefault();
+        var obj = Object.fromEntries(new FormData(this).entries());
+        if (!obj.name) { toast('Vui lòng nhập tên'); return; }
+        if (obj.shippingFee === "") obj.shippingFee = 0;
+        api('/order/shipping-methods', { method: 'POST', body: JSON.stringify(obj) }).then(function () {
+          toast('Đã thêm thành công'); ADM.closeModal(); loadShipping();
+        }).catch(function (err) { toast('Lỗi: ' + (err.message || 'Không thể lưu')); });
+      };
+    },
+    openEditShippingModal: function (id) {
+      api('/order/shipping-methods/search?keyword=' + id).then(function (data) {
+        var s = (data.content || []).find(it => it.id === id);
+        if (!s) return;
+        showModal('Sửa đơn vị vận chuyển #' + id, `
+          <form class="adm-form" id="editShipForm">
+            <div class="adm-form-group">
+              <label>Tên đơn vị</label>
+              <input type="text" name="name" value="${esc(s.name)}">
+            </div>
+            <div class="adm-form-group">
+              <label>Phí vận chuyển (VNĐ)</label>
+              <input type="number" name="shippingFee" value="${s.shippingFee}">
+            </div>
+            <div class="adm-form-actions">
+              <button type="button" class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Hủy</button>
+              <button type="submit" class="adm-btn adm-btn--primary">Cập nhật</button>
+            </div>
+          </form>
+        `);
+        $('editShipForm').onsubmit = function (e) {
+          e.preventDefault();
+          var obj = Object.fromEntries(new FormData(this).entries());
+          api('/order/shipping-methods/' + id, { method: 'PUT', body: JSON.stringify(obj) }).then(function () {
+            toast('Đã cập nhật thành công'); ADM.closeModal(); loadShipping();
+          }).catch(function (err) { toast('Lỗi: ' + (err.message || 'Cập nhật thất bại')); });
+        };
+      });
+    },
+    openAddPaymentModal: function () {
+      showModal('Thêm phương thức thanh toán', `
+        <form class="adm-form" id="addPayForm">
+          <div class="adm-form-group">
+            <label>Tên phương thức</label>
+            <input type="text" name="name" placeholder="Ví dụ: Ví MoMo">
+          </div>
+          <div class="adm-form-actions">
+            <button type="button" class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Hủy</button>
+            <button type="submit" class="adm-btn adm-btn--primary">Lưu phương thức</button>
+          </div>
+        </form>
+      `);
+      $('addPayForm').onsubmit = function (e) {
+        e.preventDefault();
+        var obj = Object.fromEntries(new FormData(this).entries());
+        if (!obj.name) { toast('Vui lòng nhập tên'); return; }
+        api('/order/payment-methods', { method: 'POST', body: JSON.stringify(obj) }).then(function () {
+          toast('Đã thêm thành công'); ADM.closeModal(); loadPayments();
+        }).catch(function (err) { toast('Lỗi: ' + (err.message || 'Không thể lưu')); });
+      };
+    },
+    openEditPaymentModal: function (id) {
+      api('/order/payment-methods/search?keyword=' + id).then(function (data) {
+        var p = (data.content || []).find(it => it.id === id);
+        if (!p) return;
+        showModal('Sửa phương thức thanh toán #' + id, `
+          <form class="adm-form" id="editPayForm">
+            <div class="adm-form-group">
+              <label>Tên phương thức</label>
+              <input type="text" name="name" value="${esc(p.name)}">
+            </div>
+            <div class="adm-form-actions">
+              <button type="button" class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Hủy</button>
+              <button type="submit" class="adm-btn adm-btn--primary">Cập nhật</button>
+            </div>
+          </form>
+        `);
+        $('editPayForm').onsubmit = function (e) {
+          e.preventDefault();
+          var obj = Object.fromEntries(new FormData(this).entries());
+          api('/order/payment-methods/' + id, { method: 'PUT', body: JSON.stringify(obj) }).then(function () {
+            toast('Đã cập nhật thành công'); ADM.closeModal(); loadPayments();
+          }).catch(function (err) { toast('Lỗi: ' + (err.message || 'Cập nhật thất bại')); });
+        };
+      });
     },
 
     openOrderDetailModal: function (id) {
@@ -428,6 +707,7 @@
 
             <div>
               <h4 style="color:var(--adm-accent2);margin-bottom:12px;border-bottom:1px solid var(--adm-border);padding-bottom:8px">🖼️ Hình ảnh sản phẩm</h4>
+
               <div style="display:flex;flex-wrap:wrap;margin-top:12px">
                 ${imagesHTML || '<p style="color:var(--adm-text3)">Sản phẩm này chưa có hình ảnh.</p>'}
               </div>
@@ -855,6 +1135,216 @@
         });
       };
     },
+    openAddPostModal: function () {
+      showModal('Thêm bài viết mới', `
+        <form class="adm-form" id="addPostForm">
+          <div class="adm-form-group">
+            <label>Tiêu đề bài viết</label>
+            <input type="text" name="title" placeholder="Nhập tiêu đề hấp dẫn...">
+          </div>
+          <div class="adm-form-group">
+            <label>Danh mục</label>
+            <select name="categoryId" id="modalPostCategorySelect"><option value="">Đang tải...</option></select>
+          </div>
+          <div class="adm-form-group">
+            <label>Tóm tắt (Mô tả ngắn)</label>
+            <textarea name="summary" rows="2" placeholder="Nếu bỏ trống sẽ tự động lấy từ nội dung..."></textarea>
+          </div>
+          <div class="adm-form-group">
+            <label>Nội dung bài viết</label>
+            <textarea name="content" rows="8" placeholder="Nhập nội dung bài viết ở đây..."></textarea>
+          </div>
+          <div class="adm-form-group">
+            <div class="adm-form-check">
+              <input type="checkbox" id="addPostPub" name="published" value="true" checked>
+              <label for="addPostPub">Đã đăng (Công khai ngay)</label>
+            </div>
+          </div>
+          <div class="adm-form-group">
+            <label>Ảnh bài viết (Ảnh đầu tiên sẽ làm thumbnail)</label>
+            <input type="file" id="addPostFiles" multiple accept="image/*">
+          </div>
+          <div class="adm-form-actions">
+            <button type="button" class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Hủy</button>
+            <button type="submit" class="adm-btn adm-btn--primary">Lưu bài viết</button>
+          </div>
+        </form>
+      `);
+
+      api('/content/categories').then(data => {
+        var sel = $('modalPostCategorySelect');
+        var rows = data.content || (Array.isArray(data) ? data : []);
+        if (sel) sel.innerHTML = rows.map(c => `<option value="${c.id}">${c.name}</option>`).join('') || '<option value="">Chưa có danh mục</option>';
+      });
+
+      $('addPostForm').onsubmit = function (e) {
+        e.preventDefault();
+        var fd = new FormData(this);
+        var obj = Object.fromEntries(fd.entries());
+        if (!obj.title || obj.title.length < 10) { toast('Tiêu đề phải ít nhất 10 ký tự'); return; }
+        if (!obj.content) { toast('Nội dung không được để trống'); return; }
+        
+        obj.published = !!obj.published;
+        obj.categoryId = parseInt(obj.categoryId);
+
+        var finalFd = new FormData();
+        finalFd.append('title', obj.title);
+        finalFd.append('content', obj.content);
+        finalFd.append('summary', obj.summary || '');
+        finalFd.append('categoryId', obj.categoryId);
+        finalFd.append('published', obj.published);
+
+        var fileInput = $('addPostFiles');
+        if (fileInput && fileInput.files.length > 0) {
+          for (var i = 0; i < fileInput.files.length; i++) {
+            finalFd.append('images', fileInput.files[i]);
+          }
+        }
+
+        api('/content/posts', { method: 'POST', body: finalFd, formData: true }).then(() => {
+          toast('Đã thêm bài viết thành công!');
+          ADM.closeModal(); loadPosts();
+        }).catch(err => toast('Lỗi: ' + (err.message || 'Không thể tạo bài viết')));
+      };
+    },
+
+    openEditPostModal: function (id) {
+      api('/content/posts/' + id).then(function (p) {
+        showModal('Chỉnh sửa bài viết #' + id, `
+          <form class="adm-form" id="editPostForm">
+            <div class="adm-form-group">
+              <label>Tiêu đề bài viết</label>
+              <input type="text" name="title" value="${esc(p.title)}">
+            </div>
+            <div class="adm-form-group">
+              <label>Danh mục</label>
+              <select name="categoryId" id="modalPostCategoryEdit" data-sel="${p.category ? p.category.id : ''}"><option value="">Đang tải...</option></select>
+            </div>
+            <div class="adm-form-group">
+              <label>Tóm tắt (Mô tả ngắn)</label>
+              <textarea name="summary" rows="2">${esc(p.summary || '')}</textarea>
+            </div>
+            <div class="adm-form-group">
+              <label>Nội dung bài viết</label>
+              <textarea name="content" rows="8">${esc(p.content)}</textarea>
+            </div>
+            <div class="adm-form-group">
+              <div class="adm-form-check">
+                <input type="checkbox" id="editPostPub" name="published" value="true" ${p.published ? 'checked' : ''}>
+                <label for="editPostPub">Đã đăng</label>
+              </div>
+            </div>
+            <div class="adm-form-group">
+              <label>Ảnh hiện tại (Nhấn vào ảnh để chọn xóa)</label>
+              <div id="editPostImages" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+                ${(p.imagesInfo || []).map((img) => `
+                  <div class="ws-img-edit-item" style="position:relative;cursor:pointer" data-id="${img.id}" onclick="this.classList.toggle('to-delete')">
+                    <img src="${img.url}" style="width:80px;height:80px;object-fit:cover;border-radius:4px;border:2px solid transparent">
+                    <div class="ws-img-delete-overlay" style="position:absolute;inset:0;background:rgba(232,93,93,0.6);display:none;align-items:center;justify-content:center;color:#fff;font-size:20px;border-radius:4px">✕</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="adm-form-group">
+              <label>Thêm ảnh mới</label>
+              <input type="file" id="editPostFiles" multiple accept="image/*">
+            </div>
+            <div class="adm-form-actions">
+              <button type="button" class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Hủy</button>
+              <button type="submit" class="adm-btn adm-btn--primary">Lưu thay đổi</button>
+            </div>
+          </form>
+        `);
+
+        api('/content/categories').then(data => {
+          var sel = $('modalPostCategoryEdit');
+          var rows = data.content || (Array.isArray(data) ? data : []);
+          var selId = parseInt(sel.getAttribute('data-sel'));
+          if (sel) sel.innerHTML = rows.map(c => `<option value="${c.id}" ${c.id === selId ? 'selected' : ''}>${c.name}</option>`).join('') || '<option value="">Chưa có danh mục</option>';
+        });
+
+        $('editPostForm').onsubmit = function (e) {
+          e.preventDefault();
+          var fd = new FormData(this);
+          var obj = Object.fromEntries(fd.entries());
+          obj.published = !!obj.published;
+          obj.categoryId = parseInt(obj.categoryId);
+
+          var finalFd = new FormData();
+          
+          // Lấy danh sách ID ảnh cần xóa
+          var delIds = [];
+          document.querySelectorAll('#editPostImages .ws-img-edit-item.to-delete').forEach(el => {
+            delIds.push(parseInt(el.dataset.id));
+          });
+
+          finalFd.append('request', new Blob([JSON.stringify({
+            title: obj.title,
+            content: obj.content,
+            summary: obj.summary,
+            categoryId: obj.categoryId,
+            published: obj.published,
+            deletedImageIds: delIds
+          })], { type: 'application/json' }));
+
+          var fileInput = $('editPostFiles');
+          if (fileInput && fileInput.files.length > 0) {
+            for (var i = 0; i < fileInput.files.length; i++) {
+              finalFd.append('newImages', fileInput.files[i]);
+            }
+          }
+
+          api('/content/posts/' + id, { method: 'PUT', body: finalFd, formData: true }).then(() => {
+            toast('Đã cập nhật bài viết!');
+            ADM.closeModal(); loadPosts();
+          }).catch(err => toast('Lỗi: ' + (err.message || 'Cập nhật thất bại')));
+        };
+      }).catch(() => toast('Không thể tải thông tin bài viết'));
+    },
+
+    openPostDetailModal: function (id) {
+      api('/content/posts/' + id).then(function (p) {
+        var imagesHTML = (p.images || []).map(img => `<img src="${img}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid var(--adm-border)">`).join('');
+        
+        showModal('Chi tiết bài viết #' + id, `
+          <div class="adm-detail">
+            <div style="margin-bottom:24px">
+              <h2 style="font-size:24px;margin-bottom:8px;color:var(--adm-text)">${esc(p.title)}</h2>
+              <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px">
+                <span class="adm-badge adm-badge--info">${esc(p.category ? p.category.name : '—')}</span>
+                <span style="font-size:13px;color:var(--adm-text3)">📅 ${fmtDate(p.createdAt)}</span>
+                ${p.published ? '<span class="adm-badge adm-badge--success">Đã đăng</span>' : '<span class="adm-badge adm-badge--warning">Nháp</span>'}
+              </div>
+            </div>
+
+            <div style="background:var(--adm-bg2);padding:16px;border-radius:8px;border:1px dashed var(--adm-border);margin-bottom:24px">
+              <h4 style="margin-bottom:8px;font-size:14px;color:var(--adm-accent2)">📝 Tóm tắt</h4>
+              <p style="font-style:italic;color:var(--adm-text2);line-height:1.6">${esc(p.summary || 'Không có tóm tắt.')}</p>
+            </div>
+
+            <div style="margin-bottom:24px">
+              <h4 style="margin-bottom:12px;border-bottom:1px solid var(--adm-border);padding-bottom:8px">📖 Nội dung</h4>
+              <div style="color:var(--adm-text2);line-height:1.8;white-space:pre-line;max-height:400px;overflow-y:auto;padding-right:8px">
+                ${esc(p.content)}
+              </div>
+            </div>
+
+            <div style="margin-bottom:24px">
+              <h4 style="margin-bottom:12px;border-bottom:1px solid var(--adm-border);padding-bottom:8px">🖼️ Hình ảnh</h4>
+              <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px">
+                ${imagesHTML || '<p style="color:var(--adm-text3)">Bài viết này không có hình ảnh.</p>'}
+              </div>
+            </div>
+
+            <div class="adm-form-actions" style="margin-top:32px;padding-top:24px;border-top:1px solid var(--adm-border)">
+              <button class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Đóng</button>
+              <button class="adm-btn adm-btn--primary" onclick="ADM.closeModal(); ADM.openEditPostModal(${p.id})">Sửa bài viết</button>
+            </div>
+          </div>
+        `);
+      }).catch(() => toast('Không thể tải chi tiết bài viết'));
+    },
+
     openEditProductModal: function (id) {
       // Fetch current product
       api('/product/products/' + id).then(function (p) {
@@ -970,6 +1460,7 @@
         toast('Không thể lấy thông tin sản phẩm');
       });
     },
+
     closeModal: function () {
       var m = $('admModalOverlay');
       if (m) m.classList.remove('is-open');
@@ -1004,7 +1495,7 @@
 
   function sectionHeader(title, section, actionBtn) {
     var currentKeyword = pageState.keyword || '';
-    return '<div class="adm-section"><div class="adm-section-header"><h3 class="adm-section-title">' + title + '</h3><div class="adm-section-actions">' + (actionBtn || '') + '<div class="adm-search"><input type="text" id="admSearch_' + section + '" value="' + esc(currentKeyword) + '" placeholder="Tìm kiếm..."></div></div></div></div>';
+    return '<div class="adm-section"><div class="adm-section-header"><h3 class="adm-section-title">' + title + '</h3><div class="adm-section-actions">' + (actionBtn || '') + '<div class="adm-search"><input type="text" id="admSearch_' + section + '" value="' + esc(currentKeyword) + '" placeholder="Tìm theo tên hoặc ID..."></div></div></div></div>';
   }
 
   function showModal(title, contentHTML) {

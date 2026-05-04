@@ -25,8 +25,9 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public List<UserResponse> getUsers() {
-        return userService.getAllUsers();
+    public List<UserResponse> getUsers(@RequestParam(required = false) String keyword,
+                                       @RequestParam(required = false) String role) {
+        return userService.getAllUsers(keyword, role);
     }
 
     @GetMapping("/{id}")

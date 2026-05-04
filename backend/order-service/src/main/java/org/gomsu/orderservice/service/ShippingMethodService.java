@@ -73,11 +73,12 @@ public class ShippingMethodService {
     }
 
     @Transactional
-    // Dùng cho hành động xóa dứt khoát khỏi danh sách hiển thị chính của Admin.
-    public void softDeleteShippingMethod(Long id) {
-        ShippingMethod shippingMethod = getEntityById(id);
-        shippingMethod.setActive(false);
-        shippingMethodRepository.save(shippingMethod);
+    // Xóa vĩnh viễn khỏi database theo yêu cầu Admin
+    public void deleteShippingMethod(Long id) {
+        if (!shippingMethodRepository.existsById(id)) {
+            throw new RuntimeException("Không tìm thấy đơn vị vận chuyển ID: " + id);
+        }
+        shippingMethodRepository.deleteById(id);
     }
 
     @Transactional

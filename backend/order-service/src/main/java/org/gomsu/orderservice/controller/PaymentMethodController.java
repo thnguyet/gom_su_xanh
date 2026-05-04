@@ -55,13 +55,13 @@ public class PaymentMethodController {
         return ResponseEntity.ok(paymentMethodService.updatePaymentMethod(id, request));
     }
 
-    // Xóa mềm
+    // Xóa vĩnh viễn (Dành cho Admin)
     // THÀNH CÔNG
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> delete(@PathVariable Long id) {
-        paymentMethodService.softDeletePaymentMethod(id);
-        return ResponseEntity.ok("Đã xóa mềm phương thức thanh toán ID: " + id);
+        paymentMethodService.deletePaymentMethod(id);
+        return ResponseEntity.ok("Đã xóa vĩnh viễn phương thức thanh toán ID: " + id);
     }
 
     // Cập nhật nhanh trạng thái Bật/Tắt (Switch) (THÀNH CÔNG)

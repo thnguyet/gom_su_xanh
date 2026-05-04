@@ -14,12 +14,9 @@ import java.util.Optional;
 
 public interface WorkshopRepository extends JpaRepository<Workshop, Long> {
     @Query("SELECT w FROM Workshop w WHERE " +
-            // 1. Nếu Admin truyền activeParam (true/false) thì lọc theo đó.
-            // Nếu không truyền (null), Admin thấy hết, User chỉ thấy active = true.
             "(:activeParam IS NULL OR w.active = :activeParam) AND " +
             "(:isAdmin IS TRUE OR w.active IS TRUE) AND " +
-
-            "(:keyword IS NULL OR LOWER(w.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+            "(:keyword IS NULL OR :keyword = '' OR LOWER(w.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR CONCAT(w.id, '') LIKE CONCAT('%', :keyword, '%')) AND " +
             "(:location IS NULL OR LOWER(w.location) LIKE LOWER(CONCAT('%', :location, '%'))) AND " +
             "(:minPrice IS NULL OR w.price >= :minPrice) AND " +
             "(:maxPrice IS NULL OR w.price <= :maxPrice) AND " +

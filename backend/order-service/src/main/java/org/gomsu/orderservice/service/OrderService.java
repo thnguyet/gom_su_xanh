@@ -142,6 +142,7 @@ public class OrderService {
         // 7. Khởi tạo đối tượng Order
         Order order = Order.builder()
                 .customerId(customerId)
+                .customerName(user.getUsername()) // Lưu tên khách hàng
                 .address(finalAddress)
                 .phoneNumber(finalPhone)
                 .note(orderRequest.getNote())
@@ -229,19 +230,19 @@ public class OrderService {
 
     // 2. Hàm cho Admin: Giữ nguyên vì nó là hàm mạnh mẽ nhất
     public Page<OrderResponse> getAllOrdersForAdmin(
-            Long customerId, OrderStatus status,
+            String keyword, Long customerId, OrderStatus status,
             LocalDateTime startDate, LocalDateTime endDate,
             int page, int size, String sortBy, String sortDir) {
-
+ 
         Pageable pageable = createPageable(page, size, sortBy, sortDir);
-        return orderRepository.findAllOrdersForAdmin(customerId, status, startDate, endDate, pageable)
+        return orderRepository.findAllOrdersForAdmin(keyword, customerId, status, startDate, endDate, pageable)
                 .map(order -> toOrderResponse(order, null));
     }
-
+ 
     // 3. Hàm cho User: Tái sử dụng luôn hàm của Admin, cực gọn!
     public Page<OrderResponse> getMyOrders(Long customerId, OrderStatus status, int page, int size, String sortBy, String sortDir) {
         // Gọi luôn hàm Admin, truyền startDate và endDate là null
-        return getAllOrdersForAdmin(customerId, status, null, null, page, size, sortBy, sortDir);
+        return getAllOrdersForAdmin(null, customerId, status, null, null, page, size, sortBy, sortDir);
     }
 
     @Transactional
@@ -275,6 +276,11 @@ public class OrderService {
 
     private OrderResponse toOrderResponse(Order order, String providedCustomerName) {
         String customerName = providedCustomerName;
+        if (customerName == null) {
+            customerName = order.getCustomerName(); // Lấy tên đã lưu trong Order
+        }
+        
+        // Nếu vẫn null (đơn hàng cũ), mới gọi Identity Service
         if (customerName == null) {
             customerName = "N/A";
             try {

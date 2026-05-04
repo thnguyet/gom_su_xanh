@@ -75,8 +75,9 @@ public class ReviewController {
     @GetMapping("/admin/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<ReviewResponse>> getAllForAdmin(
+            @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(reviewService.getAllReviewsForAdmin(pageable));
+        return ResponseEntity.ok(reviewService.getAllReviewsForAdmin(keyword, pageable));
     }
 
     // 6. ADMIN: Phản hồi khách hàng

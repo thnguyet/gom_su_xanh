@@ -51,12 +51,12 @@ public class ShippingMethodController {
         return ResponseEntity.ok(shippingMethodService.updateShippingMethod(id, request));
     }
 
-    // Xóa mềm đơn vị vận chuyển (THÀNH CÔNG)
+    // Xóa vĩnh viễn đơn vị vận chuyển khỏi DB (THÀNH CÔNG)
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> delete(@PathVariable Long id) {
-        shippingMethodService.softDeleteShippingMethod(id);
-        return ResponseEntity.ok("Đã xóa mềm đơn vị vận chuyển ID: " + id);
+        shippingMethodService.deleteShippingMethod(id);
+        return ResponseEntity.ok("Đã xóa vĩnh viễn đơn vị vận chuyển ID: " + id);
     }
 
     // Cập nhật nhanh trạng thái Bật/Tắt (Switch) (THÀNH CÔNG)

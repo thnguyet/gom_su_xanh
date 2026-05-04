@@ -14,7 +14,7 @@ public interface ShippingMethodRepository extends JpaRepository<ShippingMethod,L
 
     @Query("SELECT s FROM ShippingMethod s WHERE " +
             "(:onlyActive IS NULL OR s.active = :onlyActive) AND " +
-            "(:keyword IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+            "(:keyword IS NULL OR :keyword = '' OR CONCAT(s.id, '') LIKE CONCAT('%', :keyword, '%') OR LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
             "(:fromDate IS NULL OR s.createdAt >= :fromDate) AND " +
             "(:toDate IS NULL OR s.createdAt <= :toDate)")
     Page<ShippingMethod> searchMethods(

@@ -67,10 +67,12 @@ public class PaymentMethodService {
     }
 
     @Transactional
-    public void softDeletePaymentMethod(Long id) {
-        PaymentMethod paymentMethod = getEntityById(id);
-        paymentMethod.setActive(false); // Xóa mềm: chỉ chuyển trạng thái
-        paymentMethodRepository.save(paymentMethod);
+    // Xóa vĩnh viễn khỏi DB
+    public void deletePaymentMethod(Long id) {
+        if (!paymentMethodRepository.existsById(id)) {
+            throw new RuntimeException("Không tìm thấy phương thức thanh toán ID: " + id);
+        }
+        paymentMethodRepository.deleteById(id);
     }
 
     @Transactional
