@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blog - Gốm Sứ Xanh</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../styles-pages.css">
+  <style>
+    /* Blog Hero */
+    .blog-hero {
+      max-width: 1280px;
+      margin: 40px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+    .blog-hero-img {
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: var(--shadow-card);
+    }
+    .blog-hero-content h1 {
+      font-size: clamp(36px, 5vw, 56px);
+      color: var(--clr-forest);
+      margin: 0 0 16px;
+    }
+    .blog-hero-content h2 {
+      font-size: 24px;
+      color: var(--clr-teal);
+      margin: 0 0 24px;
+    }
+    .blog-hero-content p {
+      font-size: 18px;
+      color: var(--clr-forest);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    /* Search & Categories */
+    .blog-tools {
+      max-width: 1280px;
+      margin: 0 auto 60px;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .search-bar {
+      display: flex;
+      flex: 1;
+      max-width: 600px;
+    }
+    .search-input {
+      flex: 1;
+      padding: 12px 20px;
+      border: 1px solid var(--clr-forest);
+      border-radius: 12px 0 0 12px;
+      font-size: 16px;
+      font-family: inherit;
+      background: rgba(245, 242, 240, 1);
+    }
+    .search-btn {
+      padding: 0 24px;
+      background: var(--clr-moss);
+      color: var(--clr-cream);
+      border: 1px solid var(--clr-moss);
+      border-radius: 0 12px 12px 0;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .blog-nav {
+      display: flex;
+      gap: 24px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--clr-forest);
+    }
+    .blog-nav a {
+      color: inherit;
+      text-decoration: none;
+      opacity: 0.7;
+    }
+    .blog-nav a:hover, .blog-nav a.is-active {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    /* Popular Section */
+    .popular-section {
+      max-width: 1280px;
+      margin: 0 auto 80px;
+      padding: 0 20px;
+    }
+    .popular-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-top: 24px;
+    }
+    .popular-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(245, 242, 240, 0.5);
+      padding: 12px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: transform 0.2s;
+    }
+    .popular-card:hover { transform: translateY(-2px); }
+    .popular-card img {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .popular-card-content h4 {
+      margin: 0 0 4px;
+      color: var(--clr-forest);
+      font-size: 16px;
+    }
+    .popular-card-content p {
+      margin: 0;
+      color: var(--clr-forest);
+      opacity: 0.7;
+      font-size: 14px;
+    }
+
+    /* Recent Posts */
+    .recent-section {
+      max-width: 1280px;
+      margin: 0 auto 80px;
+      padding: 0 20px;
+    }
+    .recent-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-top: 32px;
+    }
+    .blog-card {
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: transform 0.2s;
+    }
+    .blog-card:hover { transform: translateY(-4px); }
+    .blog-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    .blog-card-date {
+      font-size: 14px;
+      color: var(--clr-forest);
+      opacity: 0.6;
+    }
+    .blog-card h3 {
+      margin: 0;
+      color: var(--clr-forest);
+      font-size: 20px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .blog-card p {
+      margin: 0;
+      color: var(--clr-forest);
+      font-size: 15px;
+      line-height: 1.6;
+      opacity: 0.8;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    @media (max-width: 1024px) {
+      .popular-grid { grid-template-columns: repeat(2, 1fr); }
+      .recent-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .blog-hero { grid-template-columns: 1fr; }
+      .popular-grid, .recent-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="page-main">
+    
+    <!-- Hero -->
+    <section class="blog-hero">
+      <div class="blog-hero-content">
+        <h1 class="all-caps">Blog Gốm Sứ Xanh</h1>
+        <h2>Hành trình tái sinh những mảnh gốm vỡ</h2>
+        <p>Vì sao lại là gốm sứ xanh?</p>
+      </div>
+      <img src="../assets/images/6af42cba9c23adf10ffc2498d269be931aa6a399.png" alt="Blog Hero" class="blog-hero-img">
+    </section>
+
+    <!-- Tools -->
+    <div class="blog-tools">
+      <div class="search-bar">
+        <input type="text" id="blogSearchInput" class="search-input" placeholder="Tìm kiếm bài viết">
+        <button id="blogSearchBtn" class="search-btn">Tìm kiếm</button>
+      </div>
+      <div class="blog-nav">
+        <a href="#" class="is-active">Gốm Sứ Xanh's Blog</a>
+      </div>
+    </div>
+
+    <!-- Popular -->
+    <section class="popular-section">
+      <h2 class="section-title" style="font-size: 24px; text-transform:none; border-bottom: 2px solid var(--clr-forest); padding-bottom: 8px; display: inline-block;">Phổ biến nhất</h2>
+      <div class="popular-grid" id="popularGrid">
+        <!-- Dữ liệu từ DB sẽ đổ vào đây -->
+      </div>
+    </section>
+
+    <!-- Recent -->
+    <section class="recent-section">
+      <h2 class="section-title" style="font-size: 24px; text-transform:none; border-bottom: 2px solid var(--clr-forest); padding-bottom: 8px; display: inline-block;">Bài viết gần đây</h2>
+      <div class="recent-grid" id="recentGrid">
+      </div>
+      <div id="recentPagination" class="pagination-wrap" style="margin-top:40px; display:flex; justify-content:center; gap:8px;"></div>
+    </section>
+
+  </main>
+
+  <script src="../app.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var API_URL = 'http://localhost:8080/content/posts';
+
+      function fmtDate(d) {
+        if (!d) return '';
+        var date = new Date(d);
+        var day = date.getDate();
+        var month = date.getMonth() + 1;
+        var year = date.getFullYear();
+        return day + ' TH.' + month + ', ' + year;
+      }
+
+      // 1. Lấy 4 bài viết đầu tiên (Phổ biến nhất theo yêu cầu)
+      fetch(API_URL + '?page=0&size=4&sortDir=ASC')
+        .then(res => res.json())
+        .then(data => {
+          var posts = data.content || [];
+          var html = '';
+          posts.forEach(p => {
+            html += `
+              <a href="trang-blog-2_1458-2868.html?id=${p.id}" class="popular-card">
+                <img src="${p.thumbnail || '../assets/images/placeholder.png'}" alt="${p.title}">
+                <div class="popular-card-content">
+                  <h4>${p.title}</h4>
+                  <p>${fmtDate(p.createdAt)}</p>
+                </div>
+              </a>
+            `;
+          });
+          document.getElementById('popularGrid').innerHTML = html || '<p>Chưa có bài viết phổ biến.</p>';
+        })
+        .catch(err => console.error('Lỗi tải bài viết phổ biến:', err));
+
+      var currentPage = 0;
+      var pageSize = 8;
+      var searchKeyword = '';
+
+      function loadRecentPosts(page) {
+        currentPage = page;
+        var url = API_URL + '?page=' + page + '&size=' + pageSize + '&sortDir=DESC';
+        if (searchKeyword) {
+          url += '&keyword=' + encodeURIComponent(searchKeyword);
+        }
+
+        fetch(url)
+          .then(res => res.json())
+          .then(data => {
+            var posts = data.content || [];
+            var html = '';
+            posts.forEach(p => {
+              html += `
+                <a href="trang-blog-2_1458-2868.html?id=${p.id}" class="blog-card">
+                  <img src="${p.thumbnail || '../assets/images/placeholder.png'}" alt="${p.title}">
+                  <div class="blog-card-date">${fmtDate(p.createdAt)}</div>
+                  <h3>${p.title}</h3>
+                  <p>${p.summary || ''}</p>
+                </a>
+              `;
+            });
+            document.getElementById('recentGrid').innerHTML = html || '<p>Không tìm thấy bài viết nào.</p>';
+            renderPagination(data);
+          })
+          .catch(err => console.error('Lỗi tải bài viết gần đây:', err));
+      }
+
+      // Xử lý tìm kiếm
+      function doSearch() {
+        searchKeyword = document.getElementById('blogSearchInput').value.trim();
+        loadRecentPosts(0);
+      }
+
+      document.getElementById('blogSearchBtn').addEventListener('click', doSearch);
+      document.getElementById('blogSearchInput').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') doSearch();
+      });
+
+      function renderPagination(data) {
+        var wrap = document.getElementById('recentPagination');
+        if (!data || data.totalPages <= 1) {
+          wrap.innerHTML = '';
+          return;
+        }
+
+        var html = '';
+        var total = data.totalPages;
+        
+        // Nút Previous
+        html += `<button class="btn-outline ${currentPage === 0 ? 'disabled' : ''}" 
+                  onclick="${currentPage > 0 ? 'loadRecentPosts(' + (currentPage - 1) + ')' : ''}" 
+                  style="padding:8px 16px; min-width:auto;">&lt;</button>`;
+
+        // Các số trang
+        for (var i = 0; i < total; i++) {
+          html += `<button class="btn-outline ${i === currentPage ? 'is-active' : ''}" 
+                    onclick="loadRecentPosts(${i})" 
+                    style="padding:8px 16px; min-width:auto; ${i === currentPage ? 'background:var(--clr-forest); color:#fff;' : ''}">${i + 1}</button>`;
+        }
+
+        // Nút Next
+        html += `<button class="btn-outline ${currentPage === total - 1 ? 'disabled' : ''}" 
+                  onclick="${currentPage < total - 1 ? 'loadRecentPosts(' + (currentPage + 1) + ')' : ''}" 
+                  style="padding:8px 16px; min-width:auto;">&gt;</button>`;
+
+        wrap.innerHTML = html;
+      }
+
+      window.loadRecentPosts = loadRecentPosts;
+
+      // 1. Lấy 4 bài viết đầu tiên (Phổ biến nhất theo yêu cầu)
+      fetch(API_URL + '?page=0&size=4&sortDir=ASC')
+        .then(res => res.json())
+        .then(data => {
+          var posts = data.content || [];
+          var html = '';
+          posts.forEach(p => {
+            html += `
+              <a href="trang-blog-2_1458-2868.html?id=${p.id}" class="popular-card">
+                <img src="${p.thumbnail || '../assets/images/placeholder.png'}" alt="${p.title}">
+                <div class="popular-card-content">
+                  <h4>${p.title}</h4>
+                  <p>${fmtDate(p.createdAt)}</p>
+                </div>
+              </a>
+            `;
+          });
+          document.getElementById('popularGrid').innerHTML = html || '<p>Chưa có bài viết phổ biến.</p>';
+        })
+        .catch(err => console.error('Lỗi tải bài viết phổ biến:', err));
+
+      // 2. Lấy các bài viết gần đây
+      loadRecentPosts(0);
+    });
+  </script>
+</body>
+</html>

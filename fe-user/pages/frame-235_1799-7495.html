@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phiếu Đăng Ký — Gốm Sứ Xanh</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    /* Minimal landing while modal loads */
+    body {
+      margin: 0;
+      background: var(--clr-sand, #f0ede2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: var(--font-body, 'DM Sans', sans-serif);
+      color: var(--clr-forest, #1c3d1e);
+    }
+    .redirect-msg {
+      text-align: center;
+      padding: 40px;
+      opacity: 0;
+      animation: fadeMsg .6s .3s ease forwards;
+    }
+    .redirect-msg h2 {
+      font-family: var(--font-display, 'Anton', sans-serif);
+      font-size: 28px;
+      margin: 0 0 12px;
+    }
+    .redirect-msg p {
+      font-size: 15px;
+      color: var(--text-muted, #7a8a6a);
+      margin: 0;
+    }
+    @keyframes fadeMsg { to { opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div class="redirect-msg">
+    <h2>PHIẾU ĐĂNG KÝ</h2>
+    <p>Đang mở form đăng ký workshop…</p>
+  </div>
+
+  <script src="../app.js" defer></script>
+  <script>
+    // Auto-open the registration modal when this page is visited directly
+    (function() {
+      // Small delay to let app.js initialize
+      setTimeout(function() {
+        if (typeof openRegistrationModal === 'function') {
+          openRegistrationModal();
+        }
+      }, 300);
+    })();
+  </script>
+</body>
+</html>

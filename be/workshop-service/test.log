@@ -1,0 +1,91 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< com.gomsu:workshop-service >---------------------
+[INFO] Building workshop-service 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.5.13:run (default-cli) > test-compile @ workshop-service >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ workshop-service ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ workshop-service ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ workshop-service ---
+[INFO] skip non existing resourceDirectory C:\Users\hieuk\Desktop\GomSuXanh\backend\workshop-service\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ workshop-service ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:3.5.13:run (default-cli) < test-compile @ workshop-service <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.5.13:run (default-cli) @ workshop-service ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.13)
+
+2026-05-01T19:15:13.855+07:00  INFO 28404 --- [workshop-service] [           main] c.g.w.WorkshopServiceApplication         : Starting WorkshopServiceApplication using Java 22.0.2 with PID 28404 (C:\Users\hieuk\Desktop\GomSuXanh\backend\workshop-service\target\classes started by hieuk in C:\Users\hieuk\Desktop\GomSuXanh\backend\workshop-service)
+2026-05-01T19:15:13.857+07:00  INFO 28404 --- [workshop-service] [           main] c.g.w.WorkshopServiceApplication         : No active profile set, falling back to 1 default profile: "default"
+2026-05-01T19:15:15.168+07:00  INFO 28404 --- [workshop-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-01T19:15:15.383+07:00  INFO 28404 --- [workshop-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 200 ms. Found 3 JPA repository interfaces.
+2026-05-01T19:15:16.054+07:00  INFO 28404 --- [workshop-service] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=c16b908e-adf1-3935-bf3c-19700e4c2853
+2026-05-01T19:15:16.629+07:00  INFO 28404 --- [workshop-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8084 (http)
+2026-05-01T19:15:16.649+07:00  INFO 28404 --- [workshop-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-01T19:15:16.649+07:00  INFO 28404 --- [workshop-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.53]
+2026-05-01T19:15:16.743+07:00  INFO 28404 --- [workshop-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-01T19:15:16.754+07:00  INFO 28404 --- [workshop-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2815 ms
+2026-05-01T19:15:17.007+07:00  INFO 28404 --- [workshop-service] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-01T19:15:17.078+07:00  INFO 28404 --- [workshop-service] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.45.Final
+2026-05-01T19:15:17.117+07:00  INFO 28404 --- [workshop-service] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-01T19:15:17.458+07:00  INFO 28404 --- [workshop-service] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-01T19:15:17.505+07:00  INFO 28404 --- [workshop-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-05-01T19:15:17.934+07:00  INFO 28404 --- [workshop-service] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@59a3eaf7
+2026-05-01T19:15:17.937+07:00  INFO 28404 --- [workshop-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-05-01T19:15:18.041+07:00  INFO 28404 --- [workshop-service] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 9.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-01T19:15:19.431+07:00  INFO 28404 --- [workshop-service] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-01T19:15:19.553+07:00  INFO 28404 --- [workshop-service] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-01T19:15:19.719+07:00  WARN 28404 --- [workshop-service] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-01T19:15:19.870+07:00  INFO 28404 --- [workshop-service] [           main] o.s.c.openfeign.FeignClientFactoryBean   : For 'identity-service' URL not provided. Will try picking an instance via load-balancing.
+2026-05-01T19:15:20.284+07:00  INFO 28404 --- [workshop-service] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-01T19:15:22.195+07:00  INFO 28404 --- [workshop-service] [           main] o.s.c.openfeign.FeignClientFactoryBean   : For 'identity-service' URL not provided. Will try picking an instance via load-balancing.
+2026-05-01T19:15:23.620+07:00  INFO 28404 --- [workshop-service] [           main] DiscoveryClientOptionalArgsConfiguration : Eureka HTTP Client uses RestTemplate.
+2026-05-01T19:15:23.672+07:00  WARN 28404 --- [workshop-service] [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2026-05-01T19:15:23.726+07:00  INFO 28404 --- [workshop-service] [           main] o.s.c.n.eureka.InstanceInfoFactory       : Setting initial instance status as: STARTING
+2026-05-01T19:15:23.770+07:00  INFO 28404 --- [workshop-service] [           main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
+2026-05-01T19:15:23.776+07:00  INFO 28404 --- [workshop-service] [           main] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-05-01T19:15:23.792+07:00  INFO 28404 --- [workshop-service] [           main] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-05-01T19:15:23.792+07:00  INFO 28404 --- [workshop-service] [           main] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-05-01T19:15:23.792+07:00  INFO 28404 --- [workshop-service] [           main] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-05-01T19:15:23.792+07:00  INFO 28404 --- [workshop-service] [           main] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-05-01T19:15:23.792+07:00  INFO 28404 --- [workshop-service] [           main] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-05-01T19:15:23.792+07:00  INFO 28404 --- [workshop-service] [           main] com.netflix.discovery.DiscoveryClient    : Application version is -1: true
+2026-05-01T19:15:23.792+07:00  INFO 28404 --- [workshop-service] [           main] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-05-01T19:15:24.237+07:00  INFO 28404 --- [workshop-service] [           main] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-05-01T19:15:24.240+07:00  INFO 28404 --- [workshop-service] [           main] com.netflix.discovery.DiscoveryClient    : Starting heartbeat executor: renew interval is: 30
+2026-05-01T19:15:24.243+07:00  INFO 28404 --- [workshop-service] [           main] c.n.discovery.InstanceInfoReplicator     : InstanceInfoReplicator onDemand update allowed rate per min is 4
+2026-05-01T19:15:24.245+07:00  INFO 28404 --- [workshop-service] [           main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1777637724245 with initial instances count: 4
+2026-05-01T19:15:24.252+07:00  INFO 28404 --- [workshop-service] [           main] o.s.c.n.e.s.EurekaServiceRegistry        : Registering application WORKSHOP-SERVICE with eureka with status UP
+2026-05-01T19:15:24.254+07:00  INFO 28404 --- [workshop-service] [           main] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1777637724254, current=UP, previous=STARTING]
+2026-05-01T19:15:24.257+07:00  INFO 28404 --- [workshop-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_WORKSHOP-SERVICE/192.168.221.1:workshop-service:8084: registering service...
+2026-05-01T19:15:24.295+07:00  INFO 28404 --- [workshop-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8084 (http) with context path '/'
+2026-05-01T19:15:24.296+07:00  INFO 28404 --- [workshop-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8084
+2026-05-01T19:15:24.316+07:00  INFO 28404 --- [workshop-service] [           main] c.g.w.WorkshopServiceApplication         : Started WorkshopServiceApplication in 11.267 seconds (process running for 11.984)
+2026-05-01T19:15:24.337+07:00  INFO 28404 --- [workshop-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_WORKSHOP-SERVICE/192.168.221.1:workshop-service:8084 - registration status: 204

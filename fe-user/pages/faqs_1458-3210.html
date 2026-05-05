@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Câu hỏi thường gặp (FAQs) - Gốm Sứ Xanh</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../styles-pages.css">
+  <style>
+    .faq-header {
+      background: var(--clr-mint);
+      padding: 100px 24px 64px;
+      text-align: center;
+    }
+    .faq-title {
+      font-family: var(--font-heading);
+      font-size: clamp(32px, 5vw, 48px);
+      color: var(--clr-forest);
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .faq-search {
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .faq-search input {
+      width: 100%;
+      padding: 16px 24px;
+      border: 1px solid var(--clr-forest);
+      border-radius: 100px;
+      font-size: 18px;
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--clr-forest);
+      outline: none;
+    }
+
+    .faq-categories {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+      padding: 0 24px;
+    }
+    .faq-cat-btn {
+      padding: 12px 24px;
+      border-radius: 100px;
+      border: 1px solid var(--clr-forest);
+      background: transparent;
+      color: var(--clr-forest);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .faq-cat-btn.active, .faq-cat-btn:hover {
+      background: var(--clr-forest);
+      color: white;
+    }
+
+    .faq-container {
+      max-width: 1200px;
+      margin: 64px auto;
+      padding: 0 24px;
+      display: grid;
+      gap: 48px;
+    }
+
+    .faq-item {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      background: rgba(254, 252, 245, 1);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      align-items: center;
+      border: 1px solid rgba(148, 181, 120, 0.3);
+    }
+    .faq-item.reverse {
+      direction: rtl;
+    }
+    .faq-item.reverse > * {
+      direction: ltr;
+    }
+
+    .faq-content {
+      padding: 40px;
+    }
+    .faq-q {
+      font-family: var(--font-heading);
+      font-size: 28px;
+      color: var(--clr-teal);
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+    .faq-a {
+      font-size: 20px;
+      color: var(--clr-forest);
+      line-height: 1.6;
+    }
+    .faq-a ul {
+      padding-left: 24px;
+      margin-top: 12px;
+    }
+    .faq-a li {
+      margin-bottom: 8px;
+    }
+
+    .faq-img {
+      width: 100%;
+      height: 100%;
+      min-height: 350px;
+      object-fit: cover;
+    }
+
+    @media (max-width: 900px) {
+      .faq-item {
+        grid-template-columns: 1fr;
+      }
+      .faq-img {
+        height: 250px;
+        min-height: auto;
+      }
+      .faq-content {
+        padding: 32px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-main">
+    
+    <header class="faq-header">
+      <h1 class="faq-title">Gốm Sứ Xanh: Những câu hỏi thường gặp</h1>
+      <div class="faq-search">
+        <input type="text" placeholder="Tìm kiếm câu hỏi...">
+      </div>
+    </header>
+
+    <div class="faq-categories" style="margin-top: 48px;">
+      <button class="faq-cat-btn active">Phổ biến nhất</button>
+      <button class="faq-cat-btn">Hoạt động truyền thống</button>
+      <button class="faq-cat-btn">Sản phẩm gốm</button>
+      <button class="faq-cat-btn">Chính sách</button>
+    </div>
+
+    <div class="faq-container">
+      
+      <div class="faq-item">
+        <div class="faq-content">
+          <h3 class="faq-q">Q1: Workshop Gốm sứ xanh là gì?</h3>
+          <div class="faq-a">
+            <p>Workshop Gốm sứ xanh của chúng mình là workshop gốm tái chế, nơi bạn sẽ được trải nghiệm các hoạt động có tính mỹ thuật với các sản phẩm gốm tái chế của chúng mình. Đây là 1 hoạt động vô cùng ý nghĩa và góp phần bảo vệ mội trường cũng như giúp bạn giải trí cuối tuần.</p>
+          </div>
+        </div>
+        <img src="../assets/images/e8574da36f2d9747ebdacab8683c63bbd9142da7.png" alt="FAQ Image" class="faq-img">
+      </div>
+
+      <div class="faq-item reverse">
+        <div class="faq-content">
+          <h3 class="faq-q">Q2: Với một người chưa biết nhiều về mỹ thuật thì có tham gia được không?</h3>
+          <div class="faq-a">
+            <p>Không sao hết bởi vì trong workshop của chúng mình có các “nghệ nhân” luôn ở đó và giúp đỡ bạn mỗi khi bạn cần. Chỉ cần bạn cởi mở hỏi xin góp ý, những nghệ nhân đó sẽ sẵn sàng góp ý cho bạn để sản phẩm của bạn được đẹp nhất có thể nhé!</p>
+          </div>
+        </div>
+        <img src="../assets/images/809093763e6439f4a6aa30c92e3b59a5446123d9.png" alt="FAQ Image" class="faq-img">
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-content">
+          <h3 class="faq-q">Q3: Các hoạt động trong workshop gốm tái chế?</h3>
+          <div class="faq-a">
+            <p>Khi đến với workshop gốm tái chế của chúng mình bạn sẽ được trải nghiệm:</p>
+            <ul>
+              <li><strong>Tranh Gốm sứ tái chế:</strong> Dựa vào những nguyên vật liệu được cung cấp, bạn có thể sáng tạo ra những bức tranh độc đáo.</li>
+              <li><strong>Làm nam châm gắn tủ lạnh:</strong> Bạn có thể vẽ hoặc tô màu trên các hình có sẵn, biến chúng thành nam châm trang trí.</li>
+              <li><strong>Làm móc chìa khóa:</strong> Từ các mảnh gốm vỡ, bạn sẽ vẽ lên các mảnh phôi và cuối cùng là phủ bóng, treo dây.</li>
+            </ul>
+          </div>
+        </div>
+        <img src="../assets/images/7ac9da3aea5f0b1e3ac5f9fdff42dac235d82acd.png" alt="FAQ Image" class="faq-img">
+      </div>
+
+      <div class="faq-item reverse">
+        <div class="faq-content">
+          <h3 class="faq-q">Q4: Khi tham gia workshop mình có phải mang dụng cụ thêm không?</h3>
+          <div class="faq-a">
+            <p>Không nha! Khi đến với workshop của chúng mình, bạn không cần phải mang thêm gì cả, tất cả dụng cụ đã được chúng mình chuẩn bị đầy đủ. Bạn chỉ cần chuẩn bị 1 tinh thần thoải mái cùng với một nguồn năng lượng tích cực đến với Gốm sứ xanh thôi!</p>
+          </div>
+        </div>
+        <img src="../assets/images/bb99dd44ac4774b62dc93ede458ab97219852e3b.png" alt="FAQ Image" class="faq-img">
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-content">
+          <h3 class="faq-q">Q5: Quy mô workshop của Gốm Sứ Xanh?</h3>
+          <div class="faq-a">
+            <p>1 buổi workshop của bọn mình sẽ có từ 25-30 người, tùy vào địa điểm to hơn có thể tổ chức với quy mô lớn hơn.</p>
+          </div>
+        </div>
+        <img src="../assets/images/ba599bfa3b6d43cee876c44e51a78e2f28e00586.png" alt="FAQ Image" class="faq-img">
+      </div>
+
+      <div class="faq-item reverse">
+        <div class="faq-content">
+          <h3 class="faq-q">Q6: Workshop diễn ra trong bao lâu và giá của workshop là bao nhiêu?</h3>
+          <div class="faq-a">
+            <p>Workshop Gốm sứ xanh diễn ra từ 8h-12h hoặc 13h-17h và giá vé là 420.000đ. Giá vé đã bao gồm:</p>
+            <ul>
+              <li>Tất cả các dụng cụ trong workshop</li>
+              <li>Các “nghệ nhân” và trợ giảng hỗ trợ, hướng dẫn</li>
+              <li>01 đồ uống miễn phí ở địa điểm tổ chức</li>
+            </ul>
+          </div>
+        </div>
+        <img src="../assets/images/d4e61e94aa05792807648cf9631d483bb5edc5fa.png" alt="FAQ Image" class="faq-img">
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-content">
+          <h3 class="faq-q">Q7: Mình bận vào ngày hôm tổ chức workshop thì có được đổi sang ngày hôm khác không?</h3>
+          <div class="faq-a">
+            <p>Nếu bạn bận hoặc không thể tham gia workshop, bạn có thể đổi lịch sang hôm khác bằng cách:</p>
+            <ul>
+              <li>B1: Vào mục “Tài khoản” > “Lịch sử đăng ký”</li>
+              <li>B2: Bấm vào nút “Thay đổi” tại hàng hiển thị workshop</li>
+              <li>B3: Thay đổi lịch (Lưu ý: Chỉ được đổi trong vòng 7 ngày trước ngày workshop diễn ra)</li>
+            </ul>
+          </div>
+        </div>
+        <img src="../assets/images/8d57287674cd68ca34d6b4d0b2b68dbe30681112.png" alt="FAQ Image" class="faq-img">
+      </div>
+
+      <div class="faq-item reverse">
+        <div class="faq-content">
+          <h3 class="faq-q">Q8: Tôi có được đi thêm cùng bạn bè, người thân không?</h3>
+          <div class="faq-a">
+            <p>Bạn có thể tìm người đồng hành để có được trải nghiệm tốt nhất nha, và cũng đừng quên mua vé cho họ nữa. Workshop có giới hạn số lượng người trong đợt đăng kí đó nên bạn hãy theo dõi để đăng kí được sớm nhé.</p>
+          </div>
+        </div>
+        <img src="../assets/images/16903097376d2b650450b74469d2e124f5a11e20.png" alt="FAQ Image" class="faq-img">
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-content">
+          <h3 class="faq-q">Q9: Làm thế nào để đăng kí tham gia workshop?</h3>
+          <div class="faq-a">
+            <p>Bạn chỉ cần làm theo các bước sau:</p>
+            <ul>
+              <li>B1: Vào trang workshop, bấm vào nút “Đăng kí” và hoàn tất thanh toán.</li>
+              <li>B2: Có mặt tại địa điểm tổ chức trước 15 phút.</li>
+              <li>B3: Tận hưởng không gian và trải nghiệm tại workshop Gốm sứ xanh!</li>
+            </ul>
+            <p><em>Fact: Cuối buổi hãy cùng nán lại một xíu để chụp ảnh kỉ niệm nha!</em></p>
+          </div>
+        </div>
+        <img src="../assets/images/d3651eafe4a416d51768091ed530f2e8a56e862e.png" alt="FAQ Image" class="faq-img">
+      </div>
+
+    </div>
+  </main>
+  <script src="../app.js" defer></script>
+</body>
+</html>

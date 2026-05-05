@@ -1,0 +1,91 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< org.gomsu:discovery-service >---------------------
+[INFO] Building discovery-service 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:4.0.5:run (default-cli) > test-compile @ discovery-service >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ discovery-service ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ discovery-service ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ discovery-service ---
+[INFO] skip non existing resourceDirectory C:\Users\hieuk\Desktop\GomSuXanh\backend\discovery-service\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ discovery-service ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:4.0.5:run (default-cli) < test-compile @ discovery-service <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:4.0.5:run (default-cli) @ discovery-service ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.5)
+
+2026-05-01T19:13:14.557+07:00  INFO 28360 --- [           main] o.g.d.DiscoveryServiceApplication        : Starting DiscoveryServiceApplication using Java 22.0.2 with PID 28360 (C:\Users\hieuk\Desktop\GomSuXanh\backend\discovery-service\target\classes started by hieuk in C:\Users\hieuk\Desktop\GomSuXanh\backend\discovery-service)
+2026-05-01T19:13:14.562+07:00  INFO 28360 --- [           main] o.g.d.DiscoveryServiceApplication        : No active profile set, falling back to 1 default profile: "default"
+2026-05-01T19:13:16.417+07:00  INFO 28360 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=c08263e7-ea2c-379b-8df4-a5a236bab33a
+2026-05-01T19:13:16.803+07:00  INFO 28360 --- [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8761 (http)
+2026-05-01T19:13:16.823+07:00  INFO 28360 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-01T19:13:16.823+07:00  INFO 28360 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-01T19:13:16.917+07:00  INFO 28360 --- [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 2284 ms
+2026-05-01T19:13:18.269+07:00  INFO 28360 --- [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using JSON encoding codec LegacyJacksonJson
+2026-05-01T19:13:18.269+07:00  INFO 28360 --- [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using JSON decoding codec LegacyJacksonJson
+2026-05-01T19:13:18.462+07:00  INFO 28360 --- [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using XML encoding codec XStreamXml
+2026-05-01T19:13:18.462+07:00  INFO 28360 --- [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using XML decoding codec XStreamXml
+2026-05-01T19:13:18.667+07:00  INFO 28360 --- [           main] o.s.v.b.OptionalValidatorFactoryBean     : Failed to set up a Bean Validation provider: jakarta.validation.NoProviderFoundException: Unable to create a Configuration, because no Jakarta Validation provider could be found. Add a provider like Hibernate Validator (RI) to your classpath.
+2026-05-01T19:13:19.450+07:00  WARN 28360 --- [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2026-05-01T19:13:19.475+07:00  INFO 28360 --- [           main] o.s.c.n.eureka.InstanceInfoFactory       : Setting initial instance status as: STARTING
+2026-05-01T19:13:19.499+07:00  INFO 28360 --- [           main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
+2026-05-01T19:13:19.499+07:00  INFO 28360 --- [           main] com.netflix.discovery.DiscoveryClient    : Client configured to neither register nor query for data.
+2026-05-01T19:13:19.500+07:00  INFO 28360 --- [           main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1777637599500 with initial instances count: 0
+2026-05-01T19:13:19.545+07:00  INFO 28360 --- [           main] c.n.eureka.DefaultEurekaServerContext    : Initializing ...
+2026-05-01T19:13:19.547+07:00  INFO 28360 --- [           main] c.n.eureka.cluster.PeerEurekaNodes       : Adding new peer nodes [http://localhost:8761/eureka/]
+2026-05-01T19:13:19.655+07:00  INFO 28360 --- [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using JSON encoding codec LegacyJacksonJson
+2026-05-01T19:13:19.655+07:00  INFO 28360 --- [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using JSON decoding codec LegacyJacksonJson
+2026-05-01T19:13:19.655+07:00  INFO 28360 --- [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using XML encoding codec XStreamXml
+2026-05-01T19:13:19.655+07:00  INFO 28360 --- [           main] c.n.d.provider.DiscoveryJerseyProvider   : Using XML decoding codec XStreamXml
+2026-05-01T19:13:19.699+07:00  INFO 28360 --- [           main] c.n.eureka.cluster.PeerEurekaNodes       : Replica node URL:  http://localhost:8761/eureka/
+2026-05-01T19:13:19.708+07:00  INFO 28360 --- [           main] c.n.e.registry.AbstractInstanceRegistry  : Finished initializing remote region registries. All known remote regions: []
+2026-05-01T19:13:19.708+07:00  INFO 28360 --- [           main] c.n.eureka.DefaultEurekaServerContext    : Initialized
+2026-05-01T19:13:19.719+07:00  INFO 28360 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-05-01T19:13:19.779+07:00  INFO 28360 --- [           main] o.s.c.n.e.s.EurekaServiceRegistry        : Registering application UNKNOWN with eureka with status UP
+2026-05-01T19:13:19.793+07:00  INFO 28360 --- [       Thread-9] o.s.c.n.e.server.EurekaServerBootstrap   : isAws returned false
+2026-05-01T19:13:19.793+07:00  INFO 28360 --- [       Thread-9] o.s.c.n.e.server.EurekaServerBootstrap   : Initialized server context
+2026-05-01T19:13:19.793+07:00  INFO 28360 --- [       Thread-9] c.n.e.r.PeerAwareInstanceRegistryImpl    : Got 1 instances from neighboring DS node
+2026-05-01T19:13:19.794+07:00  INFO 28360 --- [       Thread-9] c.n.e.r.PeerAwareInstanceRegistryImpl    : Renew threshold is: 1
+2026-05-01T19:13:19.794+07:00  INFO 28360 --- [       Thread-9] c.n.e.r.PeerAwareInstanceRegistryImpl    : Changing status to UP
+2026-05-01T19:13:19.797+07:00  INFO 28360 --- [       Thread-9] e.s.EurekaServerInitializerConfiguration : Started Eureka Server
+2026-05-01T19:13:19.809+07:00  INFO 28360 --- [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8761 (http) with context path '/'
+2026-05-01T19:13:19.810+07:00  INFO 28360 --- [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8761
+2026-05-01T19:13:19.831+07:00  INFO 28360 --- [           main] o.g.d.DiscoveryServiceApplication        : Started DiscoveryServiceApplication in 6.407 seconds (process running for 7.213)
+2026-05-01T19:13:38.283+07:00  INFO 28360 --- [nio-8761-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-01T19:13:38.283+07:00  INFO 28360 --- [nio-8761-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-05-01T19:13:38.285+07:00  INFO 28360 --- [nio-8761-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-05-01T19:13:38.760+07:00  INFO 28360 --- [nio-8761-exec-2] c.n.e.registry.AbstractInstanceRegistry  : Registered instance API-GATEWAY/192.168.221.1:api-gateway:8080 with status UP (replication=false)
+2026-05-01T19:13:39.487+07:00  INFO 28360 --- [nio-8761-exec-3] c.n.e.registry.AbstractInstanceRegistry  : Registered instance API-GATEWAY/192.168.221.1:api-gateway:8080 with status UP (replication=true)
+2026-05-01T19:14:04.309+07:00  INFO 28360 --- [nio-8761-exec-4] c.n.e.registry.AbstractInstanceRegistry  : Registered instance IDENTITY-SERVICE/192.168.221.1:identity-service:8081 with status UP (replication=false)
+2026-05-01T19:14:04.825+07:00  INFO 28360 --- [nio-8761-exec-6] c.n.e.registry.AbstractInstanceRegistry  : Registered instance IDENTITY-SERVICE/192.168.221.1:identity-service:8081 with status UP (replication=true)
+2026-05-01T19:14:19.797+07:00  INFO 28360 --- [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 0ms
+2026-05-01T19:14:25.281+07:00  INFO 28360 --- [nio-8761-exec-1] c.n.e.registry.AbstractInstanceRegistry  : Registered instance CONTENT-SERVICE/192.168.221.1:content-service:8085 with status UP (replication=false)
+2026-05-01T19:14:25.795+07:00  INFO 28360 --- [nio-8761-exec-2] c.n.e.registry.AbstractInstanceRegistry  : Registered instance CONTENT-SERVICE/192.168.221.1:content-service:8085 with status UP (replication=true)
+2026-05-01T19:14:45.061+07:00  INFO 28360 --- [io-8761-exec-10] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ORDER-SERVICE/192.168.221.1:order-service:8083 with status UP (replication=false)
+2026-05-01T19:14:45.578+07:00  INFO 28360 --- [nio-8761-exec-1] c.n.e.registry.AbstractInstanceRegistry  : Registered instance ORDER-SERVICE/192.168.221.1:order-service:8083 with status UP (replication=true)
+2026-05-01T19:15:05.627+07:00  INFO 28360 --- [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance PRODUCT-SERVICE/192.168.221.1:product-service:8082 with status UP (replication=false)
+2026-05-01T19:15:06.144+07:00  INFO 28360 --- [io-8761-exec-10] c.n.e.registry.AbstractInstanceRegistry  : Registered instance PRODUCT-SERVICE/192.168.221.1:product-service:8082 with status UP (replication=true)
+2026-05-01T19:15:19.798+07:00  INFO 28360 --- [a-EvictionTimer] c.n.e.registry.AbstractInstanceRegistry  : Running the evict task with compensationTime 0ms
+2026-05-01T19:15:24.335+07:00  INFO 28360 --- [nio-8761-exec-8] c.n.e.registry.AbstractInstanceRegistry  : Registered instance WORKSHOP-SERVICE/192.168.221.1:workshop-service:8084 with status UP (replication=false)
+2026-05-01T19:15:24.840+07:00  INFO 28360 --- [nio-8761-exec-9] c.n.e.registry.AbstractInstanceRegistry  : Registered instance WORKSHOP-SERVICE/192.168.221.1:workshop-service:8084 with status UP (replication=true)

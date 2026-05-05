@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hoàn thành đơn hàng - Gốm Sứ Xanh</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../styles-pages.css">
+  <style>
+    .success-page {
+      padding: 64px 24px 120px;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    /* Checkout Steps Breadcrumb */
+    .checkout-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 80px;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--clr-forest);
+      font-size: 16px;
+    }
+    .step.active .step-num {
+      background: var(--clr-forest);
+      color: var(--clr-cream);
+    }
+    .step.completed .step-num {
+      background: rgba(148, 181, 120, 0.6);
+      color: var(--clr-forest);
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(148, 181, 120, 0.4);
+      color: var(--clr-forest);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .step-divider {
+      height: 1px;
+      width: 40px;
+      background: rgba(148, 181, 120, 0.4);
+    }
+
+    .success-title {
+      font-family: var(--font-heading);
+      font-size: 32px;
+      color: var(--clr-forest);
+      text-transform: uppercase;
+      margin-bottom: 48px;
+    }
+
+    .success-text {
+      font-size: 18px;
+      color: var(--clr-forest);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .btn-home {
+      display: inline-block;
+      margin-top: 48px;
+      background: var(--clr-forest);
+      color: var(--clr-cream);
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-home:hover {
+      background: var(--clr-leaf);
+    }
+  </style>
+</head>
+<body>
+  <main class="success-page">
+    
+    <div class="checkout-steps">
+      <div class="step completed"><div class="step-num">1</div> Giỏ hàng</div>
+      <div class="step-divider"></div>
+      <div class="step completed"><div class="step-num">2</div> Thanh toán</div>
+      <div class="step-divider"></div>
+      <div class="step active"><div class="step-num">3</div> Hoàn thành đơn hàng</div>
+    </div>
+
+    <h1 class="success-title">ĐẶT HÀNG THÀNH CÔNG</h1>
+    
+    <p class="success-text">Cảm ơn bạn. Đơn hàng của bạn đã được xác nhận.</p>
+    <p class="success-text">Bạn sẽ nhận được mail thông báo chi tiết đơn hàng trong thời gian sớm nhất.</p>
+
+    <a href="ho-so-ca-nhan_147-86.html#orders" class="btn-home">Xem lịch sử đơn hàng</a>
+
+  </main>
+
+  <script src="../app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đăng ký — Gốm Sứ Xanh</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../styles-pages.css">
+  <style>
+    .register-page {
+      min-height: 100vh;
+      background-image: url('../assets/images/6799477a82bcda0f3d8ceb8313f7b1cef21ffdcd.png');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+    }
+    .register-page::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(241,239,228,.72);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .register-page .nav { background: rgba(255,253,246,.92); }
+
+    .register-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      padding-top: calc(var(--nav-h) + 40px);
+      position: relative;
+      z-index: 1;
+    }
+
+    .register-box {
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .form-title {
+      
+      font-size: clamp(28px, 5vw, 40px);
+      font-weight: 900;
+      color: var(--clr-teal);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin: 0 0 32px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-label {
+      display: block;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--clr-forest);
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 15px 20px;
+      border: 1.5px solid rgba(148,181,120,.5);
+      border-radius: 12px;
+      background: rgba(255,253,246,.85);
+      
+      font-size: 15px;
+      color: var(--clr-forest);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .form-input::placeholder { color: #8a9a7a; }
+    .form-input:focus {
+      border-color: var(--clr-teal);
+      box-shadow: 0 0 0 4px rgba(46,125,96,.1);
+      background: var(--clr-cream);
+    }
+
+    .form-check-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 16px 0 22px;
+    }
+    .form-check-row input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--clr-leaf);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .form-check-label {
+      font-size: 14px;
+      color: var(--clr-forest);
+    }
+    .form-check-label a { color: var(--clr-teal); font-weight: 600; text-decoration: none; }
+
+    .form-submit {
+      width: 100%;
+      padding: 15px;
+      background: var(--clr-moss);
+      border: none;
+      border-radius: var(--radius-pill);
+      color: var(--clr-cream);
+      font-family: 'Afacad', Arial, sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .25s;
+      letter-spacing: .02em;
+      box-shadow: 0 4px 8px rgba(0,0,0,.15);
+    }
+    .form-submit:hover { background: var(--clr-teal); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.2); }
+
+    .form-divider {
+      text-align: center;
+      margin: 20px 0 10px;
+      font-size: 15px;
+      color: #7a8a6a;
+    }
+    .form-social-title {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--clr-forest);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .form-social-btns {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding-bottom: 40px;
+    }
+    .form-social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: var(--clr-cream);
+      border: 1.5px solid var(--clr-clay);
+      text-decoration: none;
+      font-size: 26px;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    }
+    .form-social-btn:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+  </style>
+</head>
+<body class="gsxpage register-page">
+
+  <!-- NAVBAR -->
+  <nav class="gsx-nav">
+    <div class="gsx-nav-inner">
+      <a class="gsx-nav-brand" href="trang-chu_417-354.html">
+        <img src="../assets/images/ea188f8baac92ab0012022a5ea61a0e65d086c2c.png" alt="Logo">
+        <span>GỐM SỨ XANH</span>
+      </a>
+      <div class="gsx-nav-links">
+        <a class="gsx-nav-link" href="trang-chu_417-354.html">Trang chủ</a>
+        <a class="gsx-nav-link" href="ve-chung-toi_1662-3482.html">Về chúng tôi</a>
+        <a class="gsx-nav-link" href="trang-workshop-real_1719-3931.html">Workshop</a>
+        <a class="gsx-nav-link" href="trang-san-pham_945-1348.html">Sản phẩm</a>
+        <a class="gsx-nav-link" href="trang-blog_29-2.html">Blog</a>
+      </div>
+      <div class="gsx-nav-actions">
+        <a class="gsx-nav-btn is-active" href="dang-nhap_839-134.html" id="navAccount" title="Tài khoản">Tài khoản</a>
+        <img class="gsx-nav-flag" src="../assets/images/9b34aad7bad2bbce2089b52760f4970386deffb6.png" alt="VN">
+        <img class="gsx-nav-flag" src="../assets/images/632be14a1b97bffb1dbc6c251283ddff51b3e613.png" alt="EN">
+      </div>
+    </div>
+  </nav>
+
+  <!-- FORM -->
+  <div class="register-wrap">
+    <div class="register-box">
+      <h1 class="form-title">Đăng ký</h1>
+
+      <div class="form-group">
+        <label class="form-label" for="reg-name">Họ và tên</label>
+        <input class="form-input" id="reg-name" type="text" placeholder="Họ và tên" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <input class="form-input" id="reg-email" type="email" placeholder="Email" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <input class="form-input" id="reg-phone" type="tel" placeholder="Số điện thoại" autocomplete="tel">
+      </div>
+      <div class="form-group">
+        <input class="form-input" id="reg-address" type="text" placeholder="Địa chỉ" autocomplete="street-address">
+      </div>
+      <div class="form-group">
+        <select class="form-input" id="reg-gender" style="color: var(--clr-forest);">
+          <option value="" disabled selected>Chọn giới tính</option>
+          <option value="MALE">Nam</option>
+          <option value="FEMALE">Nữ</option>
+          <option value="OTHER">Khác</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="reg-pass">Mật khẩu</label>
+        <input class="form-input" id="reg-pass" type="password" placeholder="Mật khẩu" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <input class="form-input" id="reg-pass2" type="password" placeholder="Xác nhận mật khẩu" autocomplete="new-password">
+      </div>
+
+      <div class="form-check-row">
+        <input type="checkbox" id="reg-agree">
+        <label class="form-check-label" for="reg-agree">Tôi đồng ý với <a href="#">Điều khoản &amp; Chính sách</a></label>
+      </div>
+
+      <button class="form-submit" id="registerBtn" type="button">Đăng ký</button>
+
+      <div class="form-divider">hoặc</div>
+      <div class="form-social-title">Đăng nhập bằng</div>
+      <div class="form-social-btns">
+        <a class="form-social-btn" href="#" title="Google">🔵</a>
+        <a class="form-social-btn" href="https://www.facebook.com/profile.php?id=100095447280090" target="_blank" title="Facebook">📘</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../app.js" defer></script>
+  <script>
+    document.getElementById('registerBtn').addEventListener('click', function () {
+      var name  = document.getElementById('reg-name').value.trim();
+      var email = document.getElementById('reg-email').value.trim();
+      var phone = document.getElementById('reg-phone').value.trim();
+      var address = document.getElementById('reg-address').value.trim();
+      var gender = document.getElementById('reg-gender').value;
+      var pass  = document.getElementById('reg-pass').value.trim();
+      var pass2 = document.getElementById('reg-pass2').value.trim();
+      var agree = document.getElementById('reg-agree').checked;
+      
+      if (!name || !email || !phone || !address || !gender || !pass) { alert('Vui lòng điền đầy đủ thông tin.'); return; }
+      if (pass !== pass2) { alert('Mật khẩu xác nhận không khớp.'); return; }
+      if (!agree) { alert('Vui lòng đồng ý với điều khoản.'); return; }
+      
+      var submitBtn = this;
+      var originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Đang xử lý...';
+      submitBtn.disabled = true;
+
+      var payload = {
+        username: name,
+        email: email,
+        phone: phone,
+        address: address,
+        gender: gender,
+        password: pass
+      };
+
+      fetch('http://localhost:8080/identity/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json().then(data => ({ status: res.status, body: data })))
+      .then(res => {
+        if (res.status === 200 || res.status === 201 || (res.body && res.body.code === 1000)) {
+          alert('Đăng ký thành công! Vui lòng đăng nhập.');
+          window.location.href = 'dang-nhap_839-134.html';
+        } else {
+          alert('Đăng ký thất bại: ' + (res.body.message || 'Lỗi hệ thống'));
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Lỗi kết nối đến máy chủ.');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      });
+    });
+  </script>
+</body>
+</html>

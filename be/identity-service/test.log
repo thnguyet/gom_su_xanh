@@ -1,0 +1,88 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< org.gomsu:identity-service >---------------------
+[INFO] Building identity-service 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.4.3:run (default-cli) > test-compile @ identity-service >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ identity-service ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ identity-service ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ identity-service ---
+[INFO] skip non existing resourceDirectory C:\Users\hieuk\Desktop\GomSuXanh\backend\identity-service\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ identity-service ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:3.4.3:run (default-cli) < test-compile @ identity-service <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.4.3:run (default-cli) @ identity-service ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.3)
+
+2026-05-01T19:13:53.080+07:00  INFO 15912 --- [identity-service] [           main] o.g.i.IdentityServiceApplication         : Starting IdentityServiceApplication using Java 22.0.2 with PID 15912 (C:\Users\hieuk\Desktop\GomSuXanh\backend\identity-service\target\classes started by hieuk in C:\Users\hieuk\Desktop\GomSuXanh\backend\identity-service)
+2026-05-01T19:13:53.083+07:00  INFO 15912 --- [identity-service] [           main] o.g.i.IdentityServiceApplication         : No active profile set, falling back to 1 default profile: "default"
+2026-05-01T19:13:54.466+07:00  INFO 15912 --- [identity-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-01T19:13:54.741+07:00  INFO 15912 --- [identity-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 257 ms. Found 3 JPA repository interfaces.
+2026-05-01T19:13:55.179+07:00  INFO 15912 --- [identity-service] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=a0f698ae-34bb-3b44-9472-88b3a8f84291
+2026-05-01T19:13:56.109+07:00  INFO 15912 --- [identity-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+2026-05-01T19:13:56.176+07:00  INFO 15912 --- [identity-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-01T19:13:56.178+07:00  INFO 15912 --- [identity-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.36]
+2026-05-01T19:13:56.335+07:00  INFO 15912 --- [identity-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-01T19:13:56.336+07:00  INFO 15912 --- [identity-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3197 ms
+2026-05-01T19:13:56.602+07:00  INFO 15912 --- [identity-service] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-01T19:13:56.720+07:00  INFO 15912 --- [identity-service] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.8.Final
+2026-05-01T19:13:56.834+07:00  INFO 15912 --- [identity-service] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-01T19:13:57.518+07:00  INFO 15912 --- [identity-service] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-01T19:13:57.576+07:00  INFO 15912 --- [identity-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-05-01T19:13:58.113+07:00  INFO 15912 --- [identity-service] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@774304ca
+2026-05-01T19:13:58.116+07:00  INFO 15912 --- [identity-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-05-01T19:13:58.269+07:00  INFO 15912 --- [identity-service] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 9.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-01T19:14:00.506+07:00  INFO 15912 --- [identity-service] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-01T19:14:00.641+07:00  INFO 15912 --- [identity-service] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-01T19:14:01.472+07:00  WARN 15912 --- [identity-service] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-01T19:14:03.407+07:00  INFO 15912 --- [identity-service] [           main] DiscoveryClientOptionalArgsConfiguration : Eureka HTTP Client uses RestTemplate.
+2026-05-01T19:14:03.491+07:00  WARN 15912 --- [identity-service] [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2026-05-01T19:14:03.541+07:00  INFO 15912 --- [identity-service] [           main] o.s.c.n.eureka.InstanceInfoFactory       : Setting initial instance status as: STARTING
+2026-05-01T19:14:03.607+07:00  INFO 15912 --- [identity-service] [           main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
+2026-05-01T19:14:03.619+07:00  INFO 15912 --- [identity-service] [           main] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-05-01T19:14:03.638+07:00  INFO 15912 --- [identity-service] [           main] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-05-01T19:14:03.638+07:00  INFO 15912 --- [identity-service] [           main] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-05-01T19:14:03.638+07:00  INFO 15912 --- [identity-service] [           main] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-05-01T19:14:03.638+07:00  INFO 15912 --- [identity-service] [           main] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-05-01T19:14:03.640+07:00  INFO 15912 --- [identity-service] [           main] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-05-01T19:14:03.640+07:00  INFO 15912 --- [identity-service] [           main] com.netflix.discovery.DiscoveryClient    : Application version is -1: true
+2026-05-01T19:14:03.640+07:00  INFO 15912 --- [identity-service] [           main] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-05-01T19:14:04.229+07:00  INFO 15912 --- [identity-service] [           main] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-05-01T19:14:04.231+07:00  INFO 15912 --- [identity-service] [           main] com.netflix.discovery.DiscoveryClient    : Starting heartbeat executor: renew interval is: 30
+2026-05-01T19:14:04.235+07:00  INFO 15912 --- [identity-service] [           main] c.n.discovery.InstanceInfoReplicator     : InstanceInfoReplicator onDemand update allowed rate per min is 4
+2026-05-01T19:14:04.238+07:00  INFO 15912 --- [identity-service] [           main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1777637644237 with initial instances count: 1
+2026-05-01T19:14:04.243+07:00  INFO 15912 --- [identity-service] [           main] o.s.c.n.e.s.EurekaServiceRegistry        : Registering application IDENTITY-SERVICE with eureka with status UP
+2026-05-01T19:14:04.245+07:00  INFO 15912 --- [identity-service] [           main] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1777637644245, current=UP, previous=STARTING]
+2026-05-01T19:14:04.248+07:00  INFO 15912 --- [identity-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_IDENTITY-SERVICE/192.168.221.1:identity-service:8081: registering service...
+2026-05-01T19:14:04.280+07:00  INFO 15912 --- [identity-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/'
+2026-05-01T19:14:04.281+07:00  INFO 15912 --- [identity-service] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8081
+2026-05-01T19:14:04.300+07:00  INFO 15912 --- [identity-service] [           main] o.g.i.IdentityServiceApplication         : Started IdentityServiceApplication in 11.881 seconds (process running for 12.51)
+2026-05-01T19:14:04.311+07:00  INFO 15912 --- [identity-service] [foReplicator-%d] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_IDENTITY-SERVICE/192.168.221.1:identity-service:8081 - registration status: 204
