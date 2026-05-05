@@ -10,19 +10,6 @@
 ![RabbitMQ](https://img.shields.io/badge/Rabbitmq-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)
 
 
-> [!IMPORTANT]
-> ## 📌 Quy tắc & Ràng buộc hệ thống
-> 1. **Định danh người dùng**: 
->    - Cho phép trùng **Họ tên (Username)**.
->    - **Email** và **Số điện thoại** bắt buộc phải là duy nhất (Unique).
-> 2. **Truy cập công khai**:
->    - Khách có thể xem: Trang chủ, Về chúng tôi, Workshop, Blog, và toàn bộ danh mục Sản phẩm mà không cần đăng nhập.
->    - Chỉ yêu cầu đăng nhập khi: Đặt hàng, Đăng ký workshop, hoặc vào trang Hồ sơ cá nhân.
-> 3. **Tài khoản Quản trị (Bypass)**:
->    - Tài khoản: `admin` / Mật khẩu: `admin` (Dùng để truy cập nhanh trang quản trị).
-> 4. **Cấu trúc thư mục**: 
->    - Phải giữ đúng cấu trúc `be/`, `fe-admin/`, `fe-user/` để hệ thống hoạt động ổn định.
-
 ---
 
 **Gốm Sứ Xanh** là một hệ thống thương mại điện tử hiện đại chuyên cung cấp các sản phẩm gốm sứ thủ công nghệ thuật và các buổi workshop trải nghiệm làm gốm.
