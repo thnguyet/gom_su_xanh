@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sản phẩm - Gốm Sứ Xanh</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../styles-pages.css">
+  <style>
+    .category-scroll {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      padding: 20px 48px;
+      margin-bottom: 40px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      max-width: 1280px;
+      margin: 0 auto 40px;
+    }
+    .category-scroll::-webkit-scrollbar { display: none; }
+    .category-card {
+      position: relative;
+      flex: 0 0 220px;
+      height: 320px;
+      border-radius: 12px;
+      overflow: hidden;
+      scroll-snap-align: start;
+      text-decoration: none;
+      display: block;
+      border: 1px solid rgba(148,181,120,.3);
+      box-shadow: 0 4px 20px rgba(28,61,30,.08);
+      transition: transform 0.3s ease;
+    }
+    .category-card:hover { transform: translateY(-4px); }
+    .category-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .category-card .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(28,61,30,0.8) 0%, rgba(28,61,30,0.2) 100%);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 24px;
+    }
+    .category-card h3 {
+      color: var(--clr-cream);
+      font-family: var(--font-heading);
+      font-size: 22px;
+      margin: 0;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .products-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      max-width: 1160px;
+      margin: 0 auto 32px;
+      padding: 0 40px;
+    }
+    .product-count {
+      color: var(--clr-forest);
+      font-size: 16px;
+      opacity: 0.8;
+      margin-bottom: 6px;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 64px;
+      padding-bottom: 80px;
+    }
+    .page-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      color: var(--clr-forest);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .page-btn:hover { background: rgba(148,181,120,.2); }
+    .page-btn.is-active {
+      background: var(--clr-moss);
+      color: var(--clr-cream);
+    }
+    .page-next { width: auto; padding: 0 16px; }
+
+    /* Search Box */
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: var(--clr-cream);
+      border: 1.5px solid var(--clr-moss);
+      border-radius: 100px;
+      padding: 4px 8px 4px 20px;
+      width: 280px;
+      transition: all 0.3s;
+      margin-bottom: 6px;
+    }
+    .search-box:focus-within {
+      box-shadow: 0 0 0 3px rgba(148,181,120,.2);
+      border-color: var(--clr-teal);
+    }
+    .search-box input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 14px;
+      color: var(--clr-forest);
+      width: 100%;
+      font-family: inherit;
+    }
+    .search-box button {
+      background: var(--clr-moss);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 14px;
+    }
+    .search-box button:hover { background: var(--clr-teal); }
+
+    /* Filter Bar */
+    .filter-bar {
+      max-width: 1160px;
+      margin: 0 auto 32px;
+      padding: 0 40px;
+      display: flex;
+      align-items: flex-start; /* Căn từ trên xuống */
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .filter-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 36px; /* Đẩy xuống để ngang hàng với thanh trượt (vượt qua phần chữ số phía trên) */
+    }
+    .gsx-btn-sm {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: var(--clr-moss);
+      color: white;
+    }
+    .gsx-btn-sm:hover { background: var(--clr-teal); transform: translateY(-1px); }
+    .gsx-btn-sm.btn-outline {
+      background: transparent;
+      border: 1px solid var(--clr-moss);
+      color: var(--clr-moss);
+    }
+    .gsx-btn-sm.btn-outline:hover {
+      background: rgba(148,181,120,.1);
+    }
+
+    /* Range Slider */
+    .price-range-wrapper {
+      width: 400px;
+      padding: 0 10px;
+    }
+    .price-slider-container {
+      position: relative;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 10px;
+      margin-top: 25px;
+    }
+    .price-slider-track {
+      position: absolute;
+      height: 100%;
+      background: var(--clr-moss);
+      border-radius: 10px;
+      z-index: 1;
+    }
+    .range-input {
+      position: relative;
+    }
+    .range-input input {
+      position: absolute;
+      width: 100%;
+      height: 4px;
+      top: -4px;
+      background: none;
+      pointer-events: none;
+      -webkit-appearance: none;
+      appearance: none;
+      z-index: 2;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: white;
+      pointer-events: auto;
+      -webkit-appearance: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      cursor: grab;
+      border: 3px solid var(--clr-moss);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+    input[type="range"]::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(0.95);
+    }
+
+    .slider-ticks {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+      padding: 0 2px;
+    }
+    .tick {
+      width: 2px;
+      height: 6px;
+      background: #ccc;
+      position: relative;
+    }
+    .tick::after {
+      content: attr(data-label);
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: #888;
+      white-space: nowrap;
+    }
+
+    .price-values {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: 15px;
+      color: var(--clr-forest);
+      font-weight: 700;
+      font-family: var(--font-heading);
+    }
+
+    @media (max-width: 900px) {
+      .products-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        text-align: center;
+      }
+      .search-box {
+        width: 100%;
+        max-width: 400px;
+      }
+      .product-count {
+        margin-bottom: 0;
+      }
+      .filter-bar {
+        justify-content: center;
+        padding: 0 20px;
+        gap: 20px;
+      }
+      .price-range-wrapper {
+        width: 100%;
+        max-width: 400px;
+      }
+      .filter-actions {
+        margin-top: 0;
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="page-main">
+    
+    <div class="category-scroll" id="categoryScroll">
+      <!-- Categories will be dynamically loaded here -->
+    </div>
+
+    <!-- Products Header -->
+    <div class="products-header">
+      <div class="product-count" id="productCount" style="width: 280px;">Đang tải...</div>
+      <h1 class="section-title all-caps" style="margin:0">SẢN PHẨM TỪ GỐM SỨ XANH</h1>
+      <div class="search-box">
+        <input type="text" id="productSearchInput" placeholder="Tìm tên sản phẩm...">
+        <button id="productSearchBtn">🔍</button>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="price-range-wrapper">
+        <div class="price-values">
+          <span id="minPriceVal">0đ</span>
+          <span>-</span>
+          <span id="maxPriceVal">5.000.000đ</span>
+        </div>
+        <div class="price-slider-container">
+          <div class="price-slider-track" id="sliderTrack"></div>
+          <div class="range-input">
+            <input type="range" id="minPriceInput" min="0" max="5000000" value="0" step="10000">
+            <input type="range" id="maxPriceInput" min="0" max="5000000" value="5000000" step="10000">
+          </div>
+          <div class="slider-ticks">
+            <div class="tick" data-label="0"></div>
+            <div class="tick" data-label="1M"></div>
+            <div class="tick" data-label="2M"></div>
+            <div class="tick" data-label="3M"></div>
+            <div class="tick" data-label="4M"></div>
+            <div class="tick" data-label="5M"></div>
+          </div>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button id="applyPriceFilterBtn" class="gsx-btn-sm">Lọc giá</button>
+        <button id="resetPriceFilterBtn" class="gsx-btn-sm btn-outline">Xóa lọc</button>
+      </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="cards-section" style="padding-top: 0;">
+      <div class="cards-grid" id="productsGrid">
+        <!-- Products will be injected here via JS -->
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="productsPagination">
+        <!-- Pagination will be injected here via JS -->
+      </div>
+    </div>
+  </main>
+
+  <script src="../app.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var currentPage = 0;
+      var pageSize = 8;
+      var currentCategoryId = null;
+      var maxPriceLimit = 5000000;
+
+      function loadProducts(page) {
+        var keyword = document.getElementById('productSearchInput').value || '';
+        var minPrice = document.getElementById('minPriceInput').value;
+        var maxPrice = document.getElementById('maxPriceInput').value;
+        
+        var url = 'http://localhost:8080/product/products/all?page=' + page + '&size=' + pageSize;
+        if (currentCategoryId) {
+          url += '&categoryId=' + currentCategoryId;
+        }
+        if (keyword) {
+          url += '&keyword=' + encodeURIComponent(keyword);
+        }
+        if (minPrice > 0) url += '&minPrice=' + minPrice;
+        if (maxPrice < maxPriceLimit) url += '&maxPrice=' + maxPrice;
+        fetch(url)
+          .then(res => res.json())
+          .then(data => {
+            // Spring Data JPA Page format
+            var pageData = data.data || data; // depending on ApiResponse wrapper
+            if (data.code === 1000 && data.result) {
+              pageData = data.result;
+            }
+            
+            var content = pageData.content || [];
+            var totalElements = pageData.totalElements || 0;
+            var totalPages = pageData.totalPages || 0;
+            
+            // Update Header
+            var fromItem = page * pageSize + 1;
+            var toItem = Math.min((page + 1) * pageSize, totalElements);
+            if (totalElements === 0) {
+              document.getElementById('productCount').textContent = 'Không có sản phẩm nào.';
+            } else {
+              document.getElementById('productCount').textContent = 'Hiển thị ' + fromItem + '-' + toItem + ' / ' + totalElements + ' sản phẩm';
+            }
+
+            // Render Products
+            var grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+            content.forEach(p => {
+              var imageUrl = (p.imageUrls && p.imageUrls.length > 0) ? p.imageUrls[0] : '../assets/images/placeholder.jpg';
+              var priceStr = new Intl.NumberFormat('vi-VN').format(p.price || 0) + 'VNĐ';
+              var detailUrl = 'trang-san-pham-chi-tiet.html?slug=' + (p.slug || p.id);
+              
+              var isOutOfStock = (p.stockQuantity <= 0);
+              var btnText = isOutOfStock ? 'Hết hàng' : 'Mua ngay';
+              var btnStyle = isOutOfStock ? 'background: #ccc; color: #666; cursor: not-allowed;' : '';
+              
+              var card = document.createElement('div');
+              card.className = 'gsx-card';
+              card.id = 'product-' + p.id;
+              card.innerHTML = `
+                <a href="${detailUrl}" class="gsx-card-link-mask"></a>
+                <img src="${imageUrl}" alt="${p.name}">
+                <div class="gsx-card-body">
+                  <h3 class="gsx-card-title">${p.name}</h3>
+                  <p class="gsx-card-price">${priceStr}</p>
+                  <a href="${isOutOfStock ? '#' : detailUrl}" class="gsx-card-btn" style="${btnStyle}">${btnText}</a>
+                </div>
+              `;
+              grid.appendChild(card);
+            });
+
+            // Kiểm tra và cuộn đến sản phẩm nếu có ID trong URL
+            var urlParams = new URLSearchParams(window.location.search);
+            var targetId = urlParams.get('id');
+            if (targetId) {
+              setTimeout(() => {
+                var element = document.getElementById('product-' + targetId);
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  // Highlight nhẹ
+                  element.style.outline = '2px solid var(--clr-leaf)';
+                  element.style.transition = 'outline 0.5s';
+                  setTimeout(() => { element.style.outline = 'none'; }, 2000);
+                }
+              }, 300);
+            }
+
+            // Render Pagination
+            var pagination = document.getElementById('productsPagination');
+            pagination.innerHTML = '';
+            if (totalPages > 1) {
+              for (let i = 0; i < totalPages; i++) {
+                let btn = document.createElement('a');
+                btn.href = '#';
+                btn.className = 'page-btn' + (i === page ? ' is-active' : '');
+                btn.textContent = i + 1;
+                btn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  currentPage = i;
+                  loadProducts(currentPage);
+                  window.scrollTo({ top: 300, behavior: 'smooth' });
+                });
+                pagination.appendChild(btn);
+              }
+            }
+          })
+          .catch(err => {
+            console.error('Lỗi khi tải sản phẩm:', err);
+            document.getElementById('productCount').textContent = 'Lỗi kết nối máy chủ.';
+          });
+      }
+
+      function loadCategories() {
+        fetch('http://localhost:8080/product/categories?size=4')
+          .then(res => res.json())
+          .then(data => {
+            var categories = data.content || (data.result ? data.result.content : []) || (Array.isArray(data) ? data : []);
+            var scroll = document.getElementById('categoryScroll');
+            
+            // Add "All" Category
+            var allHtml = `
+              <a href="#" class="category-card" data-id="null" style="border: 3px solid var(--clr-moss)">
+                <img src="../assets/images/3838a9d43772b2011d5823350fb83965460ef7e7.jpg" alt="Tất cả">
+                <div class="overlay"><h3>Tất cả<br>sản phẩm</h3></div>
+              </a>
+            `;
+            
+            var html = allHtml;
+            categories.forEach(cat => {
+              var catImg = cat.imageUrl || "../assets/images/placeholder.jpg";
+              html += `
+                <a href="#" class="category-card" data-id="${cat.id}">
+                  <img src="${catImg}" alt="${cat.name}">
+                  <div class="overlay"><h3>${cat.name}</h3></div>
+                </a>
+              `;
+            });
+            scroll.innerHTML = html;
+
+            // Add Click Events
+            scroll.querySelectorAll('.category-card').forEach(card => {
+              card.addEventListener('click', function(e) {
+                e.preventDefault();
+                var id = this.getAttribute('data-id');
+                currentCategoryId = (id === 'null') ? null : id;
+                currentPage = 0;
+                loadProducts(currentPage);
+                
+                // Highlight active category
+                scroll.querySelectorAll('.category-card').forEach(c => c.style.border = '1px solid rgba(148,181,120,.3)');
+                this.style.border = '3px solid var(--clr-moss)';
+              });
+            });
+          })
+          .catch(err => console.error('Lỗi tải danh mục:', err));
+      }
+
+      loadCategories();
+      loadProducts(currentPage);
+
+      // Search Event
+      document.getElementById('productSearchBtn').addEventListener('click', function() {
+        currentPage = 0;
+        loadProducts(currentPage);
+      });
+
+      document.getElementById('productSearchInput').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+          currentPage = 0;
+          loadProducts(currentPage);
+        }
+      });
+
+      // Price Filter Events
+      document.getElementById('applyPriceFilterBtn').addEventListener('click', function() {
+        currentPage = 0;
+        loadProducts(currentPage);
+      });
+
+      document.getElementById('resetPriceFilterBtn').addEventListener('click', function() {
+        document.getElementById('minPriceInput').value = 0;
+        document.getElementById('maxPriceInput').value = maxPriceLimit;
+        updateSlider();
+        currentPage = 0;
+        loadProducts(currentPage);
+      });
+
+      // Slider Logic
+      var minInput = document.getElementById('minPriceInput');
+      var maxInput = document.getElementById('maxPriceInput');
+      var track = document.getElementById('sliderTrack');
+      var minVal = document.getElementById('minPriceVal');
+      var maxVal = document.getElementById('maxPriceVal');
+      var priceGap = 100000;
+
+      function updateSlider() {
+        let minP = parseInt(minInput.value);
+        let maxP = parseInt(maxInput.value);
+
+        if (maxP - minP < priceGap) {
+          if (event && event.target === minInput) minInput.value = maxP - priceGap;
+          else maxInput.value = minP + priceGap;
+        }
+
+        let percentMin = (minInput.value / minInput.max) * 100;
+        let percentMax = (maxInput.value / maxInput.max) * 100;
+
+        track.style.left = percentMin + "%";
+        track.style.right = (100 - percentMax) + "%";
+        
+        minVal.textContent = new Intl.NumberFormat('vi-VN').format(minInput.value) + 'đ';
+        maxVal.textContent = new Intl.NumberFormat('vi-VN').format(maxInput.value) + 'đ';
+      }
+
+      minInput.addEventListener('input', updateSlider);
+      maxInput.addEventListener('input', updateSlider);
+      updateSlider();
+    });
+  </script>
+</body>
+</html>

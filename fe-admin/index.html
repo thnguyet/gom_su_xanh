@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gốm Sứ Xanh — Quản trị</title>
+  <meta name="description" content="Trang quản trị hệ thống Gốm Sứ Xanh">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <!-- ========== LOGIN SCREEN ========== -->
+  <div class="adm-login" id="admLogin">
+    <div class="adm-login-bg">
+      <div class="adm-login-orb adm-login-orb--1"></div>
+      <div class="adm-login-orb adm-login-orb--2"></div>
+      <div class="adm-login-orb adm-login-orb--3"></div>
+    </div>
+    <div class="adm-login-card">
+      <div class="adm-login-brand">
+        <img src="assets/images/3881c02d09f19f051c98ad68b3b25157f434e7e3.png" alt="Logo" style="width: 64px; height: 64px; object-fit: contain;">
+        <h1 class="adm-login-title">GỐM SỨ XANH</h1>
+        <p class="adm-login-subtitle">Hệ thống quản trị</p>
+      </div>
+      <form class="adm-login-form" id="admLoginForm" autocomplete="off">
+        <div class="adm-login-field">
+          <label for="admUser">Tài khoản</label>
+          <div class="adm-login-input-wrap">
+            <span class="adm-login-input-icon">👤</span>
+            <input type="text" id="admUser" placeholder="Nhập tài khoản" required autocomplete="username">
+          </div>
+        </div>
+        <div class="adm-login-field">
+          <label for="admPass">Mật khẩu</label>
+          <div class="adm-login-input-wrap">
+            <span class="adm-login-input-icon">🔒</span>
+            <input type="password" id="admPass" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+          </div>
+        </div>
+        <p class="adm-login-error" id="admLoginError"></p>
+        <button type="submit" class="adm-login-btn" id="admLoginBtn">
+          <span>Đăng nhập</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+      <a href="http://localhost:3000" class="adm-login-back">← Quay về trang chủ</a>
+    </div>
+  </div>
+
+  <!-- ========== DASHBOARD ========== -->
+  <div class="adm-app" id="admApp" style="display:none;">
+    <!-- Sidebar -->
+    <aside class="adm-sidebar" id="admSidebar">
+      <div class="adm-sidebar-brand">
+        <img src="assets/images/3881c02d09f19f051c98ad68b3b25157f434e7e3.png" alt="Logo" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;">
+        <div>
+          <div class="adm-sidebar-name">GỐM SỨ XANH</div>
+          <div class="adm-sidebar-role">Quản trị viên</div>
+        </div>
+      </div>
+      <nav class="adm-nav">
+        <button class="adm-nav-item is-active" data-section="dashboard">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>Tổng quan</span>
+        </button>
+        <button class="adm-nav-item" data-section="products">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></svg>
+          <span>Sản phẩm</span>
+        </button>
+        <button class="adm-nav-item" data-section="orders">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+          <span>Đơn hàng</span>
+        </button>
+        <button class="adm-nav-item" data-section="shipping">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+          <span>Vận chuyển</span>
+        </button>
+        <button class="adm-nav-item" data-section="payments">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          <span>Thanh toán</span>
+        </button>
+        <button class="adm-nav-item" data-section="workshops">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          <span>Workshop</span>
+        </button>
+        <button class="adm-nav-item" data-section="workshopRegs">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span>ĐK Workshop</span>
+        </button>
+        <button class="adm-nav-item" data-section="posts">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Bài viết</span>
+        </button>
+        <button class="adm-nav-item" data-section="reviews">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span>Đánh giá</span>
+        </button>
+        <button class="adm-nav-item" data-section="users">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Người dùng</span>
+        </button>
+      </nav>
+      <button class="adm-nav-item adm-nav-logout" id="admLogout">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        <span>Đăng xuất</span>
+      </button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="adm-main" id="admMain">
+      <!-- Top bar -->
+      <header class="adm-topbar">
+        <button class="adm-menu-toggle" id="admMenuToggle">☰</button>
+        <h2 class="adm-topbar-title" id="admTopTitle">Tổng quan</h2>
+        <div class="adm-topbar-right">
+          <span class="adm-topbar-date" id="admDate"></span>
+          <span class="adm-topbar-avatar">👤 Admin</span>
+        </div>
+      </header>
+
+      <!-- Content area -->
+      <div class="adm-content" id="admContent">
+        <!-- Sections will be rendered by JS -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="adm-toast" id="admToast"></div>
+
+  <!-- Thư viện Chart.js cho biểu đồ -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

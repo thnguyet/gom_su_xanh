@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thanh toán - Gốm Sứ Xanh</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../styles-pages.css">
+  <style>
+    .checkout-page {
+      padding: 48px 24px 96px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Checkout Steps Breadcrumb */
+    .checkout-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 64px;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--clr-forest);
+      font-size: 16px;
+    }
+    .step.active .step-num {
+      background: var(--clr-forest);
+      color: var(--clr-cream);
+    }
+    .step.completed .step-num {
+      background: rgba(148, 181, 120, 0.6);
+      color: var(--clr-forest);
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(148, 181, 120, 0.4);
+      color: var(--clr-forest);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .step-divider {
+      height: 1px;
+      width: 40px;
+      background: rgba(148, 181, 120, 0.4);
+    }
+
+    .checkout-title {
+      font-family: var(--font-heading);
+      font-size: 32px;
+      color: var(--clr-forest);
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 64px;
+      align-items: start;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--clr-forest);
+      margin-bottom: 24px;
+    }
+
+    /* Form Fields */
+    .form-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group {
+      flex: 1;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--clr-forest);
+      font-size: 15px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid rgba(148, 181, 120, 0.6);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--clr-forest);
+      font-family: inherit;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--clr-forest);
+    }
+
+    .address-box {
+      background: rgba(214, 228, 203, 0.5);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .login-prompt {
+      margin-bottom: 24px;
+      font-size: 15px;
+      color: var(--clr-forest);
+    }
+    .login-prompt a {
+      color: var(--clr-teal);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    /* Order Summary Side */
+    .order-summary {
+      padding-top: 16px;
+    }
+    .order-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .order-item img {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .order-item-info flex {
+      flex: 1;
+    }
+    .order-item-title {
+      font-weight: 700;
+      color: var(--clr-forest);
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+    .order-item-code {
+      font-size: 13px;
+      color: rgba(28, 61, 30, 0.7);
+    }
+    .order-item-price {
+      font-weight: 700;
+      color: var(--clr-forest);
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      font-size: 16px;
+      color: var(--clr-forest);
+      padding-bottom: 16px;
+      border-bottom: 1px dashed rgba(148, 181, 120, 0.4);
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row.total {
+      font-size: 20px;
+      font-weight: 700;
+      border-bottom: 1px solid rgba(148, 181, 120, 0.4);
+    }
+
+    /* Payment Methods */
+    .payment-method {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 32px;
+      margin-bottom: 16px;
+      color: var(--clr-forest);
+      font-weight: 500;
+    }
+    .payment-method input[type="radio"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--clr-forest);
+    }
+    
+    .bank-logos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+    .bank-logos img {
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .btn-place-order {
+      display: block;
+      width: 100%;
+      background: var(--clr-forest);
+      color: var(--clr-cream);
+      text-align: center;
+      padding: 18px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-place-order:hover {
+      background: var(--clr-leaf);
+    }
+
+    /* Bank Transfer Info Box */
+    .bank-transfer-info {
+      display: none; /* Hidden by default */
+      background: #fff;
+      border: 1.5px dashed var(--clr-moss);
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 24px;
+      animation: fadeIn 0.3s ease-out;
+    }
+    .bank-transfer-info.is-visible {
+      display: block;
+    }
+    .bt-title {
+      font-weight: 700;
+      color: var(--clr-teal);
+      margin-bottom: 16px;
+      text-align: center;
+      text-transform: uppercase;
+      font-size: 16px;
+    }
+    .bt-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 16px;
+      align-items: center;
+    }
+    .bt-qr {
+      text-align: center;
+    }
+    .bt-qr img {
+      width: 100%;
+      max-width: 160px;
+      border: 1px solid #eee;
+      padding: 8px;
+      background: #fff;
+      border-radius: 8px;
+    }
+    .bt-details {
+      font-size: 14px;
+      color: var(--clr-forest);
+    }
+    .bt-row {
+      margin-bottom: 8px;
+    }
+    .bt-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 2px;
+    }
+    .bt-value {
+      font-weight: 700;
+    }
+    .bt-copy {
+      display: inline-block;
+      margin-left: 8px;
+      cursor: pointer;
+      color: var(--clr-teal);
+      font-size: 12px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+      .checkout-grid { grid-template-columns: 1fr; gap: 48px; }
+      .checkout-steps { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="checkout-page">
+    
+    <div class="checkout-steps">
+      <div class="step completed"><div class="step-num">1</div> Giỏ hàng</div>
+      <div class="step-divider"></div>
+      <div class="step active"><div class="step-num">2</div> Thanh toán</div>
+      <div class="step-divider"></div>
+      <div class="step"><div class="step-num">3</div> Hoàn thành đơn hàng</div>
+    </div>
+
+    <h1 class="checkout-title">Thanh toán</h1>
+
+    <div class="checkout-grid">
+      
+      <!-- Personal Info -->
+      <div class="personal-info">
+        <h2 class="section-title">Thông tin cá nhân</h2>
+        
+        <div class="login-prompt">
+          Bạn đã có tài khoản? <a href="dang-nhap_839-134.html">Đăng nhập</a>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label">Họ và tên</label>
+          <input type="text" class="form-input" id="checkout-name">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="checkout-email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số điện thoại</label>
+            <input type="tel" class="form-input" id="checkout-phone">
+          </div>
+        </div>
+
+        <div class="address-box">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Đơn vị vận chuyển</label>
+              <select class="form-input" id="checkout-shipping-method" required>
+                <option value="">Đang tải đơn vị vận chuyển...</option>
+              </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phương thức thanh toán</label>
+                <select class="form-input" id="checkout-payment-method">
+                  <option value="1">Chuyển khoản ngân hàng</option>
+                  <option value="2">Thanh toán khi nhận hàng (COD)</option>
+                </select>
+              </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Địa chỉ</label>
+            <input type="text" class="form-input" id="checkout-address">
+          </div>
+        </div>
+
+        <!-- QR & Bank Info (Dynamic) -->
+        <div id="bankTransferBox" class="bank-transfer-info">
+          <div class="bt-title">Thông tin chuyển khoản</div>
+          <div class="bt-grid">
+            <div class="bt-qr">
+              <img src="../assets/images/qr.jpg" alt="QR Thanh toán" id="checkoutQrImg">
+              <div style="font-size: 11px; color: #888; margin-top: 8px;">Quét mã để thanh toán</div>
+            </div>
+            <div class="bt-details">
+              <div class="bt-row">
+                <div class="bt-label">Chủ tài khoản</div>
+                <div class="bt-value">NGUYEN THU NGUYET</div>
+              </div>
+              <div class="bt-row">
+                <div class="bt-label">Số tài khoản</div>
+                <div class="bt-value">0683834868926 <span class="bt-copy" onclick="navigator.clipboard.writeText('0683834868926'); alert('Đã sao chép STK!')">📋</span></div>
+              </div>
+              <div class="bt-row">
+                <div class="bt-label">Ngân hàng</div>
+                <div class="bt-value">MB BANK (Ngân hàng Quân đội)</div>
+              </div>
+              <div class="bt-row">
+                <div class="bt-label">Số tiền cần chuyển</div>
+                <div class="bt-value" id="btAmount" style="color: #d32f2f; font-size: 18px;">0 VNĐ</div>
+              </div>
+              <div class="bt-row">
+                <div class="bt-label">Nội dung chuyển khoản</div>
+                <div class="bt-value" id="btContent">GSX_THANHTOAN</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section-title" style="margin-top: 40px;">Thông tin bổ sung</h2>
+        <div class="form-group">
+          <label class="form-label">Ghi chú đơn hàng (tùy chọn)</label>
+          <textarea class="form-input" rows="3" placeholder="Ghi chú về đơn hàng (ví dụ thời gian hay địa chỉ chi tiết hơn)"></textarea>
+        </div>
+        <div style="font-size: 13px; color: rgba(28, 61, 30, 0.7); margin-top: 16px; line-height: 1.5;">
+          Sau khi hoàn thành thanh toán, chúng tôi sẽ gửi bạn đơn xác nhận đã thanh toán thành công. Đơn hàng được giao đến bạn trong vòng 1-3 ngày (Hà Nội), 3-5 ngày (các tỉnh thành khác).
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <h2 class="section-title">Thông tin đơn hàng</h2>
+        
+        <div id="checkoutItemsContainer">
+          <div style="text-align: center; color: var(--clr-forest);">Đang tải thông tin...</div>
+        </div>
+
+        <div class="summary-row" style="margin-top: 24px;">
+          <span>Tạm tính</span>
+          <span id="checkoutSubtotal">0 VNĐ</span>
+        </div>
+        <div class="summary-row">
+          <span>Phí vận chuyển</span>
+          <span id="checkoutShippingFee">0 VNĐ</span>
+        </div>
+        <div class="summary-row total">
+          <span>Tổng cộng</span>
+          <span id="checkoutTotal">0 VNĐ</span>
+        </div>
+
+        <div class="bank-logos">
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 12px; padding: 10px 0;">
+            <img src="../assets/images/vietcombank.png" alt="Vietcombank" title="Vietcombank" style="height: 25px; margin: 4px;">
+            <img src="../assets/images/techcombank.png" alt="Techcombank" title="Techcombank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/bidv.png" alt="BIDV" title="BIDV" style="height: 25px; margin: 4px;">
+            <img src="../assets/images/mbbank.png" alt="MBBank" title="MBBank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/vietinbank.png" alt="VietinBank" title="VietinBank" style="height: 25px; margin: 4px;">
+            <img src="../assets/images/agribank.png" alt="Agribank" title="Agribank" style="height: 25px; margin: 4px;">
+            <img src="../assets/images/tpbank.png" alt="TPBank" title="TPBank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/vpbank.png" alt="VPBank" title="VPBank" style="height: 25px; margin: 4px;">
+            <img src="../assets/images/acb.png" alt="ACB" title="ACB" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/sacombank.png" alt="Sacombank" title="Sacombank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/msb.png" alt="MSB" title="MSB" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/hdbank.png" alt="HDBank" title="HDBank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/abbank.png" alt="ABBANK" title="ABBANK" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/acb.png" alt="ACB" title="ACB" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/anz.png" alt="ANZ" title="ANZ" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/bacabank.png" alt="Bac A Bank" title="Bac A Bank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/baovietbank.png" alt="Bao Viet Bank" title="Bao Viet Bank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/bvbank.png" alt="BVBank" title="BVBank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/cimb.png" alt="CIMB" title="CIMB" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/eximbank.png" alt="Eximbank" title="Eximbank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/gpbank.png" alt="GPBank" title="GPBank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/hsbc.png" alt="HSBC" title="HSBC" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/namabank.png" alt="Nam A Bank" title="Nam A Bank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/ncb.png" alt="NCB" title="NCB" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/ocb.png" alt="OCB" title="OCB" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/pgbank.png" alt="PGBank" title="PGBank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/publicbank.png" alt="Public Bank" title="Public Bank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/pvcombank.png" alt="PVcomBank" title="PVcomBank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/saigonbank.png" alt="SaigonBank" title="SaigonBank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/scb.png" alt="SCB" title="SCB" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/seabank.png" alt="SeABank" title="SeABank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/shb.png" alt="SHB" title="SHB" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/uob.png" alt="UOB" title="UOB" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/vib.png" alt="VIB" title="VIB" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/vietabank.png" alt="VietA Bank" title="VietA Bank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/vietbank.png" alt="VietBank" title="VietBank" style="height: 20px; margin: 4px;">
+            <img src="../assets/images/wooribank.png" alt="Wooribank" title="Wooribank" style="height: 20px; margin: 4px;">
+          </div>
+          <div style='font-size:12px;color:#777;text-align:center;width:100%;'>Hỗ trợ thanh toán qua mã QR cho hơn 40 ngân hàng qua Napas247</div>
+        </div>
+
+        <button class="btn-place-order" id="placeOrderBtn">Đặt hàng</button>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="../app.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var token = localStorage.getItem('gsx_token');
+      
+      // Nếu đã đăng nhập, tự động điền thông tin và ẩn nhắc nhở đăng nhập
+      if (token) {
+        document.querySelector('.login-prompt').style.display = 'none';
+        
+        fetch('http://localhost:8080/identity/users/my-infor', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => res.json())
+        .then(data => {
+          var user = data.result || data;
+          if (user) {
+            if (user.username) document.getElementById('checkout-name').value = user.username;
+            if (user.email) document.getElementById('checkout-email').value = user.email;
+            if (user.phone) document.getElementById('checkout-phone').value = user.phone;
+            if (user.address) document.getElementById('checkout-address').value = user.address;
+          }
+        })
+        .catch(err => console.error('Lỗi lấy thông tin user:', err));
+      }
+
+      var urlParams = new URLSearchParams(window.location.search);
+      var buyNow = urlParams.get('buyNow');
+      var buyNowProductId = urlParams.get('productId');
+      var buyNowQuantity = parseInt(urlParams.get('quantity')) || 1;
+
+      if (!token && buyNow !== 'true') {
+        window.location.href = 'dang-nhap_839-134.html';
+        return;
+      }
+
+      if (buyNow === 'true' && buyNowProductId) {
+        // Luồng MUA NGAY: Chỉ lấy thông tin 1 sản phẩm
+        fetch('http://localhost:8080/product/products/' + buyNowProductId)
+        .then(res => res.json())
+        .then(data => {
+          var product = data.result || data;
+          if (data.code === 1000 && data.result) product = data.result;
+
+          // For Buy Now, since backend requires CartItem IDs, we ideally should have added to cart first.
+          // For now, let's fake it or assume it will be handled.
+          window.currentCartItems = [{ id: 0 }]; // Mock ID for Buy Now if supported
+
+          var container = document.getElementById('checkoutItemsContainer');
+          var totalPrice = (product.price || 0) * buyNowQuantity;
+          var shipFee = 30000;
+          var finalTotal = totalPrice + shipFee;
+
+          document.getElementById('checkoutSubtotal').textContent = new Intl.NumberFormat('vi-VN').format(totalPrice) + ' VNĐ';
+          document.getElementById('checkoutTotal').textContent = new Intl.NumberFormat('vi-VN').format(finalTotal) + ' VNĐ';
+
+          container.innerHTML = '';
+          var imgUrl = (product.imageUrls && product.imageUrls.length > 0) ? product.imageUrls[0] : '../assets/images/placeholder.jpg';
+          
+          var div = document.createElement('div');
+          div.className = 'order-item';
+          div.innerHTML = `
+            <img src="${imgUrl}" alt="${product.name}">
+            <div style="flex: 1;">
+              <div class="order-item-title">${product.name} (x${buyNowQuantity})</div>
+              <div class="order-item-code">Mã: ${product.id}</div>
+            </div>
+            <div class="order-item-price">${new Intl.NumberFormat('vi-VN').format(totalPrice)} VNĐ</div>
+          `;
+          container.appendChild(div);
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById('checkoutItemsContainer').innerHTML = '<div style="color:red;">Lỗi tải thông tin sản phẩm.</div>';
+        });
+      } else {
+        // Luồng GIỎ HÀNG: Lấy toàn bộ sản phẩm trong giỏ
+        fetch('http://localhost:8080/order/cart', {
+          method: 'GET',
+          headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => res.json())
+        .then(data => {
+          var cart = data.result || data;
+          if (data.code === 1000 && data.result) cart = data.result;
+
+          var items = cart.cartItemsResponse || [];
+          window.currentCartItems = items; // SAVE FOR CHECKOUT
+          var container = document.getElementById('checkoutItemsContainer');
+          
+          if (items.length === 0) {
+            container.innerHTML = '<div style="text-align:center;">Giỏ hàng trống.</div>';
+            return;
+          }
+
+          var totalPrice = cart.totalPrice || 0;
+          var shipFee = 30000;
+          var finalTotal = totalPrice + shipFee;
+
+          document.getElementById('checkoutSubtotal').textContent = new Intl.NumberFormat('vi-VN').format(totalPrice) + ' VNĐ';
+          document.getElementById('checkoutTotal').textContent = new Intl.NumberFormat('vi-VN').format(finalTotal) + ' VNĐ';
+
+          container.innerHTML = '';
+          items.forEach(item => {
+            var priceStr = new Intl.NumberFormat('vi-VN').format(item.subTotal || 0) + ' VNĐ';
+            var imgUrl = item.productImage || '../assets/images/placeholder.jpg';
+            var code = item.productId || 'HSA0000';
+            
+            var div = document.createElement('div');
+            div.className = 'order-item';
+            div.innerHTML = `
+              <img src="${imgUrl}" alt="${item.productName}">
+              <div style="flex: 1;">
+                <div class="order-item-title">${item.productName} (x${item.quantity})</div>
+                <div class="order-item-code">Mã: ${code}</div>
+              </div>
+              <div class="order-item-price">${priceStr}</div>
+            `;
+            container.appendChild(div);
+          });
+        })
+        .catch(console.error);
+      }
+
+      // Load Shipping Methods
+      function loadShippingMethods() {
+        var shipSelect = document.getElementById('checkout-shipping-method');
+        fetch('http://localhost:8080/order/shipping-methods/search?size=50&active=true', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => res.json())
+        .then(data => {
+            var methods = (data.result && data.result.content) ? data.result.content : (data.content || []);
+            if (methods.length === 0) {
+                shipSelect.innerHTML = '<option value="1" data-fee="30000">Giao hàng tiêu chuẩn (30.000đ)</option>';
+                updateOrderTotals();
+                return;
+            }
+            shipSelect.innerHTML = methods.map(m => `<option value="${m.id}" data-fee="${m.shippingFee}">${m.name} (${new Intl.NumberFormat('vi-VN').format(m.shippingFee)}đ)</option>`).join('');
+            updateOrderTotals();
+        })
+        .catch(err => {
+            console.error('Lỗi tải vận chuyển:', err);
+            shipSelect.innerHTML = '<option value="1" data-fee="30000">Giao hàng tiêu chuẩn (30.000đ)</option>';
+            updateOrderTotals();
+        });
+      }
+
+      function loadPaymentMethods() {
+        var paySelect = document.getElementById('checkout-payment-method');
+        fetch('http://localhost:8080/order/payment-methods/search?active=true', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => res.json())
+        .then(data => {
+            var methods = (data.result && data.result.content) ? data.result.content : (data.content || []);
+            if (methods.length === 0) {
+                paySelect.innerHTML = '<option value="1">Chuyển khoản ngân hàng</option><option value="2">COD</option>';
+                return;
+            }
+            paySelect.innerHTML = methods.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+            
+            // Bank logos are now always visible as requested
+        })
+        .catch(err => console.error('Lỗi tải thanh toán:', err));
+      }
+
+      function updateOrderTotals() {
+          var subTotal = parseInt(document.getElementById('checkoutSubtotal').textContent.replace(/\D/g,'')) || 0;
+          var shipSelect = document.getElementById('checkout-shipping-method');
+          var selectedOption = shipSelect.options[shipSelect.selectedIndex];
+          var shipFee = selectedOption ? parseInt(selectedOption.getAttribute('data-fee')) : 0;
+          
+          document.getElementById('checkoutShippingFee').textContent = new Intl.NumberFormat('vi-VN').format(shipFee) + ' VNĐ';
+          var total = subTotal + shipFee;
+          document.getElementById('checkoutTotal').textContent = new Intl.NumberFormat('vi-VN').format(total) + ' VNĐ';
+          
+          // Update QR Amount
+          document.getElementById('btAmount').textContent = new Intl.NumberFormat('vi-VN').format(total) + ' VNĐ';
+      }
+
+      function toggleBankTransferInfo() {
+        var paySelect = document.getElementById('checkout-payment-method');
+        var selectedText = paySelect.options[paySelect.selectedIndex].text.toLowerCase();
+        var bankBox = document.getElementById('bankTransferBox');
+        
+        // Hiện thông tin ngân hàng nếu chọn chuyển khoản hoặc không phải COD/Tiền mặt
+        if (selectedText.includes('chuyển khoản') || selectedText.includes('ngân hàng') || (!selectedText.includes('cod') && !selectedText.includes('tiền mặt'))) {
+            bankBox.classList.add('is-visible');
+            updateOrderTotals();
+        } else {
+            bankBox.classList.remove('is-visible');
+        }
+      }
+
+      document.getElementById('checkout-payment-method').addEventListener('change', toggleBankTransferInfo);
+      document.getElementById('checkout-shipping-method').addEventListener('change', updateOrderTotals);
+      loadShippingMethods();
+      loadPaymentMethods();
+      
+      // Khởi chạy kiểm tra ban đầu
+      setTimeout(toggleBankTransferInfo, 1000);
+
+      // Submit order
+      document.getElementById('placeOrderBtn').addEventListener('click', function() {
+        var name = document.getElementById('checkout-name').value.trim();
+        var phone = document.getElementById('checkout-phone').value.trim();
+        var address = document.getElementById('checkout-address').value.trim();
+        var shipId = document.getElementById('checkout-shipping-method').value;
+        var payId = document.getElementById('checkout-payment-method').value;
+        
+        if(!name || !phone || !address || !shipId) {
+          alert('Vui lòng nhập đầy đủ Họ tên, Số điện thoại, Địa chỉ và chọn Đơn vị vận chuyển.');
+          return;
+        }
+        
+        var btn = this;
+        btn.textContent = 'Đang xử lý đặt hàng...';
+        btn.disabled = true;
+
+        // Collect selected product IDs (Backend uses productId to filter from Cart)
+        var selectedIds = [];
+        if (buyNow === 'true' && buyNowProductId) {
+            selectedIds = [parseInt(buyNowProductId)];
+        } else if (window.currentCartItems) {
+            selectedIds = window.currentCartItems.map(item => item.productId);
+        }
+
+        if (selectedIds.length === 0) {
+            alert('Giỏ hàng của bạn đang trống hoặc không có sản phẩm nào được chọn.');
+            btn.textContent = 'Đặt hàng';
+            btn.disabled = false;
+            return;
+        }
+
+        // Prepare order data to match OrderRequest.java exactly
+        var orderData = {
+          address: address,
+          phoneNumber: phone,
+          note: document.querySelector('textarea').value || "Đơn đặt từ website",
+          paymentMethodId: parseInt(payId),
+          shippingMethodId: parseInt(shipId),
+          selectedCartItemIds: selectedIds
+        };
+
+        console.log('Final Order Data Payload:', orderData);
+
+        fetch('http://localhost:8080/order/orders/checkout', {
+          method: 'POST',
+          headers: { 
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify(orderData)
+        })
+        .then(res => res.json())
+        .then(data => {
+          console.log('Order Response:', data);
+          if (data.id || data.code === 1000 || data.result) {
+            // Success: Go to Completion page
+            window.location.href = 'hoan-thanh-don-hang.html';
+          } else {
+            var msg = data.message || 'Lỗi đặt hàng';
+            if (data.details && Array.isArray(data.details)) {
+               msg += ": " + data.details.join('; ');
+            }
+            alert(msg);
+            btn.textContent = 'Đặt hàng';
+            btn.disabled = false;
+          }
+        })
+        .catch(err => {
+          console.error('Checkout Error:', err);
+          alert('Không thể kết nối đến máy chủ thanh toán. Lỗi: ' + err.message);
+          btn.textContent = 'Đặt hàng';
+          btn.disabled = false;
+        });
+      });
+    });
+  </script>
+</body>
+</html>
