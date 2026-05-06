@@ -105,21 +105,15 @@ public class CategoryService {
         PostCategory category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục để xóa!"));
 
-        // 2. Kiểm tra điều kiện (Tùy chọn)
-        // Nếu Nguyệt muốn xóa mềm thì thường không cần chặn gắt gao như xóa cứng,
-        // nhưng vẫn nên check nếu có bài viết đang hoạt động.
+        // 2. Kiểm tra nếu có bài viết liên quan thì không cho xóa cứng
         if (category.getPosts() != null && !category.getPosts().isEmpty()) {
-            // Nếu xóa mềm, Nguyệt có thể đổi thông báo thành: "Hãy chuyển bài viết sang danh mục khác trước khi ẩn danh mục này!"
-            throw new RuntimeException("Không thể ẩn danh mục đang chứa bài viết!");
+            throw new RuntimeException("Không thể xóa danh mục đang chứa bài viết! Hãy chuyển bài viết sang danh mục khác hoặc chỉ tắt trạng thái hoạt động.");
         }
 
-        // 3. Thực hiện XÓA MỀM (Soft Delete)
-        category.setActive(false); // Chuyển trạng thái về false thay vì gọi repository.delete()
+        // 3. Thực hiện XÓA CỨNG (Hard Delete)
+        categoryRepository.delete(category);
 
-        // 4. Lưu lại thay đổi
-        categoryRepository.save(category);
-
-        log.info(">>> Đã xóa mềm (ẩn) danh mục ID: {} thành công.", id);
+        log.info(">>> Đã xóa cứng danh mục ID: {} thành công.", id);
     }
 
     // --- Hàm bổ trợ ---

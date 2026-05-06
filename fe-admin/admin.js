@@ -95,7 +95,7 @@
     currentSection = section;
     var items = document.querySelectorAll('.adm-nav-item[data-section]');
     items.forEach(function (it) { it.classList.toggle('is-active', it.dataset.section === section); });
-    var titles = { dashboard: 'Tổng quan', products: 'Sản phẩm', orders: 'Đơn hàng', shipping: 'Vận chuyển', payments: 'Thanh toán', workshops: 'Workshop', workshopRegs: 'ĐK Workshop', posts: 'Bài viết', reviews: 'Đánh giá', users: 'Người dùng' };
+    var titles = { dashboard: 'Tổng quan', products: 'Sản phẩm', orders: 'Đơn hàng', shipping: 'Vận chuyển', payments: 'Thanh toán', workshops: 'Workshop', workshopRegs: 'ĐK Workshop', posts: 'Bài viết', postCategories: 'Danh mục bài viết', reviews: 'Đánh giá', users: 'Người dùng' };
     $('admTopTitle').textContent = titles[section] || section;
     pageState = { page: 0, size: 10, keyword: '' };
     renderSection(section);
@@ -103,7 +103,7 @@
 
   function renderSection(s) {
     var c = $('admContent');
-    var fn = { dashboard: renderDashboard, products: renderProducts, orders: renderOrders, shipping: renderShipping, payments: renderPayments, workshops: renderWorkshops, workshopRegs: renderWorkshopRegs, posts: renderPosts, reviews: renderReviews, users: renderUsers };
+    var fn = { dashboard: renderDashboard, products: renderProducts, orders: renderOrders, shipping: renderShipping, payments: renderPayments, workshops: renderWorkshops, workshopRegs: renderWorkshopRegs, posts: renderPosts, postCategories: renderPostCategories, reviews: renderReviews, users: renderUsers };
     if (fn[s]) fn[s](c); else c.innerHTML = '<div class="adm-empty"><div class="adm-empty-icon">🚧</div><p>Đang phát triển...</p></div>';
   }
 
@@ -377,6 +377,33 @@
     }).catch(function () { $('admPostTable').innerHTML = emptyMsg('Lỗi tải bài viết'); });
   }
 
+  /* ===== POST CATEGORIES ===== */
+  function renderPostCategories(c) {
+    c.innerHTML = '<div class="adm-quick-actions"><select class="adm-select" id="admPostCatFilter"><option value="">Tất cả trạng thái</option><option value="true">Đang hoạt động</option><option value="false">Tạm dừng</option></select></div>' + 
+                  sectionHeader('Danh mục bài viết', 'postCategories', '<button class="adm-btn adm-btn--primary" onclick="ADM.openAddPostCategoryModal()">+ Thêm danh mục</button>') + 
+                  '<div id="admPostCatTable">' + skeleton(5) + '</div><div id="admPostCatPage"></div>';
+    $('admPostCatFilter').addEventListener('change', function () { pageState.active = this.value; pageState.page = 0; loadPostCategories(); });
+    bindSearch('postCategories'); 
+    loadPostCategories();
+  }
+  function loadPostCategories() {
+    var p = pageState;
+    var q = (p.keyword ? '&keyword=' + encodeURIComponent(p.keyword) : '') + (p.active ? '&active=' + p.active : '');
+    api('/content/categories?page=' + p.page + '&size=' + p.size + q).then(function (data) {
+      var rows = data.content || [];
+      if (!rows.length) { $('admPostCatTable').innerHTML = emptyMsg('Không tìm thấy danh mục'); $('admPostCatPage').innerHTML = ''; return; }
+      $('admPostCatTable').innerHTML = tableWrap(['ID', 'Tên danh mục', 'Mô tả', 'Trạng thái', 'Thao tác'], rows.map(function (s) {
+        var badge = s.active ? '<span class="adm-badge adm-badge--success">Hoạt động</span>' : '<span class="adm-badge adm-badge--neutral">Tạm dừng</span>';
+        var toggleBtn = s.active ? '<button class="adm-btn adm-btn--warning adm-btn--sm" onclick="ADM.togglePostCategoryStatus(' + s.id + ',true)">Tạm dừng</button>' : '<button class="adm-btn adm-btn--success adm-btn--sm" onclick="ADM.togglePostCategoryStatus(' + s.id + ',false)">Mở lại</button>';
+        var editBtn = '<button class="adm-btn adm-btn--info adm-btn--sm" onclick="ADM.openEditPostCategoryModal(' + s.id + ')">Sửa</button>';
+        var delBtn = '<button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delPostCategory(' + s.id + ')">Xóa</button>';
+        var nameLink = `<a href="javascript:void(0)" onclick="ADM.openPostCategoryDetailModal(${s.id})" style="font-weight:600;color:var(--adm-accent2);text-decoration:none">${esc(s.name)}</a>`;
+        return '<tr><td>#' + s.id + '</td><td>' + nameLink + '</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(s.description || '—') + '</td><td>' + badge + '</td><td><div class="adm-table-actions">' + editBtn + ' ' + toggleBtn + ' ' + delBtn + '</div></td></tr>';
+      }).join(''));
+      $('admPostCatPage').innerHTML = paginate(data);
+    }).catch(function () { $('admPostCatTable').innerHTML = emptyMsg('Lỗi tải danh mục bài viết'); });
+  }
+
   /* ===== REVIEWS ===== */
   function renderReviews(c) {
     c.innerHTML = sectionHeader('⭐ Đánh giá sản phẩm', 'reviews') + '<div id="admRevTable">' + skeleton(5) + '</div><div id="admRevPage"></div>';
@@ -455,6 +482,91 @@
     delReview: function (id) { if (confirm('Xóa đánh giá #' + id + '?')) api('/content/api/v1/reviews/admin/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa đánh giá'); renderReviews($('admContent')); }).catch(function () { toast('Lỗi xóa đánh giá'); }); },
     delShipping: function (id) { if (confirm('Xóa đơn vị vận chuyển #' + id + '?')) api('/order/shipping-methods/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa đơn vị vận chuyển'); loadShipping(); }).catch(function () { toast('Lỗi xóa'); }); },
     delPayment: function (id) { if (confirm('Xóa phương thức thanh toán #' + id + '?')) api('/order/payment-methods/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa phương thức thanh toán'); loadPayments(); }).catch(function () { toast('Lỗi xóa'); }); },
+    delPostCategory: function (id) { if (confirm('Xóa danh mục bài viết #' + id + '?')) api('/content/categories/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa danh mục'); loadPostCategories(); }).catch(function () { toast('Lỗi xóa danh mục'); }); },
+    togglePostCategoryStatus: function (id, currentActive) {
+      if (confirm(currentActive ? 'Tạm dừng danh mục này?' : 'Mở lại danh mục này?')) {
+        api('/content/categories/' + id, { method: 'PUT', body: JSON.stringify({ active: !currentActive }) }).then(function () { toast('Đã cập nhật trạng thái'); loadPostCategories(); }).catch(function () { toast('Lỗi cập nhật'); });
+      }
+    },
+    openAddPostCategoryModal: function () {
+      showModal('Thêm danh mục bài viết', `
+        <form class="adm-form" id="addPostCatForm">
+          <div class="adm-form-group">
+            <label>Tên danh mục</label>
+            <input type="text" name="name" placeholder="Ví dụ: Tin tức gốm sứ">
+          </div>
+          <div class="adm-form-group">
+            <label>Mô tả</label>
+            <textarea name="description" rows="3"></textarea>
+          </div>
+          <div class="adm-form-actions">
+            <button type="button" class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Hủy</button>
+            <button type="submit" class="adm-btn adm-btn--primary">Lưu danh mục</button>
+          </div>
+        </form>
+      `);
+      $('addPostCatForm').onsubmit = function (e) {
+        e.preventDefault();
+        var obj = Object.fromEntries(new FormData(this).entries());
+        if (!obj.name) { toast('Vui lòng nhập tên danh mục'); return; }
+        api('/content/categories', { method: 'POST', body: JSON.stringify(obj) }).then(function () {
+          toast('Đã thêm thành công'); ADM.closeModal(); loadPostCategories();
+        }).catch(function (err) { toast('Lỗi: ' + (err.message || 'Không thể lưu')); });
+      };
+    },
+    openEditPostCategoryModal: function (id) {
+      api('/content/categories/' + id).then(function (s) {
+        showModal('Sửa danh mục bài viết #' + id, `
+          <form class="adm-form" id="editPostCatForm">
+            <div class="adm-form-group">
+              <label>Tên danh mục</label>
+              <input type="text" name="name" value="${esc(s.name)}">
+            </div>
+            <div class="adm-form-group">
+              <label>Mô tả</label>
+              <textarea name="description" rows="3">${esc(s.description || '')}</textarea>
+            </div>
+            <div class="adm-form-actions">
+              <button type="button" class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Hủy</button>
+              <button type="submit" class="adm-btn adm-btn--primary">Cập nhật</button>
+            </div>
+          </form>
+        `);
+        $('editPostCatForm').onsubmit = function (e) {
+          e.preventDefault();
+          var obj = Object.fromEntries(new FormData(this).entries());
+          api('/content/categories/' + id, { method: 'PUT', body: JSON.stringify(obj) }).then(function () {
+            toast('Đã cập nhật thành công'); ADM.closeModal(); loadPostCategories();
+          }).catch(function (err) { toast('Lỗi: ' + (err.message || 'Cập nhật thất bại')); });
+        };
+      }).catch(function () { toast('Lỗi tải thông tin danh mục'); });
+    },
+    openPostCategoryDetailModal: function (id) {
+      api('/content/categories/' + id).then(function (s) {
+        showModal('Chi tiết danh mục bài viết #' + id, `
+          <div class="adm-detail">
+            <div style="margin-bottom:24px">
+              <h4 style="color:var(--adm-accent2);margin-bottom:12px;border-bottom:1px solid var(--adm-border);padding-bottom:8px">📂 Thông tin danh mục</h4>
+              <p style="margin-bottom:8px"><strong>Tên danh mục:</strong> ${esc(s.name)}</p>
+              <p style="margin-bottom:8px"><strong>Trạng thái:</strong> ${s.active ? '<span class="adm-badge adm-badge--success">Hoạt động</span>' : '<span class="adm-badge adm-badge--neutral">Tạm dừng</span>'}</p>
+              <p style="margin-bottom:8px"><strong>Ngày tạo:</strong> ${fmtDate(s.createdAt)}</p>
+            </div>
+            <div>
+              <h4 style="color:var(--adm-accent2);margin-bottom:12px;border-bottom:1px solid var(--adm-border);padding-bottom:8px">📖 Mô tả</h4>
+              <div style="font-size:14px;color:var(--adm-text2);line-height:1.6;white-space:pre-line">
+                ${esc(s.description || 'Chưa có mô tả cho danh mục này.')}
+              </div>
+            </div>
+            <div class="adm-form-actions" style="margin-top:32px">
+              <button class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Đóng cửa sổ</button>
+              <button class="adm-btn adm-btn--primary" onclick="ADM.closeModal(); ADM.openEditPostCategoryModal(${s.id})">Chỉnh sửa</button>
+            </div>
+          </div>
+        `);
+      }).catch(function () {
+        toast('Không thể tải thông tin danh mục');
+      });
+    },
     updateOrder: function (id, status) { if (!status) return; if (confirm('Cập nhật đơn #' + id + ' → ' + status + '?')) api('/order/orders/' + id + '/status?status=' + status, { method: 'PATCH' }).then(function () { toast('Đã cập nhật'); loadOrders(); }).catch(function () { toast('Lỗi cập nhật'); }); },
     checkInWorkshop: function (id) { if (confirm('Xác nhận khách hàng đã tham gia workshop?')) api('/workshop/regis-workshops/' + id, { method: 'PUT' }).then(function () { toast('Đã check-in thành công'); loadWorkshopRegs(); }).catch(function (e) { toast('Lỗi check-in: ' + e.message); }); },
     cancelWorkshopReg: function (id) { if (confirm('Hủy đơn đăng ký này?')) api('/workshop/regis-workshops/' + id + '/cancel', { method: 'PATCH' }).then(function () { toast('Đã hủy đăng ký'); loadWorkshopRegs(); }).catch(function (e) { toast('Lỗi hủy đăng ký: ' + e.message); }); },
