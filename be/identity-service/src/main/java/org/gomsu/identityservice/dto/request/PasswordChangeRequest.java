@@ -2,6 +2,7 @@ package org.gomsu.identityservice.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +17,11 @@ public class PasswordChangeRequest {
     private String oldPassword;
 
     @NotBlank(message = "Mật khẩu mới không được để trống!")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$",
-            message = "Mật khẩu phải gồm ít nhất 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt")
+    @Size(min = 8, message = "Mật khẩu phải có ít nhất 8 ký tự")
+    @Pattern(regexp = ".*[A-Z].*", message = "Mật khẩu phải có ít nhất một chữ cái viết hoa")
+    @Pattern(regexp = ".*[a-z].*", message = "Mật khẩu phải có ít nhất một chữ cái viết thường")
+    @Pattern(regexp = ".*[0-9].*", message = "Mật khẩu phải có ít nhất một chữ số")
+    @Pattern(regexp = ".*[@#$%^&+=!].*", message = "Mật khẩu phải có ít nhất một ký tự đặc biệt (@#$%^&+=!)")
+    @Pattern(regexp = "^\\S+$", message = "Mật khẩu không được chứa khoảng trắng")
     private String newPassword;
 }

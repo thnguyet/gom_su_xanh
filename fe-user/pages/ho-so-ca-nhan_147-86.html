@@ -167,6 +167,29 @@
     }
     .page-link:hover { background: rgba(148, 181, 120, 0.2); }
     .page-link.is-active { background: var(--clr-moss); color: var(--clr-cream); border-color: var(--clr-moss); }
+    
+    /* Password Toggle */
+    .password-input-wrapper { position: relative; width: 100%; }
+    .toggle-password-btn {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--clr-forest);
+      opacity: 0.6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: opacity 0.2s;
+    }
+    .toggle-password-btn:hover { 
+      opacity: 1; 
+      transform: translateY(-50%) scale(1.1) !important;
+    }
   </style>
 </head>
 <body>
@@ -265,9 +288,33 @@
           <div class="tab-panel" id="panel-security">
             <div class="content-header" style="justify-content:center;"><h3>Cập nhật mật khẩu của bạn</h3></div>
             <div class="security-form">
-              <div class="form-group"><input type="password" class="form-input-sec" placeholder="Mật khẩu hiện tại *" id="secCurrentPw"></div>
-              <div class="form-group"><input type="password" class="form-input-sec" placeholder="Mật khẩu mới *" id="secNewPw"></div>
-              <div class="form-group"><input type="password" class="form-input-sec" placeholder="Nhập lại mật khẩu mới *" id="secConfirmPw"></div>
+              <div class="form-group">
+                <label class="profile-label" for="secCurrentPw" style="display:block; margin-bottom:8px;">Mật khẩu hiện tại *</label>
+                <div class="password-input-wrapper">
+                  <input type="password" class="form-input-sec" placeholder="Nhập mật khẩu hiện tại" id="secCurrentPw">
+                  <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('secCurrentPw', this)">
+                    <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="profile-label" for="secNewPw" style="display:block; margin-bottom:8px;">Mật khẩu mới *</label>
+                <div class="password-input-wrapper">
+                  <input type="password" class="form-input-sec" placeholder="Nhập mật khẩu mới" id="secNewPw">
+                  <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('secNewPw', this)">
+                    <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="profile-label" for="secConfirmPw" style="display:block; margin-bottom:8px;">Nhập lại mật khẩu mới *</label>
+                <div class="password-input-wrapper">
+                  <input type="password" class="form-input-sec" placeholder="Xác nhận mật khẩu mới" id="secConfirmPw">
+                  <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('secConfirmPw', this)">
+                    <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </button>
+                </div>
+              </div>
               <div style="margin-top:16px;text-align:center;"><button class="btn-outline" style="padding:12px 48px;border-radius:100px;" id="updatePwBtn">Cập nhật</button></div>
             </div>
           </div>
@@ -396,6 +443,18 @@
 
   <script src="../app.js" defer></script>
   <script>
+    function togglePasswordVisibility(inputId, btn) {
+      var input = document.getElementById(inputId);
+      var svg = btn.querySelector('svg');
+      if (input.type === 'password') {
+        input.type = 'text';
+        svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+      } else {
+        input.type = 'password';
+        svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+      }
+    }
+
   document.addEventListener('DOMContentLoaded', function() {
     var token = localStorage.getItem('gsx_token');
     if (!token) { alert('Bạn chưa đăng nhập!'); window.location.href = 'dang-nhap_839-134.html'; return; }
@@ -877,8 +936,38 @@
       var cf = document.getElementById('secConfirmPw').value;
 
       if (!cur || !nw || !cf) { alert('Vui lòng nhập đầy đủ thông tin.'); return; }
-      if (nw !== cf) { alert('Mật khẩu mới không khớp.'); return; }
-      if (nw.length < 8) { alert('Mật khẩu mới phải có ít nhất 8 ký tự.'); return; }
+      if (nw !== cf) { alert('Mật khẩu xác nhận không khớp.'); return; }
+      
+      // Tách từng lỗi validation mật khẩu mới
+      if (nw.length < 8) {
+        alert('Mật khẩu mới phải có ít nhất 8 ký tự.');
+        return;
+      }
+      if (!/[A-Z]/.test(nw)) {
+        alert('Mật khẩu mới phải có ít nhất một chữ cái viết hoa.');
+        return;
+      }
+      if (!/[a-z]/.test(nw)) {
+        alert('Mật khẩu mới phải có ít nhất một chữ cái viết thường.');
+        return;
+      }
+      if (!/[0-9]/.test(nw)) {
+        alert('Mật khẩu mới phải có ít nhất một chữ số.');
+        return;
+      }
+      if (!/[@#$%^&+=!]/.test(nw)) {
+        alert('Mật khẩu mới phải có ít nhất một ký tự đặc biệt (@#$%^&+=!).');
+        return;
+      }
+      if (/\s/.test(nw)) {
+        alert('Mật khẩu không được chứa khoảng trắng.');
+        return;
+      }
+      
+      if (nw === cur) {
+        alert('Mật khẩu mới không được trùng với mật khẩu hiện tại.');
+        return;
+      }
 
       var btn = this;
       btn.disabled = true;

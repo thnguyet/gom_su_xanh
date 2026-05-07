@@ -153,6 +153,29 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.07);
     }
     .form-social-btn:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+    
+    /* Password Toggle */
+    .password-input-wrapper { position: relative; width: 100%; }
+    .toggle-password-btn {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--clr-forest);
+      opacity: 0.6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: opacity 0.2s;
+    }
+    .toggle-password-btn:hover { 
+      opacity: 1; 
+      transform: translateY(-50%) scale(1.1) !important;
+    }
   </style>
 </head>
 <body class="gsxpage register-page">
@@ -207,10 +230,21 @@
       </div>
       <div class="form-group">
         <label class="form-label" for="reg-pass">Mật khẩu</label>
-        <input class="form-input" id="reg-pass" type="password" placeholder="Mật khẩu" autocomplete="new-password">
+        <div class="password-input-wrapper">
+          <input class="form-input" id="reg-pass" type="password" placeholder="Mật khẩu" autocomplete="new-password">
+          <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('reg-pass', this)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
       </div>
       <div class="form-group">
-        <input class="form-input" id="reg-pass2" type="password" placeholder="Xác nhận mật khẩu" autocomplete="new-password">
+        <label class="form-label" for="reg-pass2">Xác nhận mật khẩu</label>
+        <div class="password-input-wrapper">
+          <input class="form-input" id="reg-pass2" type="password" placeholder="Xác nhận mật khẩu" autocomplete="new-password">
+          <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('reg-pass2', this)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
       </div>
 
       <div class="form-check-row">
@@ -231,6 +265,18 @@
 
   <script src="../app.js" defer></script>
   <script>
+    function togglePasswordVisibility(inputId, btn) {
+      var input = document.getElementById(inputId);
+      var svg = btn.querySelector('svg');
+      if (input.type === 'password') {
+        input.type = 'text';
+        svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+      } else {
+        input.type = 'password';
+        svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+      }
+    }
+
     document.getElementById('registerBtn').addEventListener('click', function () {
       var name  = document.getElementById('reg-name').value.trim();
       var email = document.getElementById('reg-email').value.trim();
@@ -243,6 +289,32 @@
       
       if (!name || !email || !phone || !address || !gender || !pass) { alert('Vui lòng điền đầy đủ thông tin.'); return; }
       if (pass !== pass2) { alert('Mật khẩu xác nhận không khớp.'); return; }
+      
+      // Tách từng lỗi validation mật khẩu
+      if (pass.length < 8) {
+        alert('Mật khẩu phải có ít nhất 8 ký tự.');
+        return;
+      }
+      if (!/[A-Z]/.test(pass)) {
+        alert('Mật khẩu phải có ít nhất một chữ cái viết hoa.');
+        return;
+      }
+      if (!/[a-z]/.test(pass)) {
+        alert('Mật khẩu phải có ít nhất một chữ cái viết thường.');
+        return;
+      }
+      if (!/[0-9]/.test(pass)) {
+        alert('Mật khẩu phải có ít nhất một chữ số.');
+        return;
+      }
+      if (!/[@#$%^&+=!]/.test(pass)) {
+        alert('Mật khẩu phải có ít nhất một ký tự đặc biệt (@#$%^&+=!).');
+        return;
+      }
+      if (/\s/.test(pass)) {
+        alert('Mật khẩu không được chứa khoảng trắng.');
+        return;
+      }
       if (!agree) { alert('Vui lòng đồng ý với điều khoản.'); return; }
       
       var submitBtn = this;

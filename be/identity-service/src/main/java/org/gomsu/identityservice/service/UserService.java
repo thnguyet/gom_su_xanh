@@ -128,6 +128,10 @@ public class UserService {
             throw new RuntimeException("Mật khẩu không đúng!");
         }
 
+        if (passwordEncoder.matches(passwordChangeRequest.getNewPassword(), user.getPassword())) {
+            throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu hiện tại!");
+        }
+
         user.setPassword(passwordEncoder.encode(passwordChangeRequest.getNewPassword()));
         userRepository.save(user);
         return toUserResponse(user);
