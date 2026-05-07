@@ -16,6 +16,7 @@ public class CategoryResponse {
     private String name;
     private String slug; // Thêm slug
     private Integer productCount;
-    private String imageUrl; // Thêm ảnh đại diện cho Category
-    private LocalDateTime createdAt; // Lấy từ BaseEntity
+    private String imageUrl;
+    private boolean active;
+    private LocalDateTime createdAt;
 }

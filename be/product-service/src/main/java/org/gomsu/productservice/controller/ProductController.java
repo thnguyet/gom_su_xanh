@@ -47,10 +47,11 @@ public class ProductController {
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(required = false) Boolean active,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate
     ) {
-        return ResponseEntity.ok(productService.getAllProducts(page, size, keyword, categoryId, minPrice, maxPrice, sortBy, sortDir, fromDate, toDate));
+        return ResponseEntity.ok(productService.getAllProducts(page, size, keyword, categoryId, minPrice, maxPrice, sortBy, sortDir, active, fromDate, toDate));
     }
 
     // 3. Lấy chi tiết sản phẩm THEO SLUG (Dành cho trang khách hàng) (THÀNH CÔNG)

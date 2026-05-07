@@ -18,6 +18,7 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     Optional<Product> findBySlug(String slug);
 
     @Query("SELECT p FROM Product p WHERE " +
+            "(:active IS NULL OR p.category.active = :active) AND " +
             "(:keyword IS NULL OR :keyword = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR CONCAT(p.id, '') LIKE CONCAT('%', :keyword, '%')) AND " +
             "(:categoryId IS NULL OR p.category.id = :categoryId) AND " +
             "(:minPrice IS NULL OR p.price >= :minPrice) AND " +
@@ -31,5 +32,6 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
             @Param("maxPrice") Double maxPrice,
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate,
+            @Param("active") Boolean active,
             Pageable pageable);
 }

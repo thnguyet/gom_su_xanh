@@ -95,7 +95,7 @@
     currentSection = section;
     var items = document.querySelectorAll('.adm-nav-item[data-section]');
     items.forEach(function (it) { it.classList.toggle('is-active', it.dataset.section === section); });
-    var titles = { dashboard: 'Tổng quan', products: 'Sản phẩm', orders: 'Đơn hàng', shipping: 'Vận chuyển', payments: 'Thanh toán', workshops: 'Workshop', workshopRegs: 'ĐK Workshop', posts: 'Bài viết', postCategories: 'Danh mục bài viết', reviews: 'Đánh giá', users: 'Người dùng' };
+    var titles = { dashboard: 'Tổng quan', products: 'Sản phẩm', categories: 'Danh mục sản phẩm', orders: 'Đơn hàng', shipping: 'Vận chuyển', payments: 'Thanh toán', workshops: 'Workshop', workshopRegs: 'ĐK Workshop', posts: 'Bài viết', postCategories: 'Danh mục bài viết', reviews: 'Đánh giá', users: 'Người dùng' };
     $('admTopTitle').textContent = titles[section] || section;
     pageState = { page: 0, size: 10, keyword: '' };
     renderSection(section);
@@ -103,7 +103,7 @@
 
   function renderSection(s) {
     var c = $('admContent');
-    var fn = { dashboard: renderDashboard, products: renderProducts, orders: renderOrders, shipping: renderShipping, payments: renderPayments, workshops: renderWorkshops, workshopRegs: renderWorkshopRegs, posts: renderPosts, postCategories: renderPostCategories, reviews: renderReviews, users: renderUsers };
+    var fn = { dashboard: renderDashboard, products: renderProducts, categories: renderCategories, orders: renderOrders, shipping: renderShipping, payments: renderPayments, workshops: renderWorkshops, workshopRegs: renderWorkshopRegs, posts: renderPosts, postCategories: renderPostCategories, reviews: renderReviews, users: renderUsers };
     if (fn[s]) fn[s](c); else c.innerHTML = '<div class="adm-empty"><div class="adm-empty-icon">🚧</div><p>Đang phát triển...</p></div>';
   }
 
@@ -261,6 +261,29 @@
       }).join(''));
       $('admProdPage').innerHTML = paginate(data);
     }).catch(function () { $('admProdTable').innerHTML = emptyMsg('Lỗi tải sản phẩm'); });
+  }
+
+  /* ===== PRODUCT CATEGORIES ===== */
+  function renderCategories(c) {
+    c.innerHTML = sectionHeader('Danh mục sản phẩm', 'categories', '<button class="adm-btn adm-btn--primary" onclick="ADM.openAddCategoryModal()">+ Thêm danh mục</button>') + '<div id="admCatTable">' + skeleton(5) + '</div><div id="admCatPage"></div>';
+    bindSearch('categories'); loadCategories();
+  }
+  function loadCategories() {
+    var p = pageState;
+    var q = p.keyword ? '&keyword=' + encodeURIComponent(p.keyword) : '';
+    api('/product/categories?page=' + p.page + '&size=' + p.size + q).then(function (data) {
+      var rows = data.content || [];
+      if (!rows.length) { $('admCatTable').innerHTML = emptyMsg('Không tìm thấy danh mục'); $('admCatPage').innerHTML = ''; return; }
+      $('admCatTable').innerHTML = tableWrap(['ID', 'Ảnh đại diện', 'Tên danh mục', 'Số sản phẩm', 'Trạng thái', 'Thao tác'], rows.map(function (s) {
+        var img = s.imageUrl ? '<img class="adm-thumb" src="' + s.imageUrl + '" alt="">' : '—';
+        var badge = s.active ? '<span class="adm-badge adm-badge--success">Hoạt động</span>' : '<span class="adm-badge adm-badge--neutral">Tạm dừng</span>';
+        var editBtn = '<button class="adm-btn adm-btn--info adm-btn--sm" onclick="ADM.openEditCategoryModal(' + s.id + ')">Sửa</button>';
+        var delBtn = '<button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delCategory(' + s.id + ')">Xóa</button>';
+        var nameLink = `<a href="javascript:void(0)" onclick="ADM.openCategoryDetailModal(${s.id})" style="font-weight:600;color:var(--adm-accent2);text-decoration:none">${esc(s.name)}</a>`;
+        return '<tr><td>#' + s.id + '</td><td>' + img + '</td><td>' + nameLink + '</td><td>' + (s.productCount || 0) + '</td><td>' + badge + '</td><td><div class="adm-table-actions">' + editBtn + ' ' + delBtn + '</div></td></tr>';
+      }).join(''));
+      $('admCatPage').innerHTML = paginate(data);
+    }).catch(function () { $('admCatTable').innerHTML = emptyMsg('Lỗi tải danh mục'); });
   }
 
   /* ===== ORDERS ===== */
@@ -483,6 +506,126 @@
     delShipping: function (id) { if (confirm('Xóa đơn vị vận chuyển #' + id + '?')) api('/order/shipping-methods/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa đơn vị vận chuyển'); loadShipping(); }).catch(function () { toast('Lỗi xóa'); }); },
     delPayment: function (id) { if (confirm('Xóa phương thức thanh toán #' + id + '?')) api('/order/payment-methods/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa phương thức thanh toán'); loadPayments(); }).catch(function () { toast('Lỗi xóa'); }); },
     delPostCategory: function (id) { if (confirm('Xóa danh mục bài viết #' + id + '?')) api('/content/categories/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa danh mục'); loadPostCategories(); }).catch(function () { toast('Lỗi xóa danh mục'); }); },
+    delCategory: function (id) { if (confirm('Xóa danh mục sản phẩm #' + id + '?')) api('/product/categories/' + id, { method: 'DELETE' }).then(function () { toast('Đã xóa danh mục'); loadCategories(); }).catch(function (err) { toast('Lỗi: ' + (err.message || 'Không thể xóa')); }); },
+    openAddCategoryModal: function () {
+      showModal('Thêm danh mục sản phẩm', `
+        <form class="adm-form" id="addCatForm">
+          <div class="adm-form-group">
+            <label>Tên danh mục</label>
+            <input type="text" name="name" placeholder="Ví dụ: Ấm chén Tử Sa">
+          </div>
+          <div class="adm-form-group">
+            <label>Ảnh đại diện (Chọn từ máy tính)</label>
+            <input type="file" id="addCatFile" accept="image/*">
+          </div>
+          <div class="adm-form-actions">
+            <button type="button" class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Hủy</button>
+            <button type="submit" class="adm-btn adm-btn--primary">Lưu danh mục</button>
+          </div>
+        </form>
+      `);
+      $('addCatForm').onsubmit = function (e) {
+        e.preventDefault();
+        var fd = new FormData(this);
+        var name = fd.get('name');
+        if (!name) { toast('Vui lòng nhập tên danh mục'); return; }
+        
+        var finalFd = new FormData();
+        finalFd.append('request', new Blob([JSON.stringify({ name: name })], { type: 'application/json' }));
+        
+        var fileInput = $('addCatFile');
+        if (fileInput && fileInput.files[0]) {
+          finalFd.append('image', fileInput.files[0]);
+        }
+        
+        api('/product/categories', { method: 'POST', body: finalFd, formData: true }).then(function () {
+          toast('Đã thêm thành công'); ADM.closeModal(); loadCategories();
+        }).catch(function (err) { toast('Lỗi: ' + (err.message || 'Không thể lưu')); });
+      };
+    },
+    openEditCategoryModal: function (id) {
+      api('/product/categories/' + id).then(function (s) {
+        showModal('Sửa danh mục sản phẩm #' + id, `
+          <form class="adm-form" id="editCatForm">
+            <div class="adm-form-group">
+              <label>Tên danh mục</label>
+              <input type="text" name="name" value="${esc(s.name)}">
+            </div>
+            <div class="adm-form-group">
+              <label>Trạng thái</label>
+              <select name="active">
+                <option value="true" ${s.active ? 'selected' : ''}>Hoạt động</option>
+                <option value="false" ${!s.active ? 'selected' : ''}>Tạm dừng</option>
+              </select>
+            </div>
+            <div class="adm-form-group">
+              <label>Ảnh hiện tại</label>
+              <div id="editCatImage" style="margin-top:8px">
+                ${s.imageUrl ? `
+                  <div class="ws-img-edit-item" style="position:relative;display:inline-block;cursor:pointer" onclick="this.classList.toggle('to-delete')">
+                    <img src="${s.imageUrl}" style="width:120px;height:120px;object-fit:cover;border-radius:8px">
+                    <div class="ws-img-delete-overlay" style="position:absolute;inset:0;background:rgba(232,93,93,0.6);display:none;align-items:center;justify-content:center;color:#fff;font-size:24px;border-radius:8px">✕</div>
+                    <p style="font-size:11px;text-align:center;margin-top:4px;color:var(--adm-danger)">Nhấn để xóa</p>
+                  </div>
+                ` : '<p style="color:var(--adm-text3)">Chưa có ảnh</p>'}
+              </div>
+            </div>
+            <div class="adm-form-group">
+              <label>Thay đổi ảnh mới</label>
+              <input type="file" id="editCatFile" accept="image/*">
+            </div>
+            <div class="adm-form-actions">
+              <button type="button" class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Hủy</button>
+              <button type="submit" class="adm-btn adm-btn--primary">Cập nhật</button>
+            </div>
+          </form>
+        `);
+        $('editCatForm').onsubmit = function (e) {
+          e.preventDefault();
+          var fd = new FormData(this);
+          var obj = {
+            name: fd.get('name'),
+            active: fd.get('active') === 'true',
+            deleteImage: document.querySelector('#editCatImage .ws-img-edit-item.to-delete') !== null
+          };
+          
+          var finalFd = new FormData();
+          finalFd.append('request', new Blob([JSON.stringify(obj)], { type: 'application/json' }));
+          
+          var fileInput = $('editCatFile');
+          if (fileInput && fileInput.files[0]) {
+            finalFd.append('image', fileInput.files[0]);
+          }
+          
+          api('/product/categories/' + id, { method: 'PUT', body: finalFd, formData: true }).then(function () {
+            toast('Đã cập nhật thành công'); ADM.closeModal(); loadCategories();
+          }).catch(function (err) { toast('Lỗi: ' + (err.message || 'Cập nhật thất bại')); });
+        };
+      }).catch(function () { toast('Lỗi tải thông tin danh mục'); });
+    },
+    openCategoryDetailModal: function (id) {
+      api('/product/categories/' + id).then(function (s) {
+        showModal('Chi tiết danh mục sản phẩm #' + id, `
+          <div class="adm-detail">
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:24px;margin-bottom:24px">
+              ${s.imageUrl ? `<img src="${s.imageUrl}" style="width:140px;height:140px;object-fit:cover;border-radius:12px;border:1px solid var(--adm-border)">` : ''}
+              <div>
+                <h4 style="color:var(--adm-accent2);margin-bottom:12px;border-bottom:1px solid var(--adm-border);padding-bottom:8px">📂 Thông tin danh mục</h4>
+                <p style="margin-bottom:8px"><strong>ID:</strong> #${s.id}</p>
+                <p style="margin-bottom:8px"><strong>Tên danh mục:</strong> ${esc(s.name)}</p>
+                <p style="margin-bottom:8px"><strong>Trạng thái:</strong> ${s.active ? '<span class="adm-badge adm-badge--success">Hoạt động</span>' : '<span class="adm-badge adm-badge--neutral">Tạm dừng</span>'}</p>
+                <p style="margin-bottom:8px"><strong>Số sản phẩm:</strong> ${s.productCount || 0}</p>
+                <p style="margin-bottom:8px"><strong>Ngày tạo:</strong> ${fmtDate(s.createdAt)}</p>
+              </div>
+            </div>
+            <div class="adm-form-actions" style="margin-top:32px">
+              <button class="adm-btn adm-btn--outline" onclick="ADM.closeModal()">Đóng cửa sổ</button>
+              <button class="adm-btn adm-btn--primary" onclick="ADM.closeModal(); ADM.openEditCategoryModal(${s.id})">Chỉnh sửa danh mục</button>
+            </div>
+          </div>
+        `);
+      }).catch(function () { toast('Không thể tải thông tin danh mục'); });
+    },
     togglePostCategoryStatus: function (id, currentActive) {
       if (confirm(currentActive ? 'Tạm dừng danh mục này?' : 'Mở lại danh mục này?')) {
         api('/content/categories/' + id, { method: 'PUT', body: JSON.stringify({ active: !currentActive }) }).then(function () { toast('Đã cập nhật trạng thái'); loadPostCategories(); }).catch(function () { toast('Lỗi cập nhật'); });
@@ -1210,10 +1353,9 @@
       </form>
     `);
 
-      // Load categories
-      api('/product/categories').then(data => {
+      // Load active categories for product dropdown
+      api('/product/categories/active').then(rows => {
         var sel = $('modalCategorySelect');
-        var rows = data.content || (Array.isArray(data) ? data : []);
         if (sel) sel.innerHTML = rows.map(c => `<option value="${c.id}">${c.name}</option>`).join('') || '<option value="">Chưa có danh mục</option>';
       });
 
@@ -1527,9 +1669,9 @@
         </form>
       `);
 
-        api('/product/categories').then(data => {
+        // Load active categories for product dropdown
+        api('/product/categories/active').then(rows => {
           var sel = $('modalCategorySelectEdit');
-          var rows = data.content || (Array.isArray(data) ? data : []);
           var selId = parseInt(sel.getAttribute('data-sel'));
           if (sel) sel.innerHTML = rows.map(c => `<option value="${c.id}" ${c.id === selId ? 'selected' : ''}>${c.name}</option>`).join('') || '<option value="">Chưa có danh mục</option>';
         });

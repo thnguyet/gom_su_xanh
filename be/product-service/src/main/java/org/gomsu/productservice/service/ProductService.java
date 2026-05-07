@@ -208,6 +208,7 @@ public class ProductService {
             Double maxPrice,
             String sortBy,
             String sortDir,
+            Boolean active,
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate) {
 
@@ -232,6 +233,7 @@ public class ProductService {
                 maxPrice,
                 fromDate,
                 toDate,
+                active,
                 pageable);
 
         return productPage.map(this::toProductResponse);

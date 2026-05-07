@@ -35,6 +35,14 @@ public class CategoryController {
     }
 
     /**
+     * DÀNH CHO DROPDOWN: Lấy danh sách danh mục đang hoạt động (không phân trang)
+     */
+    @GetMapping("/active")
+    public ResponseEntity<java.util.List<CategoryResponse>> getActiveCategories() {
+        return ResponseEntity.ok(categoryService.getActiveCategories());
+    }
+
+    /**
      * DÀNH CHO USER: Lấy chi tiết danh mục theo SLUG (Để làm trang bộ sưu tập)
      * Ví dụ: GET /categories/detail/am-chen-tu-sa (THÀNH CÔNG)
      */
@@ -53,28 +61,30 @@ public class CategoryController {
     }
 
     /**
-     * DÀNH CHO ADMIN: Tạo danh mục mới (THÀNH CÔNG)
+     * DÀNH CHO ADMIN: Tạo danh mục mới (Hỗ trợ upload ảnh)
      */
-    @PostMapping
+    @PostMapping(consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> createCategory(
-            @RequestBody @Valid CategoryCreationRequest request
+            @RequestPart("request") @Valid CategoryCreationRequest request,
+            @RequestPart(value = "image", required = false) org.springframework.web.multipart.MultipartFile image
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(categoryService.createCategory(request));
+                .body(categoryService.createCategory(request, image));
     }
 
     /**
-     * DÀNH CHO ADMIN: Cập nhật danh mục (THÀNH CÔNG)
+     * DÀNH CHO ADMIN: Cập nhật danh mục (Hỗ trợ upload ảnh & trạng thái)
      */
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> updateCategory(
             @PathVariable Long id,
-            @RequestBody @Valid CategoryUpdateRequest request
+            @RequestPart("request") @Valid CategoryUpdateRequest request,
+            @RequestPart(value = "image", required = false) org.springframework.web.multipart.MultipartFile image
     ) {
-        return ResponseEntity.ok(categoryService.updateCategory(id, request));
+        return ResponseEntity.ok(categoryService.updateCategory(id, request, image));
     }
 
     /**

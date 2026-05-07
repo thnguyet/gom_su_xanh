@@ -404,7 +404,7 @@
         .catch(err => console.error('Lỗi tải workshop:', err));
 
       // Fetch 3 sản phẩm có số lượng nhiều nhất
-      fetch('http://localhost:8080/product/products/all?page=0&size=3&sortBy=stockQuantity&sortDir=DESC')
+      fetch('http://localhost:8080/product/products/all?page=0&size=3&sortBy=stockQuantity&sortDir=DESC&active=true')
         .then(res => res.json())
         .then(data => {
           var products = [];

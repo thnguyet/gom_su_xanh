@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CategoryUpdateRequest {
-    @NotBlank(message = "Không được để trống tên danh mục")
     private String name;
+    private Boolean active;
+    private Boolean deleteImage = false;
 }

@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CloudinaryService cloudinaryService;
 
     // Lấy danh sách (Nâng cấp mặc định xếp theo ngày tạo mới nhất)
     public Page<CategoryResponse> getCategoryList(int page, int size, String keyword, String sortBy, String sortDir) {
@@ -36,7 +37,7 @@ public class CategoryService {
         Page<Category> categoryPage;
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            categoryPage = categoryRepository.findByNameContainingIgnoreCase(keyword.trim(), pageable);
+            categoryPage = categoryRepository.findByIdOrName(keyword.trim(), pageable);
         } else {
             categoryPage = categoryRepository.findAll(pageable);
         }
@@ -52,7 +53,7 @@ public class CategoryService {
 
     // Tạo mới
     @Transactional
-    public CategoryResponse createCategory(CategoryCreationRequest request) {
+    public CategoryResponse createCategory(CategoryCreationRequest request, org.springframework.web.multipart.MultipartFile image) {
         String name = request.getName().trim();
         String slug = toSlug(name);
 
@@ -60,7 +61,6 @@ public class CategoryService {
             throw new RuntimeException("Tên danh mục này đã tồn tại rồi Nguyệt ơi!");
         }
 
-        // Thêm dòng này để bảo vệ cột Unique Slug
         if (categoryRepository.existsBySlug(slug)) {
             throw new RuntimeException("Đường dẫn (Slug) này đã tồn tại, Nguyệt hãy đặt tên khác một chút nhé!");
         }
@@ -68,30 +68,64 @@ public class CategoryService {
         Category category = new Category();
         category.setName(name);
         category.setSlug(slug);
+        category.setActive(true);
+
+        if (image != null && !image.isEmpty()) {
+            try {
+                String imageUrl = cloudinaryService.uploadImage(image);
+                category.setImageUrl(imageUrl);
+            } catch (java.io.IOException e) {
+                throw new RuntimeException("Lỗi upload ảnh danh mục!");
+            }
+        }
+
         return toCategoryResponse(categoryRepository.save(category));
     }
 
     // Cập nhật
     @Transactional
-    public CategoryResponse updateCategory(Long id, CategoryUpdateRequest request) {
+    public CategoryResponse updateCategory(Long id, CategoryUpdateRequest request, org.springframework.web.multipart.MultipartFile image) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục"));
 
-        String newName = request.getName().trim();
-        String newSlug = toSlug(newName);
+        if (request.getName() != null && !request.getName().isBlank()) {
+            String newName = request.getName().trim();
+            String newSlug = toSlug(newName);
 
-        // Check trùng tên
-        if (!category.getName().equals(newName) && categoryRepository.existsByName(newName)) {
-            throw new RuntimeException("Tên danh mục mới bị trùng rồi!");
+            if (!category.getName().equals(newName) && categoryRepository.existsByName(newName)) {
+                throw new RuntimeException("Tên danh mục mới bị trùng rồi!");
+            }
+            category.setName(newName);
+            category.setSlug(newSlug);
         }
 
-        // Check trùng slug (Trường hợp Admin đổi tên nhưng lại trùng slug với danh mục khác)
-        if (!category.getSlug().equals(newSlug) && categoryRepository.existsBySlug(newSlug)) {
-            throw new RuntimeException("Đường dẫn này bị trùng với danh mục khác mất rồi!");
+        if (request.getActive() != null) {
+            category.setActive(request.getActive());
         }
 
-        category.setName(newName);
-        category.setSlug(newSlug);
+        if (Boolean.TRUE.equals(request.getDeleteImage())) {
+            if (category.getImageUrl() != null) {
+                try {
+                    cloudinaryService.deleteImage(category.getImageUrl());
+                } catch (Exception e) { /* Ignored */ }
+                category.setImageUrl(null);
+            }
+        }
+
+        if (image != null && !image.isEmpty()) {
+            // Xóa ảnh cũ nếu có
+            if (category.getImageUrl() != null) {
+                try {
+                    cloudinaryService.deleteImage(category.getImageUrl());
+                } catch (Exception e) { /* Ignored */ }
+            }
+            try {
+                String imageUrl = cloudinaryService.uploadImage(image);
+                category.setImageUrl(imageUrl);
+            } catch (java.io.IOException e) {
+                throw new RuntimeException("Lỗi upload ảnh danh mục mới!");
+            }
+        }
 
         return toCategoryResponse(categoryRepository.save(category));
     }
@@ -103,7 +137,21 @@ public class CategoryService {
         if (category.getProductCount() != null && category.getProductCount() > 0) {
             throw new RuntimeException("Không thể xóa! Danh mục này đang chứa " + category.getProductCount() + " sản phẩm.");
         }
+        
+        if (category.getImageUrl() != null) {
+            try {
+                cloudinaryService.deleteImage(category.getImageUrl());
+            } catch (Exception e) { /* Ignored */ }
+        }
+        
         categoryRepository.delete(category);
+    }
+
+    // Lấy tất cả danh mục đang hoạt động (không phân trang, dùng cho dropdown)
+    public java.util.List<CategoryResponse> getActiveCategories() {
+        return categoryRepository.findByActiveTrue().stream()
+                .map(this::toCategoryResponse)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     // Xem bo suu tap theo id
@@ -115,11 +163,14 @@ public class CategoryService {
 
     // Mapping Response
     public CategoryResponse toCategoryResponse(Category category) {
-        String catImg = null;
-        if (category.getProducts() != null && !category.getProducts().isEmpty()) {
-            var firstProd = category.getProducts().get(0);
-            if (firstProd.getProductImages() != null && !firstProd.getProductImages().isEmpty()) {
-                catImg = firstProd.getProductImages().get(0).getImageUrl();
+        String catImg = category.getImageUrl();
+        // Nếu không có ảnh đại diện riêng, thử lấy từ sản phẩm đầu tiên
+        if (catImg == null || catImg.isBlank()) {
+            if (category.getProducts() != null && !category.getProducts().isEmpty()) {
+                var firstProd = category.getProducts().get(0);
+                if (firstProd.getProductImages() != null && !firstProd.getProductImages().isEmpty()) {
+                    catImg = firstProd.getProductImages().get(0).getImageUrl();
+                }
             }
         }
 
@@ -129,6 +180,7 @@ public class CategoryService {
                 .slug(category.getSlug())
                 .productCount(category.getProductCount() != null ? category.getProductCount() : 0)
                 .imageUrl(catImg)
+                .active(category.isActive())
                 .createdAt(category.getCreatedAt())
                 .build();
     }

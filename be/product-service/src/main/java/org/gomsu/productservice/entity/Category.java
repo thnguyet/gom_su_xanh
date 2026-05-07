@@ -25,6 +25,10 @@ public class Category extends BaseEntity{
     @Column(unique = true, nullable = false)
     private String slug; // Thêm slug cho Category
 
+    private String imageUrl;
+    
+    private boolean active = true;
+
     private boolean deleted = false;
 
     @OneToMany(mappedBy = "category")

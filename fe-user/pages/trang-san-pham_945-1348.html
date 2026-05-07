@@ -14,11 +14,18 @@
       padding: 20px 48px;
       margin-bottom: 40px;
       scroll-snap-type: x mandatory;
-      scrollbar-width: none;
       max-width: 1280px;
       margin: 0 auto 40px;
+      /* Hide scrollbar */
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+      cursor: grab;
+      user-select: none;
     }
-    .category-scroll::-webkit-scrollbar { display: none; }
+    .category-scroll:active {
+      cursor: grabbing;
+    }
+    .category-scroll::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
     .category-card {
       position: relative;
       flex: 0 0 220px;
@@ -366,7 +373,7 @@
         var minPrice = document.getElementById('minPriceInput').value;
         var maxPrice = document.getElementById('maxPriceInput').value;
         
-        var url = 'http://localhost:8080/product/products/all?page=' + page + '&size=' + pageSize;
+        var url = 'http://localhost:8080/product/products/all?page=' + page + '&size=' + pageSize + '&active=true';
         if (currentCategoryId) {
           url += '&categoryId=' + currentCategoryId;
         }
@@ -466,10 +473,10 @@
       }
 
       function loadCategories() {
-        fetch('http://localhost:8080/product/categories?size=4')
+        fetch('http://localhost:8080/product/categories/active')
           .then(res => res.json())
           .then(data => {
-            var categories = data.content || (data.result ? data.result.content : []) || (Array.isArray(data) ? data : []);
+            var categories = data.result || (Array.isArray(data) ? data : data.content || []);
             var scroll = document.getElementById('categoryScroll');
             
             // Add "All" Category
@@ -570,6 +577,34 @@
       minInput.addEventListener('input', updateSlider);
       maxInput.addEventListener('input', updateSlider);
       updateSlider();
+
+      // Drag to scroll for Categories
+      const slider = document.getElementById('categoryScroll');
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      slider.addEventListener('mousedown', (e) => {
+        isDown = true;
+        slider.classList.add('active');
+        startX = e.pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+      });
+      slider.addEventListener('mouseleave', () => {
+        isDown = false;
+        slider.classList.remove('active');
+      });
+      slider.addEventListener('mouseup', () => {
+        isDown = false;
+        slider.classList.remove('active');
+      });
+      slider.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - slider.offsetLeft;
+        const walk = (x - startX) * 2; // scroll-fast
+        slider.scrollLeft = scrollLeft - walk;
+      });
     });
   </script>
 </body>
