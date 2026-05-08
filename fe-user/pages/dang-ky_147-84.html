@@ -212,15 +212,26 @@
         <input class="form-input" id="reg-name" type="text" placeholder="Họ và tên" autocomplete="name">
       </div>
       <div class="form-group">
-        <input class="form-input" id="reg-email" type="email" placeholder="Email" autocomplete="email">
+        <label class="form-label" for="reg-email">Email</label>
+        <div style="display:flex; gap:10px;">
+          <input class="form-input" id="reg-email" type="email" placeholder="Email" autocomplete="email" style="flex:1;">
+          <button type="button" id="sendOtpBtn" style="padding:0 15px; border-radius:12px; border:none; background:var(--clr-teal); color:#fff; font-weight:700; cursor:pointer; font-size:14px; white-space:nowrap; transition:all .2s;">Gửi mã</button>
+        </div>
+      </div>
+      <div class="form-group" id="otp-group" style="display:none;">
+        <label class="form-label" for="reg-otp">Mã OTP (Kiểm tra email của bạn)</label>
+        <input class="form-input" id="reg-otp" type="text" placeholder="Nhập mã OTP 6 số" maxlength="6">
       </div>
       <div class="form-group">
+        <label class="form-label" for="reg-phone">Số điện thoại</label>
         <input class="form-input" id="reg-phone" type="tel" placeholder="Số điện thoại" autocomplete="tel">
       </div>
       <div class="form-group">
+        <label class="form-label" for="reg-address">Địa chỉ</label>
         <input class="form-input" id="reg-address" type="text" placeholder="Địa chỉ" autocomplete="street-address">
       </div>
       <div class="form-group">
+        <label class="form-label" for="reg-gender">Giới tính</label>
         <select class="form-input" id="reg-gender" style="color: var(--clr-forest);">
           <option value="" disabled selected>Chọn giới tính</option>
           <option value="MALE">Nam</option>
@@ -285,9 +296,13 @@
       var gender = document.getElementById('reg-gender').value;
       var pass  = document.getElementById('reg-pass').value.trim();
       var pass2 = document.getElementById('reg-pass2').value.trim();
+      var otp   = document.getElementById('reg-otp').value.trim();
       var agree = document.getElementById('reg-agree').checked;
       
-      if (!name || !email || !phone || !address || !gender || !pass) { alert('Vui lòng điền đầy đủ thông tin.'); return; }
+      if (!name || !email || !phone || !address || !gender || !pass || !otp) { 
+        alert('Vui lòng điền đầy đủ thông tin, bao gồm cả mã OTP.'); 
+        return; 
+      }
       if (pass !== pass2) { alert('Mật khẩu xác nhận không khớp.'); return; }
       
       // Tách từng lỗi validation mật khẩu
@@ -328,7 +343,8 @@
         phone: phone,
         address: address,
         gender: gender,
-        password: pass
+        password: pass,
+        otp: otp
       };
 
       fetch('http://localhost:8080/identity/users/register', {
@@ -352,6 +368,56 @@
         alert('Lỗi kết nối đến máy chủ.');
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
+      });
+    });
+
+    // Logic gửi mã OTP
+    document.getElementById('sendOtpBtn').addEventListener('click', function() {
+      var email = document.getElementById('reg-email').value.trim();
+      if (!email) {
+        alert('Vui lòng nhập email trước khi gửi mã OTP.');
+        return;
+      }
+      
+      var btn = this;
+      var originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Đang gửi...';
+      btn.style.background = '#ccc';
+
+      fetch('http://localhost:8080/identity/users/send-otp?email=' + encodeURIComponent(email), {
+        method: 'POST'
+      })
+      .then(res => {
+        if (res.ok) {
+          alert('Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư!');
+          document.getElementById('otp-group').style.display = 'block';
+          
+          // Countdown 60s
+          var seconds = 60;
+          var timer = setInterval(function() {
+            seconds--;
+            btn.textContent = 'Gửi lại (' + seconds + 's)';
+            if (seconds <= 0) {
+              clearInterval(timer);
+              btn.disabled = false;
+              btn.textContent = originalText;
+              btn.style.background = 'var(--clr-teal)';
+            }
+          }, 1000);
+        } else {
+          alert('Không thể gửi mã OTP. Vui lòng thử lại sau.');
+          btn.disabled = false;
+          btn.textContent = originalText;
+          btn.style.background = 'var(--clr-teal)';
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Lỗi kết nối khi gửi OTP.');
+        btn.disabled = false;
+        btn.textContent = originalText;
+        btn.style.background = 'var(--clr-teal)';
       });
     });
   </script>

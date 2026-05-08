@@ -1,8 +1,13 @@
-$env:DB_PASSWORD = "Nguyetdth892005"
-$env:JWT_SIGNER_KEY = "Nguyetdth89200512345678910111213" # Dự phòng luôn cho JWT_SIGNER_KEY
-$env:CLOUDINARY_API_KEY = "316921521754154" # Cấu hình giả để service khởi động được
-$env:CLOUDINARY_API_SECRET = "_UmYMjvVBmizhELcVrSaUrYMPjw" # Bạn có thể thay bằng key thật sau
+$env:DB_PASSWORD = ""
+$env:JWT_SIGNER_KEY = "" # Dự phòng luôn cho JWT_SIGNER_KEY
+$env:CLOUDINARY_API_KEY = "" # Cấu hình giả để service khởi động được
+$env:CLOUDINARY_API_SECRET = "" # Bạn có thể thay bằng key thật sau
 
+# Cấu hình Email để gửi mã OTP (Sử dụng Gmail SMTP)
+$env:MAIL_USERNAME = "" # Thay bằng email của bạn
+$env:MAIL_PASSWORD = ""    # Thay bằng mật khẩu ứng dụng Gmail (App Password)
+$env:GOOGLE_CLIENT_ID=""
+$env:GOOGLE_CLIENT_SECRET=""
 
 $services = @(
     "discovery-service",

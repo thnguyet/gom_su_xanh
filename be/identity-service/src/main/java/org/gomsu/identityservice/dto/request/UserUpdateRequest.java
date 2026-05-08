@@ -13,13 +13,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserUpdateRequest {
 
+    private String username;
+
     @Pattern(regexp = "^0\\d{9}", message = "Số điện thoại phải gồm 10 số và bắt đầu là số 0!")
     private String phone;
 
     private String address;
-
-    @Email(message = "Nhập đúng định dạng email!")
-    private String email;
 
     private String gender;
 }

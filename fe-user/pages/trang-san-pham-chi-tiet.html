@@ -128,6 +128,56 @@
       background: var(--clr-leaf);
     }
 
+    /* Quantity Selector */
+    .quantity-selector {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 24px;
+      border: 2px solid rgba(148, 181, 120, 0.4);
+      border-radius: var(--radius-pill);
+      width: fit-content;
+      overflow: hidden;
+      background: var(--clr-cream);
+    }
+
+    .quantity-selector button {
+      background: transparent;
+      border: none;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--clr-forest);
+      transition: all 0.2s;
+    }
+
+    .quantity-selector button:hover {
+      background: rgba(148, 181, 120, 0.1);
+    }
+
+    .quantity-selector input {
+      width: 60px;
+      height: 48px;
+      border: none;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--clr-forest);
+      background: transparent;
+      -moz-appearance: textfield;
+      outline: none;
+    }
+
+    .quantity-selector input::-webkit-outer-spin-button,
+    .quantity-selector input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
     /* Tabs Section */
     .tabs-section {
       display: grid;
@@ -366,6 +416,12 @@
           </div>
         </div>
 
+        <div class="quantity-selector" id="qtySelector">
+          <button type="button" id="minusBtn">&minus;</button>
+          <input type="number" id="quantityInput" value="1" min="1" step="1">
+          <button type="button" id="plusBtn">&plus;</button>
+        </div>
+
         <div class="product-actions">
           <button class="btn-outline" id="addToCartBtn">Thêm vào giỏ hàng</button>
           <button class="btn-solid" id="buyNowBtn">Mua ngay</button>
@@ -478,6 +534,8 @@
               buyNowBtn.style.color = '#999';
               buyNowBtn.style.cursor = 'not-allowed';
             }
+            var qtySelector = document.getElementById('qtySelector');
+            if (qtySelector) qtySelector.style.display = 'none';
           }
 
           // Update Description
@@ -497,6 +555,36 @@
                 this.classList.add('active');
               });
               thumbsContainer.appendChild(img);
+            });
+          }
+
+          // Setup Quantity Selector Logic
+          var qtyInput = document.getElementById('quantityInput');
+          var minusBtn = document.getElementById('minusBtn');
+          var plusBtn = document.getElementById('plusBtn');
+
+          if (minusBtn && plusBtn && qtyInput) {
+            minusBtn.addEventListener('click', function () {
+              var val = parseInt(qtyInput.value) || 1;
+              if (val > 1) qtyInput.value = val - 1;
+            });
+            plusBtn.addEventListener('click', function () {
+              var val = parseInt(qtyInput.value) || 1;
+              var max = product.stockQuantity || 99;
+              if (val < max) {
+                qtyInput.value = val + 1;
+              } else {
+                alert('Kho chỉ còn ' + max + ' sản phẩm!');
+              }
+            });
+            qtyInput.addEventListener('change', function () {
+              var val = parseInt(this.value) || 1;
+              var max = product.stockQuantity || 99;
+              if (val < 1) this.value = 1;
+              if (val > max) {
+                alert('Kho chỉ còn ' + max + ' sản phẩm!');
+                this.value = max;
+              }
             });
           }
 
@@ -523,9 +611,10 @@
               return;
             }
 
+            var quantity = parseInt(document.getElementById('quantityInput').value) || 1;
             var formData = new URLSearchParams();
             formData.append('productId', product.id);
-            formData.append('quantity', 1);
+            formData.append('quantity', quantity);
 
             console.log('Adding to cart, productId:', product.id);
 
@@ -594,9 +683,10 @@
             this.textContent = 'Đang xử lý...';
             this.disabled = true;
 
+            var quantity = parseInt(document.getElementById('quantityInput').value) || 1;
             var formData = new URLSearchParams();
             formData.append('productId', product.id);
-            formData.append('quantity', 1);
+            formData.append('quantity', quantity);
 
             fetch('http://localhost:8080/order/cart/add', {
               method: 'POST',
@@ -611,7 +701,7 @@
                 throw new Error('Không thể thêm sản phẩm vào hệ thống thanh toán.');
               })
               .then(() => {
-                window.location.href = 'thanh-toan.html?buyNow=true&productId=' + product.id + '&quantity=1';
+                window.location.href = 'thanh-toan.html?buyNow=true&productId=' + product.id + '&quantity=' + quantity;
               })
               .catch(err => {
                 alert(err.message);

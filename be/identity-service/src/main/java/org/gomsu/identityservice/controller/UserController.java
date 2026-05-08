@@ -17,6 +17,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final org.gomsu.identityservice.service.OtpService otpService;
+
+    @PostMapping("/send-otp")
+    public String sendOtp(@RequestParam String email, @RequestParam(required = false) String type) {
+        otpService.generateAndSendOtp(email, type);
+        return "Mã OTP đã được gửi đến email của bạn!";
+    }
 
     @PostMapping("/register")
     public UserResponse createUser(@RequestBody @Valid UserCreationRequest userCreationRequest) {
@@ -49,13 +56,24 @@ public class UserController {
     }
 
     @PutMapping("/my-infor")
-    public UserResponse updateMyInfor(@RequestBody UserUpdateRequest userUpdateRequest) {
+    public UserResponse updateMyInfor(@Valid @RequestBody UserUpdateRequest userUpdateRequest) {
         return userService.updateMyInfor(userUpdateRequest);
     }
 
     @PutMapping("/changePassword")
     public UserResponse changePassword(@RequestBody @Valid PasswordChangeRequest passwordChangeRequest) {
         return userService.changePassword(passwordChangeRequest);
+    }
+
+    @PutMapping("/changeEmail")
+    public org.gomsu.identityservice.dto.response.AuthenticationResponse changeEmail(@RequestBody @Valid org.gomsu.identityservice.dto.request.EmailChangeRequest emailChangeRequest) {
+        return userService.changeEmail(emailChangeRequest);
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestBody @Valid org.gomsu.identityservice.dto.request.ResetPasswordRequest request) {
+        userService.resetPassword(request);
+        return "Đặt lại mật khẩu thành công!";
     }
 
 }

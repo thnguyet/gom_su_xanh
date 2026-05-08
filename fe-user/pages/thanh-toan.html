@@ -148,6 +148,12 @@
       margin-bottom: 4px;
       font-size: 15px;
     }
+    .order-item-unit-price {
+      font-size: 13px;
+      color: var(--clr-teal);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
     .order-item-code {
       font-size: 13px;
       color: rgba(28, 61, 30, 0.7);
@@ -523,15 +529,17 @@
           container.innerHTML = '';
           var imgUrl = (product.imageUrls && product.imageUrls.length > 0) ? product.imageUrls[0] : '../assets/images/placeholder.jpg';
           
-          var div = document.createElement('div');
-          div.className = 'order-item';
-          div.innerHTML = `
-            <img src="${imgUrl}" alt="${product.name}">
-            <div style="flex: 1;">
-              <div class="order-item-title">${product.name} (x${buyNowQuantity})</div>
-              <div class="order-item-code">Mã: ${product.id}</div>
-            </div>
-            <div class="order-item-price">${new Intl.NumberFormat('vi-VN').format(totalPrice)} VNĐ</div>
+            var unitPriceStr = new Intl.NumberFormat('vi-VN').format(product.price || 0) + ' VNĐ';
+            var div = document.createElement('div');
+            div.className = 'order-item';
+            div.innerHTML = `
+              <img src="${imgUrl}" alt="${product.name}">
+              <div style="flex: 1;">
+                <div class="order-item-title">${product.name} (x${buyNowQuantity})</div>
+                <div class="order-item-unit-price">${unitPriceStr}</div>
+                <div class="order-item-code">Mã: ${product.id}</div>
+              </div>
+              <div class="order-item-price">${new Intl.NumberFormat('vi-VN').format(totalPrice)} VNĐ</div>
           `;
           container.appendChild(div);
         })
@@ -572,12 +580,14 @@
             var imgUrl = item.productImage || '../assets/images/placeholder.jpg';
             var code = item.productId || 'HSA0000';
             
+            var unitPriceStr = new Intl.NumberFormat('vi-VN').format(item.unitPrice || 0) + ' VNĐ';
             var div = document.createElement('div');
             div.className = 'order-item';
             div.innerHTML = `
               <img src="${imgUrl}" alt="${item.productName}">
               <div style="flex: 1;">
                 <div class="order-item-title">${item.productName} (x${item.quantity})</div>
+                <div class="order-item-unit-price">${unitPriceStr}</div>
                 <div class="order-item-code">Mã: ${code}</div>
               </div>
               <div class="order-item-price">${priceStr}</div>

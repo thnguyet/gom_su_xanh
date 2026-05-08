@@ -22,19 +22,19 @@ public class User {
     @Column(name = "username", nullable = false)
     private String username;
 
-    @Column(name = "phone", unique = true, nullable = false)
+    @Column(name = "phone", unique = true)
     private String phone;
 
-    @Column(name = "address", nullable = false)
+    @Column(name = "address")
     private String address;
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "gender", nullable = false)
+    @Column(name = "gender")
     private String gender;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)

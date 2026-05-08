@@ -20,14 +20,49 @@
     logout:      'ho-so-ca-nhan_147-86.html#logout'
   };
 
+  /* ===== OAUTH2 TOKEN CAPTURE ===== */
+  (function () {
+    var urlParams = new URLSearchParams(window.location.search);
+    var oauthToken = urlParams.get('token');
+    if (oauthToken) {
+      localStorage.setItem('gsx_token', oauthToken);
+      localStorage.setItem('gsx_logged_in', 'true');
+      // Clean up URL to hide token
+      var cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+      
+      var needsUpdate = urlParams.get('needsUpdate') === 'true';
+
+      // Delay toast to ensure DOM is ready
+      setTimeout(function() {
+        if (typeof toast === 'function') {
+          if (needsUpdate) {
+            toast('Đăng nhập thành công! Vui lòng cập nhật đầy đủ thông tin cá nhân.');
+            // Redirect to profile after a short delay
+            setTimeout(function() { go(pages.profile); }, 1500);
+          } else {
+            toast('Đăng nhập thành công!');
+          }
+        }
+      }, 500);
+    }
+  })();
+
   /* ===== AUTH CHECK & CLEAN START (Run early) ===== */
   (function () {
     // Clear legacy/fake account data to ensure a clean start per browser session
+    // BUT only if we are not currently capturing an OAuth token from the URL
+    var urlParams = new URLSearchParams(window.location.search);
+    var hasOAuthToken = urlParams.get('token');
+    
     var hasInitiated = sessionStorage.getItem('gsx_app_initiated');
-    if (!hasInitiated) {
+    if (!hasInitiated && !hasOAuthToken) {
       localStorage.removeItem('gsx_logged_in');
       localStorage.removeItem('gsx_token');
       localStorage.removeItem('adm_token');
+      sessionStorage.setItem('gsx_app_initiated', 'true');
+    } else if (hasOAuthToken) {
+      // Mark as initiated if we're coming back with a token
       sessionStorage.setItem('gsx_app_initiated', 'true');
     }
 

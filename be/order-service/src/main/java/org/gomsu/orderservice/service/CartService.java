@@ -137,6 +137,7 @@ public class CartService {
                             .unitPrice(price)
                             .quantity(item.getQuantity())
                             .subTotal(price * item.getQuantity())
+                            .stockQuantity(dto != null ? dto.getStockQuantity() : 0)
                             .build();
                 })
                 .collect(Collectors.toList());

@@ -20,13 +20,21 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import javax.crypto.spec.SecretKeySpec; // Import khóa bí mật
 
+import org.springframework.context.annotation.Lazy;
+import lombok.RequiredArgsConstructor;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    @Lazy
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+
     private final String[] PUBLIC_ENDPOINTS = {
-            "/users/register", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh"
+            "/users/register", "/users/send-otp", "/users/reset-password",
+            "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh"
     };
 
     @NonFinal
@@ -48,6 +56,10 @@ public class SecurityConfig {
                 oauth2.jwt(jwtConfigurer ->
                         jwtConfigurer.decoder(jwtDecoder())
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter())) // Code này sẽ đổi SCOPE_ADMIN -> ROLE_ADMIN
+        );
+
+        httpSecurity.oauth2Login(oauth2 -> oauth2
+                .successHandler(oAuth2SuccessHandler)
         );
 
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
@@ -75,8 +87,4 @@ public class SecurityConfig {
                 .build();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 }

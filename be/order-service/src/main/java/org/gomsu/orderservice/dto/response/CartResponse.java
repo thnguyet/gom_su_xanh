@@ -34,5 +34,6 @@ public class CartResponse {
         private Double unitPrice;
         private Integer quantity;
         private Double subTotal; // Thanh tien: unitPrice * quantity
+        private Integer stockQuantity;
     }
 }

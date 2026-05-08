@@ -208,6 +208,99 @@
       opacity: 1; 
       transform: translateY(-50%) scale(1.1) !important;
     }
+
+    /* ===== Forgot Password Modal ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: var(--clr-cream, #fffdf6);
+      border-radius: 20px;
+      padding: 36px 32px;
+      max-width: 440px;
+      width: 90%;
+      box-shadow: 0 24px 48px rgba(0,0,0,.18);
+      position: relative;
+      animation: modalIn .3s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(24px) scale(.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-close {
+      position: absolute;
+      top: 14px; right: 18px;
+      background: none; border: none;
+      font-size: 22px; cursor: pointer;
+      color: var(--clr-forest);
+      opacity: .6;
+      transition: opacity .2s;
+    }
+    .modal-close:hover { opacity: 1; }
+    .modal-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--clr-teal);
+      text-align: center;
+      margin: 0 0 8px;
+    }
+    .modal-desc {
+      text-align: center;
+      font-size: 14px;
+      color: #6a7a5a;
+      margin-bottom: 24px;
+    }
+    .modal-step { display: none; }
+    .modal-step.active { display: block; }
+    .modal-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius-pill, 50px);
+      background: var(--clr-teal, #2e7d60);
+      color: #fff;
+      font-family: 'Afacad', Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      margin-top: 12px;
+    }
+    .modal-btn:hover {
+      background: var(--clr-forest, #1b4332);
+      transform: translateY(-1px);
+    }
+    .modal-btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .modal-msg {
+      text-align: center;
+      font-size: 13px;
+      margin-top: 10px;
+      min-height: 18px;
+    }
+    .modal-msg.error { color: #c0392b; }
+    .modal-msg.success { color: var(--clr-teal); }
+    .modal-back {
+      display: block;
+      margin: 10px auto 0;
+      background: none;
+      border: none;
+      color: var(--clr-forest);
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
   </style>
 </head>
 
@@ -254,7 +347,7 @@
         </div>
       </div>
 
-      <a class="form-forgot" href="#">Quên mật khẩu?</a>
+      <a class="form-forgot" href="#" id="forgotPasswordLink">Quên mật khẩu?</a>
 
       <button class="form-submit" id="loginBtn" type="button">Đăng nhập</button>
 
@@ -265,9 +358,62 @@
       <div class="form-divider">hoặc</div>
       <div class="form-social-title">Đăng nhập bằng</div>
       <div class="form-social-btns">
-        <a class="form-social-btn" href="#" title="Google">🔵</a>
-        <a class="form-social-btn" href="https://www.facebook.com/profile.php?id=100095447280090" target="_blank"
-          title="Facebook">📘</a>
+        <a class="form-social-btn" href="http://localhost:8081/oauth2/authorization/google" title="Google">
+          <img src="https://img.icons8.com/color/48/000000/google-logo.png" width="30" alt="Google">
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL QUÊN MẬT KHẨU -->
+  <div class="modal-overlay" id="forgotModal">
+    <div class="modal-box">
+      <button class="modal-close" id="forgotModalClose">&times;</button>
+
+      <!-- Bước 1: Nhập email -->
+      <div class="modal-step active" id="forgotStep1">
+        <h2 class="modal-title">Quên mật khẩu</h2>
+        <p class="modal-desc">Nhập email tài khoản của bạn. Chúng tôi sẽ gửi mã OTP để xác thực.</p>
+        <div class="form-group">
+          <input class="form-input" id="forgot-email" type="email" placeholder="Nhập email của bạn">
+        </div>
+        <button class="modal-btn" id="forgotSendOtpBtn">Gửi mã OTP</button>
+        <div class="modal-msg" id="forgotMsg1"></div>
+      </div>
+
+      <!-- Bước 2: Nhập OTP -->
+      <div class="modal-step" id="forgotStep2">
+        <h2 class="modal-title">Nhập mã OTP</h2>
+        <p class="modal-desc">Mã OTP đã được gửi tới email <strong id="forgotEmailDisplay"></strong></p>
+        <div class="form-group">
+          <input class="form-input" id="forgot-otp" type="text" placeholder="Nhập mã OTP (6 số)" maxlength="6">
+        </div>
+        <div class="form-group">
+          <div class="password-input-wrapper">
+            <input class="form-input" id="forgot-new-password" type="password" placeholder="Mật khẩu mới (ít nhất 8 ký tự, có chữ hoa và số)">
+            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('forgot-new-password', this)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="password-input-wrapper">
+            <input class="form-input" id="forgot-confirm-password" type="password" placeholder="Xác nhận mật khẩu mới">
+            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('forgot-confirm-password', this)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+        </div>
+        <button class="modal-btn" id="forgotResetBtn">Đặt lại mật khẩu</button>
+        <button class="modal-back" id="forgotBackBtn">← Quay lại</button>
+        <div class="modal-msg" id="forgotMsg2"></div>
+      </div>
+
+      <!-- Bước 3: Thành công -->
+      <div class="modal-step" id="forgotStep3">
+        <h2 class="modal-title" style="color: var(--clr-moss)">✓ Thành công!</h2>
+        <p class="modal-desc">Mật khẩu của bạn đã được đặt lại thành công.<br>Bạn có thể đăng nhập ngay bây giờ.</p>
+        <button class="modal-btn" id="forgotDoneBtn">Đăng nhập ngay</button>
       </div>
     </div>
   </div>
@@ -369,6 +515,137 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') document.getElementById('loginBtn').click();
     });
+
+    // ===== QUÊN MẬT KHẨU =====
+    (function() {
+      var modal = document.getElementById('forgotModal');
+      var step1 = document.getElementById('forgotStep1');
+      var step2 = document.getElementById('forgotStep2');
+      var step3 = document.getElementById('forgotStep3');
+      var msg1 = document.getElementById('forgotMsg1');
+      var msg2 = document.getElementById('forgotMsg2');
+      var savedEmail = '';
+
+      function showStep(step) {
+        [step1, step2, step3].forEach(function(s) { s.classList.remove('active'); });
+        step.classList.add('active');
+      }
+
+      function showMsg(el, text, type) {
+        el.textContent = text;
+        el.className = 'modal-msg ' + (type || '');
+      }
+
+      function resetModal() {
+        showStep(step1);
+        document.getElementById('forgot-email').value = '';
+        document.getElementById('forgot-otp').value = '';
+        document.getElementById('forgot-new-password').value = '';
+        document.getElementById('forgot-confirm-password').value = '';
+        msg1.textContent = '';
+        msg2.textContent = '';
+        savedEmail = '';
+      }
+
+      // Mở modal
+      document.getElementById('forgotPasswordLink').addEventListener('click', function(e) {
+        e.preventDefault();
+        resetModal();
+        modal.classList.add('active');
+      });
+
+      // Đóng modal
+      document.getElementById('forgotModalClose').addEventListener('click', function() {
+        modal.classList.remove('active');
+      });
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) modal.classList.remove('active');
+      });
+
+      // Bước 1: Gửi OTP
+      document.getElementById('forgotSendOtpBtn').addEventListener('click', function() {
+        var email = document.getElementById('forgot-email').value.trim();
+        if (!email) { showMsg(msg1, 'Vui lòng nhập email.', 'error'); return; }
+        
+        var btn = this;
+        btn.disabled = true;
+        btn.textContent = 'Đang gửi...';
+        showMsg(msg1, '', '');
+
+        fetch('http://localhost:8080/identity/users/send-otp?email=' + encodeURIComponent(email) + '&type=RESET_PASSWORD', {
+          method: 'POST'
+        })
+        .then(function(res) {
+          if (!res.ok) throw new Error('Email không tồn tại hoặc lỗi hệ thống');
+          return res.text();
+        })
+        .then(function() {
+          savedEmail = email;
+          document.getElementById('forgotEmailDisplay').textContent = email;
+          showStep(step2);
+          btn.disabled = false;
+          btn.textContent = 'Gửi mã OTP';
+        })
+        .catch(function(err) {
+          showMsg(msg1, err.message || 'Lỗi gửi OTP. Vui lòng thử lại.', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Gửi mã OTP';
+        });
+      });
+
+      // Quay lại bước 1
+      document.getElementById('forgotBackBtn').addEventListener('click', function() {
+        showStep(step1);
+        msg2.textContent = '';
+      });
+
+      // Bước 2: Đặt lại mật khẩu
+      document.getElementById('forgotResetBtn').addEventListener('click', function() {
+        var otp = document.getElementById('forgot-otp').value.trim();
+        var newPass = document.getElementById('forgot-new-password').value;
+        var confirmPass = document.getElementById('forgot-confirm-password').value;
+
+        if (!otp) { showMsg(msg2, 'Vui lòng nhập mã OTP.', 'error'); return; }
+        if (!newPass) { showMsg(msg2, 'Vui lòng nhập mật khẩu mới.', 'error'); return; }
+        if (newPass.length < 8) { showMsg(msg2, 'Mật khẩu phải có ít nhất 8 ký tự.', 'error'); return; }
+        if (!/[A-Z]/.test(newPass)) { showMsg(msg2, 'Mật khẩu phải có ít nhất 1 chữ in hoa.', 'error'); return; }
+        if (!/\d/.test(newPass)) { showMsg(msg2, 'Mật khẩu phải có ít nhất 1 chữ số.', 'error'); return; }
+        if (newPass !== confirmPass) { showMsg(msg2, 'Mật khẩu xác nhận không khớp.', 'error'); return; }
+
+        var btn = this;
+        btn.disabled = true;
+        btn.textContent = 'Đang xử lý...';
+        showMsg(msg2, '', '');
+
+        fetch('http://localhost:8080/identity/users/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: savedEmail, otp: otp, newPassword: newPass })
+        })
+        .then(function(res) {
+          if (!res.ok) return res.text().then(function(t) { throw new Error(t); });
+          return res.text();
+        })
+        .then(function() {
+          showStep(step3);
+          btn.disabled = false;
+          btn.textContent = 'Đặt lại mật khẩu';
+        })
+        .catch(function(err) {
+          var errorMsg = 'Lỗi đặt lại mật khẩu.';
+          try { var parsed = JSON.parse(err.message); errorMsg = parsed.message || errorMsg; } catch(e) { errorMsg = err.message || errorMsg; }
+          showMsg(msg2, errorMsg, 'error');
+          btn.disabled = false;
+          btn.textContent = 'Đặt lại mật khẩu';
+        });
+      });
+
+      // Bước 3: Đóng modal
+      document.getElementById('forgotDoneBtn').addEventListener('click', function() {
+        modal.classList.remove('active');
+        resetModal();
+      });
+    })();
   </script>
 </body>
 

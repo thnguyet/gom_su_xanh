@@ -39,4 +39,7 @@ public class UserCreationRequest {
     @Pattern(regexp = ".*[@#$%^&+=!].*", message = "Mật khẩu phải có ít nhất một ký tự đặc biệt (@#$%^&+=!)")
     @Pattern(regexp = "^\\S+$", message = "Mật khẩu không được chứa khoảng trắng")
     private String password;
+
+    @NotBlank(message = "Mã OTP không được để trống!")
+    private String otp;
 }

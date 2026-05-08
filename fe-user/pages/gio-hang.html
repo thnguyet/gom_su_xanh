@@ -175,6 +175,52 @@
       .cart-grid { grid-template-columns: 1fr; gap: 48px; }
       .checkout-steps { display: none; }
     }
+
+    /* Cart Quantity Selector */
+    .cart-qty-selector {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1.5px solid rgba(148, 181, 120, 0.4);
+      border-radius: 100px;
+      width: fit-content;
+      overflow: hidden;
+      background: white;
+      margin-top: 8px;
+    }
+    .cart-qty-selector button {
+      background: transparent;
+      border: none;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--clr-forest);
+      transition: background 0.2s;
+    }
+    .cart-qty-selector button:hover {
+      background: rgba(148, 181, 120, 0.1);
+    }
+    .cart-qty-selector input {
+      width: 40px;
+      height: 32px;
+      border: none;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--clr-forest);
+      background: transparent;
+      outline: none;
+      -moz-appearance: textfield;
+    }
+    .cart-qty-selector input::-webkit-outer-spin-button,
+    .cart-qty-selector input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
   </style>
 </head>
 <body>
@@ -268,7 +314,8 @@
 
           container.innerHTML = '';
           items.forEach(item => {
-            var priceStr = new Intl.NumberFormat('vi-VN').format(item.subTotal || 0) + 'VNĐ';
+            var unitPriceStr = new Intl.NumberFormat('vi-VN').format(item.unitPrice || 0) + ' VNĐ';
+            var priceStr = new Intl.NumberFormat('vi-VN').format(item.subTotal || 0) + ' VNĐ';
             var imgUrl = item.productImage || '../assets/images/placeholder.jpg';
             
             var div = document.createElement('div');
@@ -277,9 +324,12 @@
               <img src="${imgUrl}" alt="${item.productName}" class="item-img">
               <div class="item-info">
                 <h3>${item.productName}</h3>
-                <p>Số lượng: 
-                  <input type="number" min="1" value="${item.quantity}" style="width: 50px; padding: 4px; border: 1px solid rgba(148,181,120,.4); border-radius: 4px; text-align: center;" data-id="${item.productId}" class="qty-input">
-                </p>
+                <div style="color:var(--clr-teal); font-weight:700; margin-bottom:8px;">${unitPriceStr}</div>
+                <div class="cart-qty-selector">
+                  <button type="button" class="qty-minus" data-id="${item.productId}">&minus;</button>
+                  <input type="number" min="1" value="${item.quantity}" data-id="${item.productId}" data-max="${item.stockQuantity || 99}" class="qty-input">
+                  <button type="button" class="qty-plus" data-id="${item.productId}">&plus;</button>
+                </div>
               </div>
               <div class="item-price-actions">
                 <div class="item-price">${priceStr}</div>
@@ -306,20 +356,55 @@
 
           // Event Listeners for Update Quantity
           var qtyTimeout;
+          function updateCartQty(productId, newQty) {
+            clearTimeout(qtyTimeout);
+            qtyTimeout = setTimeout(() => {
+              fetch('http://localhost:8080/order/cart/update?productId=' + productId + '&quantity=' + newQty, {
+                method: 'PUT',
+                headers: { 'Authorization': 'Bearer ' + token }
+              }).then(() => loadCart());
+            }, 500);
+          }
+
+          container.querySelectorAll('.qty-minus').forEach(btn => {
+            btn.addEventListener('click', function() {
+              var id = this.getAttribute('data-id');
+              var inp = container.querySelector('.qty-input[data-id="'+id+'"]');
+              var val = parseInt(inp.value) || 1;
+              if (val > 1) {
+                inp.value = val - 1;
+                updateCartQty(id, val - 1);
+              }
+            });
+          });
+
+          container.querySelectorAll('.qty-plus').forEach(btn => {
+            btn.addEventListener('click', function() {
+              var id = this.getAttribute('data-id');
+              var inp = container.querySelector('.qty-input[data-id="'+id+'"]');
+              var val = parseInt(inp.value) || 1;
+              var max = parseInt(inp.getAttribute('data-max')) || 99;
+              if (val < max) {
+                inp.value = val + 1;
+                updateCartQty(id, val + 1);
+              } else {
+                alert('Kho chỉ còn ' + max + ' sản phẩm!');
+              }
+            });
+          });
+
           container.querySelectorAll('.qty-input').forEach(inp => {
             inp.addEventListener('change', function() {
               var id = this.getAttribute('data-id');
               var qty = parseInt(this.value);
-              if (qty < 1) qty = 1;
+              var max = parseInt(this.getAttribute('data-max')) || 99;
+              if (isNaN(qty) || qty < 1) qty = 1;
+              if (qty > max) {
+                alert('Kho chỉ còn ' + max + ' sản phẩm!');
+                qty = max;
+              }
               this.value = qty;
-              
-              clearTimeout(qtyTimeout);
-              qtyTimeout = setTimeout(() => {
-                fetch('http://localhost:8080/order/cart/update?productId=' + id + '&quantity=' + qty, {
-                  method: 'PUT',
-                  headers: { 'Authorization': 'Bearer ' + token }
-                }).then(() => loadCart());
-              }, 400);
+              updateCartQty(id, qty);
             });
           });
         })
