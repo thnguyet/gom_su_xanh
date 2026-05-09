@@ -5,6 +5,8 @@ import org.gomsu.productservice.dto.request.CategoryCreationRequest;
 import org.gomsu.productservice.dto.request.CategoryUpdateRequest;
 import org.gomsu.productservice.dto.response.CategoryResponse;
 import org.gomsu.productservice.entity.Category;
+import org.gomsu.productservice.exception.AppException;
+import org.gomsu.productservice.exception.ErrorCode;
 import org.gomsu.productservice.repository.CategoryRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,7 +49,7 @@ public class CategoryService {
     // Xem theo slug (Để làm trang "Bộ sưu tập theo loại")
     public CategoryResponse getCategoryBySlug(String slug) {
         Category category = categoryRepository.findBySlug(slug)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục!"));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
         return toCategoryResponse(category);
     }
 
@@ -58,11 +60,11 @@ public class CategoryService {
         String slug = toSlug(name);
 
         if (categoryRepository.existsByName(name)) {
-            throw new RuntimeException("Tên danh mục này đã tồn tại rồi Nguyệt ơi!");
+            throw new AppException(ErrorCode.CATEGORY_NAME_EXISTS);
         }
 
         if (categoryRepository.existsBySlug(slug)) {
-            throw new RuntimeException("Đường dẫn (Slug) này đã tồn tại, Nguyệt hãy đặt tên khác một chút nhé!");
+            throw new AppException(ErrorCode.CATEGORY_SLUG_EXISTS);
         }
 
         Category category = new Category();
@@ -75,7 +77,7 @@ public class CategoryService {
                 String imageUrl = cloudinaryService.uploadImage(image);
                 category.setImageUrl(imageUrl);
             } catch (java.io.IOException e) {
-                throw new RuntimeException("Lỗi upload ảnh danh mục!");
+                throw new AppException(ErrorCode.CATEGORY_IMAGE_UPLOAD_FAILED);
             }
         }
 
@@ -86,14 +88,14 @@ public class CategoryService {
     @Transactional
     public CategoryResponse updateCategory(Long id, CategoryUpdateRequest request, org.springframework.web.multipart.MultipartFile image) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục"));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         if (request.getName() != null && !request.getName().isBlank()) {
             String newName = request.getName().trim();
             String newSlug = toSlug(newName);
 
             if (!category.getName().equals(newName) && categoryRepository.existsByName(newName)) {
-                throw new RuntimeException("Tên danh mục mới bị trùng rồi!");
+                throw new AppException(ErrorCode.CATEGORY_NAME_EXISTS);
             }
             category.setName(newName);
             category.setSlug(newSlug);
@@ -123,7 +125,7 @@ public class CategoryService {
                 String imageUrl = cloudinaryService.uploadImage(image);
                 category.setImageUrl(imageUrl);
             } catch (java.io.IOException e) {
-                throw new RuntimeException("Lỗi upload ảnh danh mục mới!");
+                throw new AppException(ErrorCode.CATEGORY_IMAGE_UPLOAD_FAILED);
             }
         }
 
@@ -133,9 +135,9 @@ public class CategoryService {
     // Xoa Category
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy"));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
         if (category.getProductCount() != null && category.getProductCount() > 0) {
-            throw new RuntimeException("Không thể xóa! Danh mục này đang chứa " + category.getProductCount() + " sản phẩm.");
+            throw new AppException(ErrorCode.CATEGORY_HAS_PRODUCTS);
         }
         
         if (category.getImageUrl() != null) {
@@ -157,7 +159,7 @@ public class CategoryService {
     // Xem bo suu tap theo id
     public CategoryResponse getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy"));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
         return toCategoryResponse(category);
     }
 

@@ -9,6 +9,8 @@ import org.gomsu.productservice.dto.response.PromotionResponse;
 import org.gomsu.productservice.entity.Product;
 import org.gomsu.productservice.entity.ProductPromotion;
 import org.gomsu.productservice.entity.Promotion;
+import org.gomsu.productservice.exception.AppException;
+import org.gomsu.productservice.exception.ErrorCode;
 import org.gomsu.productservice.repository.CategoryRepository;
 import org.gomsu.productservice.repository.ProductRepository;
 import org.gomsu.productservice.repository.PromotionRepository;
@@ -42,7 +44,7 @@ public class PromotionService {
 
         // Check trùng cho chắc chắn nè Nguyệt
         if (promotionRepository.existsBySlug(slug)) {
-            throw new RuntimeException("Chương trình khuyến mãi này đã tồn tại rồi!");
+            throw new AppException(ErrorCode.PROMOTION_ALREADY_EXISTS);
         }
         Promotion promotion = new Promotion();
         promotion.setName(promotionRequest.getName());
@@ -53,7 +55,7 @@ public class PromotionService {
         List<ProductPromotion> productPromotions = promotionRequest.getProductDiscounts().stream()
                 .map(item -> {
                     Product product = productRepository.findById(item.getProductId())
-                            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
                     ProductPromotion productPromotion = new ProductPromotion();
                     productPromotion.setProduct(product);
                     productPromotion.setDiscountPercentage(item.getDiscountPercentage());
@@ -70,7 +72,7 @@ public class PromotionService {
     public PromotionResponse updatePromotion(Long id, PromotionUpdateRequest request) {
         // 1. Kiểm tra sự tồn tại
         Promotion promotion = promotionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy khuyến mãi ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
 
         // 2. Cập nhật thông tin cơ bản (Chỉ cập nhật nếu KHÔNG NULL)
         if (request.getName() != null && !request.getName().isBlank()) {
@@ -102,7 +104,7 @@ public class PromotionService {
                 else {
                     // TRƯỜNG HỢP 2: Sản phẩm chưa có trong đợt này -> Tạo mới và thêm vào List
                     Product product = productRepository.findById(dto.getProductId())
-                            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + dto.getProductId()));
+                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
                     ProductPromotion pp = new ProductPromotion();
                     pp.setProduct(product);
@@ -123,11 +125,11 @@ public class PromotionService {
     public PromotionResponse stopPromotion(Long id) {
         // 1. Tìm chương trình khuyến mãi
         Promotion promotion = promotionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đợt khuyến mãi ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
 
         // 2. Kiểm tra nếu nó đã dừng rồi thì không cần làm gì nữa
         if (Boolean.FALSE.equals(promotion.getIsActive())) {
-            throw new RuntimeException("Chương trình này đã tạm dừng từ trước đó.");
+            throw new AppException(ErrorCode.PROMOTION_ALREADY_STOPPED);
         }
 
         // 3. Cập nhật trạng thái và thời gian kết thúc
@@ -153,7 +155,7 @@ public class PromotionService {
     // Lay promotion theo slug
     public PromotionResponse getPromotionBySlug(String slug) {
         Promotion promotion = promotionRepository.findBySlug(slug)
-                .orElseThrow(() -> new RuntimeException("Chương trình khuyến mãi không tồn tại!"));
+                .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
         return toPromotionResponse(promotion);
     }
 
@@ -161,7 +163,7 @@ public class PromotionService {
     @Transactional
     public void deletePromotion(Long id) {
         Promotion promotion = promotionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đợt khuyến mãi này"));
+                .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
 
         // Clear danh sách để Hibernate hiểu là cần xóa các bản ghi con trước
         promotion.getProductPromotions().clear();
@@ -172,7 +174,7 @@ public class PromotionService {
     public PromotionResponse getPromotionById(Long id) {
         // Tìm Promotion trong DB, nếu không có thì ném lỗi
         Promotion promotion = promotionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đợt khuyến mãi với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
 
         // Dùng chính cái hàm "phù thủy" toPromotionResponse để biến nó thành DTO đẹp đẽ
         return toPromotionResponse(promotion);

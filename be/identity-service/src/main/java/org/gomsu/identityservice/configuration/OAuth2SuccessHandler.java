@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.gomsu.identityservice.entity.Role;
 import org.gomsu.identityservice.entity.RoleName;
 import org.gomsu.identityservice.entity.User;
+import org.gomsu.identityservice.exception.AppException;
+import org.gomsu.identityservice.exception.ErrorCode;
 import org.gomsu.identityservice.repository.RoleRepository;
 import org.gomsu.identityservice.repository.UserRepository;
 import org.gomsu.identityservice.service.AuthenticationService;
@@ -45,7 +47,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             String name = oauth2User.getAttribute("name");
 
             if (email == null || email.isBlank()) {
-                throw new RuntimeException("Không tìm thấy email từ tài khoản Google!");
+                throw new AppException(ErrorCode.OAUTH2_EMAIL_NOT_FOUND);
             }
 
             log.info("OAuth2 login - Email: {}, Name: {}", email, name);

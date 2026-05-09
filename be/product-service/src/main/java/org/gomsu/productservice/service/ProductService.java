@@ -7,6 +7,8 @@ import org.gomsu.productservice.dto.request.ProductRestockRequest;
 import org.gomsu.productservice.dto.request.ProductUpdateRequest;
 import org.gomsu.productservice.dto.response.ProductResponse;
 import org.gomsu.productservice.entity.*;
+import org.gomsu.productservice.exception.AppException;
+import org.gomsu.productservice.exception.ErrorCode;
 import org.gomsu.productservice.repository.CategoryRepository;
 import org.gomsu.productservice.repository.ProductImageRepository;
 import org.gomsu.productservice.repository.ProductRepository;
@@ -53,7 +55,7 @@ public class ProductService {
                 .build();
 
         Category category = categoryRepository.findById(productCreationRequest.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục với ID này!"));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
         product.setCategory(category);
 
         Product savedProduct = productRepository.save(product);
@@ -112,7 +114,7 @@ public class ProductService {
                 if (product.getProductImages() == null) product.setProductImages(new ArrayList<>());
                 product.getProductImages().add(productImage);
             } catch (IOException e) {
-                throw new RuntimeException("Lỗi upload ảnh");
+                throw new AppException(ErrorCode.PRODUCT_IMAGE_UPLOAD_FAILED);
             }
         }
     }
@@ -121,7 +123,7 @@ public class ProductService {
     @Transactional
     public ProductResponse updateProduct(ProductUpdateRequest productUpdateRequest, Long id, List<MultipartFile> images) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm!"));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         if (productUpdateRequest.getName() != null && !productUpdateRequest.getName().isEmpty()) {
             product.setName(productUpdateRequest.getName());
@@ -157,7 +159,7 @@ public class ProductService {
                         cloudinaryService.deleteImage(productImage.getImageUrl());
                         return true;
                     } catch (IOException e) {
-                        throw new RuntimeException("Lỗi khi xóa ảnh trên Cloudinary");
+                        throw new AppException(ErrorCode.PRODUCT_IMAGE_DELETE_FAILED);
                     }
                 }
                 return false;
@@ -176,7 +178,7 @@ public class ProductService {
             productOpt = productRepository.findById(Long.parseLong(slug));
         }
 
-        Product product = productOpt.orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại!"));
+        Product product = productOpt.orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         return toProductResponse(product);
     }
 
@@ -184,7 +186,7 @@ public class ProductService {
     @Transactional
     public void deleteProduct(Long id) {
         Product deleteProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm cần xóa!"));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         if(deleteProduct.getProductImages() != null && !deleteProduct.getProductImages().isEmpty()) {
             for (ProductImage productImage : deleteProduct.getProductImages()) {
                 try {
@@ -242,7 +244,7 @@ public class ProductService {
     //Xem 1 san pham theo id
     public ProductResponse getProductById(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm này"));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         return this.toProductResponse(product);
     }
 
@@ -250,7 +252,7 @@ public class ProductService {
     @Transactional
     public ProductResponse uploadProductImages(Long id, List<MultipartFile> images) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm này"));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         if (images != null && !images.isEmpty()) {
             for (MultipartFile file : images) {
                 try {
@@ -260,7 +262,7 @@ public class ProductService {
                     productImage.setProduct(product);
                     product.getProductImages().add(productImageRepository.save(productImage));
                 } catch (IOException e) {
-                    throw new RuntimeException("Lỗi khi upload ảnh mới");
+                    throw new AppException(ErrorCode.PRODUCT_IMAGE_UPLOAD_FAILED);
                 }
             }
             productRepository.save(product);
@@ -301,7 +303,7 @@ public class ProductService {
             for (ProductRestockRequest restockRequest : restockRequests) {
                 // Tim san pham trong DB
                 Product product = productRepository.findById(restockRequest.getProductId())
-                        .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + restockRequest.getProductId()));
+                        .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
                 // Cong lai so luong
                 int newQuantity = product.getStockQuantity() + restockRequest.getQuantity();
@@ -315,10 +317,10 @@ public class ProductService {
     public void reduceStock(List<ProductRestockRequest> requests) {
         for (ProductRestockRequest req : requests) {
             Product product = productRepository.findById(req.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + req.getProductId()));
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
             if (product.getStockQuantity() < req.getQuantity()) {
-                throw new RuntimeException("Sản phẩm " + product.getName() + " đã hết hàng hoặc không đủ số lượng!");
+                throw new AppException(ErrorCode.PRODUCT_INSUFFICIENT_STOCK);
             }
 
             product.setStockQuantity(product.getStockQuantity() - req.getQuantity());
@@ -330,7 +332,7 @@ public class ProductService {
     public void updateProductRating(Long productId, Double averageRating, Long reviewCount) {
         // 1. Tìm sản phẩm
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + productId));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         // 2. Xử lý giá trị NULL trước khi so sánh
         // Nếu trong DB là null thì coi như là 0.0 hoặc 0

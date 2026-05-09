@@ -3,6 +3,8 @@ package com.gomsu.contentservice.controller;
 import com.gomsu.contentservice.dto.request.PostRequest;
 import com.gomsu.contentservice.dto.request.PostUpdateRequest;
 import com.gomsu.contentservice.dto.response.PostResponse;
+import com.gomsu.contentservice.exception.AppException;
+import com.gomsu.contentservice.exception.ErrorCode;
 import com.gomsu.contentservice.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +45,7 @@ public class PostController {
 
         if (adminId == null) {
             log.error("Không tìm thấy userId trong Token! Claims hiện có: {}", jwt.getClaims());
-            throw new RuntimeException("Xác thực người dùng thất bại");
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
         PostResponse response = postService.createPost(postRequest, adminId);

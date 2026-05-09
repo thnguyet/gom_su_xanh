@@ -11,6 +11,8 @@ import com.gomsu.contentservice.dto.request.ReviewRequest;
 import com.gomsu.contentservice.dto.request.ReviewUpdateRequest;
 import com.gomsu.contentservice.dto.response.ReviewResponse;
 import com.gomsu.contentservice.entity.Review;
+import com.gomsu.contentservice.exception.AppException;
+import com.gomsu.contentservice.exception.ErrorCode;
 import com.gomsu.contentservice.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +58,7 @@ public class ReviewService {
 
         // 2. Chặn trùng (Mỗi user chỉ review 1 sản phẩm 1 lần)
         if (reviewRepository.existsByProductIdAndUserIdAndIsDeletedFalse(request.getProductId(), userId)) {
-            throw new RuntimeException("Bạn đã đánh giá sản phẩm này rồi!");
+            throw new AppException(ErrorCode.REVIEW_ALREADY_EXISTS);
         }
 
         // 3. Map dữ liệu vào Entity
@@ -82,11 +84,11 @@ public class ReviewService {
     @Transactional
     public ReviewResponse updateReview(Long reviewId, ReviewUpdateRequest request, Long userId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Đánh giá không tồn tại"));
+                .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
 
         // 1. Kiểm tra chính chủ
         if (!review.getUserId().equals(userId)) {
-            throw new RuntimeException("Bạn không có quyền sửa!");
+            throw new AppException(ErrorCode.REVIEW_EDIT_UNAUTHORIZED);
         }
 
         // 2. Chỉ cập nhật những gì User gửi lên (Check null)
@@ -132,7 +134,7 @@ public class ReviewService {
     @Transactional
     public ReviewResponse replyReview(Long reviewId, ReviewReplyRequest replyRequest) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đánh giá"));
+                .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
 
         review.setAdminReply(replyRequest.getAdminReply());
         review.setRepliedAt(LocalDateTime.now());
@@ -144,10 +146,10 @@ public class ReviewService {
     @Transactional
     public void deleteReview(Long reviewId, Long userId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Đánh giá không tồn tại"));
+                .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
 
         if (!review.getUserId().equals(userId)) {
-            throw new RuntimeException("Bạn không có quyền thực hiện hành động này!");
+            throw new AppException(ErrorCode.REVIEW_UNAUTHORIZED);
         }
 
         review.setDeleted(true);
@@ -159,7 +161,7 @@ public class ReviewService {
     @Transactional
     public void deleteReviewByAdmin(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Đánh giá không tồn tại"));
+                .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
 
         review.setDeleted(true);
         reviewRepository.save(review);

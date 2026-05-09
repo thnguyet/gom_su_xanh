@@ -5,6 +5,8 @@ import org.gomsu.orderservice.dto.request.ShippingMethodRequest;
 import org.gomsu.orderservice.dto.request.ShippingMethodUpdateRequest;
 import org.gomsu.orderservice.dto.response.ShippingMethodResponse;
 import org.gomsu.orderservice.entity.ShippingMethod;
+import org.gomsu.orderservice.exception.AppException;
+import org.gomsu.orderservice.exception.ErrorCode;
 import org.gomsu.orderservice.repository.ShippingMethodRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -76,7 +78,7 @@ public class ShippingMethodService {
     // Xóa vĩnh viễn khỏi database theo yêu cầu Admin
     public void deleteShippingMethod(Long id) {
         if (!shippingMethodRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy đơn vị vận chuyển ID: " + id);
+                        throw new AppException(ErrorCode.SHIPPING_METHOD_NOT_FOUND);
         }
         shippingMethodRepository.deleteById(id);
     }

@@ -11,6 +11,8 @@ import com.gomsu.workshopservice.entity.RegistrationStatus;
 import com.gomsu.workshopservice.entity.Workshop;
 import com.gomsu.workshopservice.entity.WorkshopImage;
 import com.gomsu.workshopservice.entity.WorkshopRegistration;
+import com.gomsu.workshopservice.exception.AppException;
+import com.gomsu.workshopservice.exception.ErrorCode;
 import com.gomsu.workshopservice.repository.RegistrationRepository;
 import com.gomsu.workshopservice.repository.WorkshopImageRepository;
 import com.gomsu.workshopservice.repository.WorkshopRepository;
@@ -81,7 +83,7 @@ public class WorkshopService {
                     WorkshopImage savedWorkshopImage = workshopImageRepository.save(workImage);
                     savedWorkshop.getImages().add(savedWorkshopImage);
                 } catch (IOException e) {
-                    throw new RuntimeException("Lỗi khi upload ảnh: " + e.getMessage());
+                    throw new AppException(ErrorCode.WORKSHOP_IMAGE_UPLOAD_FAILED);
                 }
             }
         }
@@ -122,13 +124,13 @@ public class WorkshopService {
 
     public WorkshopResponse getWorkshopById(Long id) {
         Workshop workshop = workshopRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Workshop!"));
+                .orElseThrow(() -> new AppException(ErrorCode.WORKSHOP_NOT_FOUND));
         return toWorkshopResponse(workshop);
     }
 
     public WorkshopResponse getWorkshopBySlug(String slug) {
         Workshop workshop = workshopRepository.findBySlug(slug)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Workshop!"));
+                .orElseThrow(() -> new AppException(ErrorCode.WORKSHOP_NOT_FOUND));
         return toWorkshopResponse(workshop);
     }
 
@@ -136,7 +138,7 @@ public class WorkshopService {
     @Transactional
     public WorkshopResponse uploadWorkshopImages(Long id, List<MultipartFile> images) {
         Workshop workshop = workshopRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy workshop này"));
+                .orElseThrow(() -> new AppException(ErrorCode.WORKSHOP_NOT_FOUND));
         if (images != null && !images.isEmpty()) {
             for (MultipartFile file : images) {
                 try {
@@ -147,7 +149,7 @@ public class WorkshopService {
                             .build();
                     workshop.getImages().add(workshopImage);
                 } catch (IOException e) {
-                    throw new RuntimeException("Lỗi khi upload ảnh mới");
+                    throw new AppException(ErrorCode.WORKSHOP_IMAGE_UPLOAD_FAILED);
                 }
             }
             workshopRepository.save(workshop);
@@ -158,7 +160,7 @@ public class WorkshopService {
     //Sua workshop
     public WorkshopResponse updateWorkshop(Long id, WorkshopUpdateRequest workshopUpdateRequest, List<MultipartFile> images) {
         Workshop workshop = workshopRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Workshop!"));
+                .orElseThrow(() -> new AppException(ErrorCode.WORKSHOP_NOT_FOUND));
 
         if (workshopUpdateRequest.getName() != null && !workshopUpdateRequest.getName().isEmpty()) {
             workshop.setName(workshopUpdateRequest.getName());
@@ -211,7 +213,7 @@ public class WorkshopService {
                             .workshop(workshop)
                             .build());
                 } catch (IOException e) {
-                    throw new RuntimeException("Lỗi upload ảnh mới");
+                    throw new AppException(ErrorCode.WORKSHOP_IMAGE_UPLOAD_FAILED);
                 }
             }
         }
@@ -237,7 +239,7 @@ public class WorkshopService {
     @Transactional
     public void deleteWorkshop(Long id) {
         Workshop workshop = workshopRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Workshop!"));
+                .orElseThrow(() -> new AppException(ErrorCode.WORKSHOP_NOT_FOUND));
 
         // Xóa tất cả ảnh trên Cloudinary trước
         if (workshop.getImages() != null) {
@@ -268,7 +270,7 @@ public class WorkshopService {
                 workshopId, status, keyword, fromDate, toDate, pageable);
 
         Workshop workshop = workshopRepository.findById(workshopId)
-                .orElseThrow(() -> new RuntimeException("Workshop không tồn tại"));
+                .orElseThrow(() -> new AppException(ErrorCode.WORKSHOP_NOT_FOUND));
 
         // Thay vì dùng userCache và gọi Client, mình truyền null vào toResponse
         // vì toResponse đã được mình sửa để ưu tiên lấy Name từ bản ghi Registration rồi.

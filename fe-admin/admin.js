@@ -35,6 +35,18 @@
 
         if (!r.ok) {
           return (isJson ? r.json() : r.text()).then(function (err) {
+            // HIỂN THỊ LỖI RA CONSOLE ĐỂ DEBUG
+            console.group("%c ❌ API ERROR: " + path, "color: white; background: #e11d48; padding: 4px; border-radius: 4px; font-weight: bold;");
+            console.error("Status:", r.status);
+            if (typeof err === 'object') {
+                console.error("Mã lỗi (Code):", err.code);
+                console.error("Thông báo (Message):", err.message);
+                console.error("Chi tiết phản hồi:", err);
+            } else {
+                console.error("Phản hồi lỗi (Text):", err);
+            }
+            console.groupEnd();
+            
             throw err;
           });
         }
@@ -910,6 +922,8 @@
               <div>
                 <h4 style="color:var(--adm-accent2);margin-bottom:12px;border-bottom:1px solid var(--adm-border);padding-bottom:8px">👤 Thông tin khách hàng</h4>
                 <p style="margin-bottom:6px"><strong>Họ tên:</strong> ${esc(r.customerName)}</p>
+                <p style="margin-bottom:6px"><strong>Số điện thoại:</strong> ${esc(r.customerPhone || '—')}</p>
+                <p style="margin-bottom:6px"><strong>Email:</strong> ${esc(r.customerEmail || '—')}</p>
                 <p style="margin-bottom:6px"><strong>Mã khách hàng:</strong> #${r.customerId}</p>
               </div>
               <div>

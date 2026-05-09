@@ -9,6 +9,8 @@ import org.gomsu.identityservice.dto.response.AuthenticationResponse;
 import org.gomsu.identityservice.dto.response.UserResponse;
 import org.gomsu.identityservice.entity.RoleName;
 import org.gomsu.identityservice.entity.User;
+import org.gomsu.identityservice.exception.AppException;
+import org.gomsu.identityservice.exception.ErrorCode;
 import org.gomsu.identityservice.repository.RoleRepository;
 import org.gomsu.identityservice.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,14 +33,14 @@ public class UserService {
     public UserResponse createUser(UserCreationRequest userCreationRequest) {
         // Verify OTP
         if (!otpService.verifyOtp(userCreationRequest.getEmail(), userCreationRequest.getOtp())) {
-            throw new RuntimeException("Mã OTP không đúng hoặc đã hết hạn!");
+            throw new AppException(ErrorCode.INVALID_OTP);
         }
 
         if (userRepository.existsByEmail(userCreationRequest.getEmail())) {
-            throw new RuntimeException("Email này đã được đăng ký!");
+            throw new AppException(ErrorCode.EMAIL_ALREADY_REGISTERED);
         }
         if (userRepository.existsByPhone(userCreationRequest.getPhone())) {
-            throw new RuntimeException("Số điện thoại này đã được đăng ký!");
+            throw new AppException(ErrorCode.PHONE_ALREADY_REGISTERED);
         }
 
         User user = new User();
@@ -82,13 +84,13 @@ public class UserService {
 
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return toUserResponse(user);
     }
 
     public void deleteUserById(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User không tồn tại!");
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
         userRepository.deleteById(id);
     }
@@ -100,7 +102,7 @@ public class UserService {
 
         // Tìm xem có không bằng Email
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return toUserResponse(user);
     }
 
@@ -111,7 +113,7 @@ public class UserService {
 
         // Tìm xem có không bằng Email
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         //Update lai user do
         if (userUpdateRequest.getUsername() != null) {
@@ -135,15 +137,15 @@ public class UserService {
         String currentEmail = context.getAuthentication().getName();
 
         User user = userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         if (userRepository.existsByEmail(request.getNewEmail())) {
-            throw new RuntimeException("Email mới đã được đăng ký bởi tài khoản khác!");
+            throw new AppException(ErrorCode.EMAIL_TAKEN_BY_OTHER);
         }
 
         // Verify OTP (Check against the NEW email)
         if (!otpService.verifyOtp(request.getNewEmail(), request.getOtp())) {
-            throw new RuntimeException("Mã OTP không đúng hoặc đã hết hạn!");
+            throw new AppException(ErrorCode.INVALID_OTP);
         }
 
         user.setEmail(request.getNewEmail());
@@ -169,14 +171,18 @@ public class UserService {
 
         // Tìm xem có không bằng Email
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        
+        if (!passwordChangeRequest.getNewPassword().equals(passwordChangeRequest.getConfirmPassword())) {
+            throw new AppException(ErrorCode.PASSWORDS_NOT_MATCHED);
+        }
 
         if (!passwordEncoder.matches(passwordChangeRequest.getOldPassword(), user.getPassword())){
-            throw new RuntimeException("Mật khẩu không đúng!");
+            throw new AppException(ErrorCode.OLD_PASSWORD_WRONG);
         }
 
         if (passwordEncoder.matches(passwordChangeRequest.getNewPassword(), user.getPassword())) {
-            throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu hiện tại!");
+            throw new AppException(ErrorCode.NEW_PASSWORD_SAME_AS_OLD);
         }
 
         user.setPassword(passwordEncoder.encode(passwordChangeRequest.getNewPassword()));
@@ -187,11 +193,11 @@ public class UserService {
     public void resetPassword(org.gomsu.identityservice.dto.request.ResetPasswordRequest request) {
         // Kiểm tra email tồn tại
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại trong hệ thống!"));
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_RESET));
 
         // Xác minh OTP
         if (!otpService.verifyOtp(request.getEmail(), request.getOtp())) {
-            throw new RuntimeException("Mã OTP không đúng hoặc đã hết hạn!");
+            throw new AppException(ErrorCode.INVALID_OTP);
         }
 
         // Đặt mật khẩu mới

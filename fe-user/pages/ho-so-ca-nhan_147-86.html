@@ -499,6 +499,14 @@
           <div class="detail-item-value" id="modalWsCustomer">...</div>
         </div>
         <div>
+          <div class="detail-item-label">Số điện thoại</div>
+          <div class="detail-item-value" id="modalWsPhone">...</div>
+        </div>
+        <div>
+          <div class="detail-item-label">Email</div>
+          <div class="detail-item-value" id="modalWsEmail">...</div>
+        </div>
+        <div>
           <div class="detail-item-label">Số lượng vé</div>
           <div class="detail-item-value" id="modalWsQty">...</div>
         </div>
@@ -988,6 +996,8 @@
             document.getElementById('modalWsName').textContent = reg.workshopName;
             document.getElementById('modalWsRegDate').textContent = new Date(reg.registrationDate).toLocaleString('vi-VN');
             document.getElementById('modalWsCustomer').textContent = reg.customerName;
+            document.getElementById('modalWsPhone').textContent = reg.customerPhone || '—';
+            document.getElementById('modalWsEmail').textContent = reg.customerEmail || '—';
             document.getElementById('modalWsQty').textContent = reg.ticketQuantity;
             document.getElementById('modalWsPrice').textContent = new Intl.NumberFormat('vi-VN').format(reg.pricePerTicket || 0) + ' VNĐ';
             var workshopStatusMap = {

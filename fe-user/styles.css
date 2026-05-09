@@ -515,6 +515,30 @@ a.hotspot:active, button:active, .app-action:active {
   opacity: .7;
 }
 
+.gsx-reg-input.is-error {
+  border-color: #ff5252 !important;
+  background-color: rgba(255, 82, 82, 0.05) !important;
+  box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.15) !important;
+}
+.gsx-reg-input:focus {
+  border-color: var(--clr-moss);
+  box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1);
+}
+
+.gsx-field-error {
+  color: #ff5252;
+  font-size: 12px;
+  margin-top: 6px;
+  display: block;
+  font-weight: 500;
+  animation: gsxErrorFadeIn 0.3s ease-out forwards;
+}
+
+@keyframes gsxErrorFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .app-field:focus {
   border-color: var(--clr-teal);
   box-shadow: 0 0 0 4px rgba(46, 125, 96, .12),

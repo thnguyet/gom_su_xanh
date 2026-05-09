@@ -48,13 +48,13 @@ public class AuthenticationService {
         //Kiem tra xem user nay co ton tai khong?
         var user = userRepository.findByEmail(authenticationRequest.getEmail())
                 .orElseGet(() -> userRepository.findByPhone(authenticationRequest.getEmail())
-                        .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!")));
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
 
         //Kiem tra xem password cua user nay co dung khong?
         boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
 
         if (!authenticated) {
-            throw new RuntimeException("Sai mật khẩu!");
+            throw new AppException(ErrorCode.WRONG_PASSWORD);
         }
 
         var expiryTime = new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli());
@@ -113,7 +113,7 @@ public class AuthenticationService {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes())); // lay con dau bi mat ra de ky
             return jwsObject.serialize(); // in ra
         } catch (JOSEException e) {
-            throw new RuntimeException("Lỗi tạo token", e);
+            throw new AppException(ErrorCode.TOKEN_GENERATION_FAILED);
         }
     }
 

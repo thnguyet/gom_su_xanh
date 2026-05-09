@@ -10,6 +10,8 @@ import org.gomsu.orderservice.dto.response.CartResponse;
 import org.gomsu.orderservice.dto.response.OrderResponse;
 import org.gomsu.orderservice.dto.response.UserResponse;
 import org.gomsu.orderservice.entity.*;
+import org.gomsu.orderservice.exception.AppException;
+import org.gomsu.orderservice.exception.ErrorCode;
 import org.gomsu.orderservice.repository.CartRepository;
 import org.gomsu.orderservice.repository.OrderRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -116,7 +118,7 @@ public class OrderService {
                 .toList();
 
         if (selectedItems.isEmpty()) {
-            throw new RuntimeException("Vui lòng chọn ít nhất một sản phẩm để đặt hàng!");
+            throw new AppException(ErrorCode.ORDER_EMPTY_SELECTION);
         }
 
         // 4. Lấy thông tin Vận chuyển & Thanh toán (Lấy 1 lần để tối ưu)
@@ -134,15 +136,18 @@ public class OrderService {
                 ? orderRequest.getAddress() : user.getAddress();
         String finalPhone = (orderRequest.getPhoneNumber() != null && !orderRequest.getPhoneNumber().isBlank())
                 ? orderRequest.getPhoneNumber() : user.getPhone();
+        String finalEmail = (orderRequest.getEmail() != null && !orderRequest.getEmail().isBlank())
+                ? orderRequest.getEmail() : user.getEmail();
 
         if (finalAddress == null || finalAddress.isBlank()) {
-            throw new RuntimeException("Địa chỉ nhận hàng không được để trống!");
+            throw new AppException(ErrorCode.ORDER_MISSING_ADDRESS);
         }
 
         // 7. Khởi tạo đối tượng Order
         Order order = Order.builder()
                 .customerId(customerId)
                 .customerName(user.getUsername()) // Lưu tên khách hàng
+                .customerEmail(finalEmail)
                 .address(finalAddress)
                 .phoneNumber(finalPhone)
                 .note(orderRequest.getNote())
@@ -187,16 +192,16 @@ public class OrderService {
     public OrderResponse cancelOrder(Long customerId, Long orderId, boolean isAdmin) {
         // Tim don hang
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         // Kiem tra xem don hang co dung la cua nguoi nay khong
         if (!isAdmin && !order.getCustomerId().equals(customerId)) {
-            throw new RuntimeException("Bạn không có quyền hủy đơn hàng này!");
+            throw new AppException(ErrorCode.ORDER_CANCEL_UNAUTHORIZED);
         }
 
         // Chi cho phep huy khi o trang thai PENDING hoac CONFIRMED
         if (order.getStatus() != OrderStatus.PENDING && order.getStatus() != OrderStatus.CONFIRMED) {
-            throw new RuntimeException("Đơn hàng đang trong quá trình vận chuển, không thể hủy!");
+            throw new AppException(ErrorCode.ORDER_CANCEL_INVALID_STATUS);
         }
 
         // Cap nhat trang thai CANCELLED
@@ -248,7 +253,7 @@ public class OrderService {
     @Transactional
     public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus, Long adminId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         // 1. Nếu Admin chọn trạng thái HỦY
         if (newStatus == OrderStatus.CANCELLED) {
@@ -259,7 +264,7 @@ public class OrderService {
         // 2. Nếu chuyển sang các trạng thái khác (SHIPPING, COMPLETED, v.v.)
         // Kiểm tra logic: Không cho phép chuyển từ CANCELLED sang các trạng thái khác
         if (order.getStatus() == OrderStatus.CANCELLED) {
-            throw new RuntimeException("Đơn hàng đã hủy không thể cập nhật trạng thái khác!");
+            throw new AppException(ErrorCode.ORDER_ALREADY_CANCELLED);
         }
 
         order.setStatus(newStatus);
@@ -270,7 +275,7 @@ public class OrderService {
 
     public OrderResponse getOrderById(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng ID: " + orderId));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
         return toOrderResponse(order, null);
     }
 

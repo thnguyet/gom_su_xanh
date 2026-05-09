@@ -7,6 +7,8 @@ import org.gomsu.orderservice.dto.response.PaymentMethodResponse;
 import org.gomsu.orderservice.dto.response.ShippingMethodResponse;
 import org.gomsu.orderservice.entity.PaymentMethod;
 import org.gomsu.orderservice.entity.ShippingMethod;
+import org.gomsu.orderservice.exception.AppException;
+import org.gomsu.orderservice.exception.ErrorCode;
 import org.gomsu.orderservice.repository.PaymentMethodRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -70,7 +72,7 @@ public class PaymentMethodService {
     // Xóa vĩnh viễn khỏi DB
     public void deletePaymentMethod(Long id) {
         if (!paymentMethodRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy phương thức thanh toán ID: " + id);
+            throw new AppException(ErrorCode.PAYMENT_METHOD_NOT_FOUND);
         }
         paymentMethodRepository.deleteById(id);
     }

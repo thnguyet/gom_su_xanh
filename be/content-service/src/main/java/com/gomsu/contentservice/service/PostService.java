@@ -7,6 +7,8 @@ import com.gomsu.contentservice.dto.response.PostResponse;
 import com.gomsu.contentservice.entity.Post;
 import com.gomsu.contentservice.entity.PostCategory;
 import com.gomsu.contentservice.entity.PostImage;
+import com.gomsu.contentservice.exception.AppException;
+import com.gomsu.contentservice.exception.ErrorCode;
 import com.gomsu.contentservice.repository.CategoryRepository;
 import com.gomsu.contentservice.repository.PostImageRepository;
 import com.gomsu.contentservice.repository.PostRepository;
@@ -41,11 +43,11 @@ public class PostService {
     public PostResponse createPost(PostRequest request, Long adminId) {
         // 1. Tìm Category
         PostCategory category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thể loại với ID: " + request.getCategoryId()));
+                .orElseThrow(() -> new AppException(ErrorCode.POST_CATEGORY_NOT_FOUND));
 
         // --- BỔ SUNG: Chặn tạo bài viết nếu Category đã bị ẩn ---
         if (Boolean.FALSE.equals(category.getActive())) {
-            throw new RuntimeException("Không thể tạo bài viết trong danh mục đã bị ẩn hoặc ngừng hoạt động!");
+            throw new AppException(ErrorCode.POST_CATEGORY_INACTIVE);
         }
 
         // 2. Tạo Slug & Post object
@@ -84,7 +86,7 @@ public class PostService {
                     post.getImages().add(postImage);
                 } catch (IOException e) {
                     log.error("Lỗi upload ảnh: {}", e.getMessage());
-                    throw new RuntimeException("Lỗi xử lý hình ảnh");
+                    throw new AppException(ErrorCode.POST_IMAGE_UPLOAD_FAILED);
                 }
             }
         }
@@ -95,14 +97,14 @@ public class PostService {
     // 1. Lấy chi tiết bài viết theo Slug
     public PostResponse getPostBySlug(String slug) {
         Post post = postRepository.findBySlug(slug)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết với slug: " + slug));
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
         return toPostResponse(post);
     }
 
     // 1b. Lấy chi tiết bài viết theo ID
     public PostResponse getPostById(Long id) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
         return toPostResponse(post);
     }
 
@@ -126,7 +128,7 @@ public class PostService {
     public PostResponse updatePost(Long id, PostUpdateRequest request, List<MultipartFile> newImages) {
         // 1. Kiểm tra bài viết có tồn tại không
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
         // 2. Cập nhật các trường thông tin cơ bản (Chỉ cập nhật nếu không null/rỗng)
         if (request.getTitle() != null && !request.getTitle().isBlank()) {
@@ -150,7 +152,7 @@ public class PostService {
         // 3. Cập nhật Category nếu có thay đổi
         if (request.getCategoryId() != null) {
             PostCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy thể loại bài viết!"));
+                    .orElseThrow(() -> new AppException(ErrorCode.POST_CATEGORY_NOT_FOUND));
             post.setCategory(category);
         }
 
@@ -186,7 +188,7 @@ public class PostService {
                     post.getImages().add(postImage);
                 } catch (IOException e) {
                     log.error("Lỗi upload ảnh lên Cloudinary: {}", e.getMessage());
-                    throw new RuntimeException("Lỗi khi upload ảnh mới");
+                    throw new AppException(ErrorCode.POST_IMAGE_UPLOAD_NEW_FAILED);
                 }
             }
         }
@@ -205,7 +207,7 @@ public class PostService {
     public void deletePost(Long id) {
         // 1. Tìm bài viết
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết cần xóa với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
         // 2. XỬ LÝ XÓA ẢNH CHI TIẾT TRÊN CLOUDINARY
         if (post.getImages() != null && !post.getImages().isEmpty()) {

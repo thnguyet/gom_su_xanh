@@ -4,6 +4,8 @@ import com.gomsu.contentservice.dto.request.CategoryRequest;
 import com.gomsu.contentservice.dto.request.CategoryUpdateRequest;
 import com.gomsu.contentservice.dto.response.CategoryResponse;
 import com.gomsu.contentservice.entity.PostCategory;
+import com.gomsu.contentservice.exception.AppException;
+import com.gomsu.contentservice.exception.ErrorCode;
 import com.gomsu.contentservice.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,13 +44,13 @@ public class CategoryService {
     // 2. Xem chi tiết theo Slug (Cho khách)
     public CategoryResponse getBySlug(String slug) {
         PostCategory category = categoryRepository.findBySlug(slug)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục!"));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
         return toResponse(category);
     }
 
     public CategoryResponse getById(Long id) {
         PostCategory category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
         return toResponse(category);
     }
 
@@ -56,7 +58,7 @@ public class CategoryService {
     @Transactional
     public CategoryResponse createCategory(CategoryRequest request) {
         if (categoryRepository.existsByName(request.getName())) {
-            throw new RuntimeException("Tên danh mục đã tồn tại!");
+            throw new AppException(ErrorCode.CATEGORY_ALREADY_EXISTS);
         }
 
         String slug = toSlug(request.getName());
@@ -78,11 +80,11 @@ public class CategoryService {
     @Transactional
     public CategoryResponse updateCategory(Long id, CategoryUpdateRequest request) {
         PostCategory category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         if (request.getName() != null && !request.getName().equals(category.getName())) {
             if (categoryRepository.existsByName(request.getName())) {
-                throw new RuntimeException("Tên danh mục mới đã tồn tại!");
+                throw new AppException(ErrorCode.CATEGORY_ALREADY_EXISTS);
             }
             category.setName(request.getName());
             category.setSlug(toSlug(request.getName()));
@@ -103,11 +105,11 @@ public class CategoryService {
     public void deleteCategory(Long id) {
         // 1. Tìm danh mục
         PostCategory category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục để xóa!"));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         // 2. Kiểm tra nếu có bài viết liên quan thì không cho xóa cứng
         if (category.getPosts() != null && !category.getPosts().isEmpty()) {
-            throw new RuntimeException("Không thể xóa danh mục đang chứa bài viết! Hãy chuyển bài viết sang danh mục khác hoặc chỉ tắt trạng thái hoạt động.");
+            throw new AppException(ErrorCode.CATEGORY_HAS_POSTS);
         }
 
         // 3. Thực hiện XÓA CỨNG (Hard Delete)

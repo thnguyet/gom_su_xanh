@@ -23,6 +23,7 @@ public class Order extends BaseEntity{
 
     private String address;
     private String phoneNumber;
+    private String customerEmail;
 
     @Column(name = "note")
     private String note;

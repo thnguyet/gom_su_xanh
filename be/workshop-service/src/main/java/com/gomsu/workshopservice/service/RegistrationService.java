@@ -8,6 +8,8 @@ import com.gomsu.workshopservice.entity.RegistrationStatus;
 import com.gomsu.workshopservice.entity.Workshop;
 import com.gomsu.workshopservice.entity.WorkshopImage;
 import com.gomsu.workshopservice.entity.WorkshopRegistration;
+import com.gomsu.workshopservice.exception.AppException;
+import com.gomsu.workshopservice.exception.ErrorCode;
 import com.gomsu.workshopservice.repository.RegistrationRepository;
 import com.gomsu.workshopservice.repository.WorkshopRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,41 +38,52 @@ public class RegistrationService {
     private final RabbitTemplate rabbitTemplate;
 
     @Transactional
-    public RegistrationResponse registerWorkshop(Long userId, Long workshopId, Integer quantity, String note, LocalDate participationDate, String participationTime) {
+    public RegistrationResponse registerWorkshop(Long userId, Long workshopId, Integer quantity, String note, LocalDate participationDate, String participationTime, String name, String phone) {
         log.info("Bắt đầu đăng ký Workshop ID: {} cho User ID: {}", workshopId, userId);
 
         // 1. Tìm Workshop
         Workshop workshop = workshopRepository.findById(workshopId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Workshop!"));
+                .orElseThrow(() -> new AppException(ErrorCode.WORKSHOP_NOT_FOUND));
+
+        if (quantity == null || quantity <= 0) {
+            throw new AppException(ErrorCode.REGISTRATION_INVALID_QUANTITY);
+        }
 
         // 2. Kiểm tra thời gian đăng ký
         LocalDateTime now = LocalDateTime.now();
         if (now.isBefore(workshop.getRegistrationStartDate()) || now.isAfter(workshop.getRegistrationEndDate())) {
-            throw new RuntimeException("Thời gian đăng ký không hợp lệ (chưa mở hoặc đã kết thúc)!");
+            throw new AppException(ErrorCode.REGISTRATION_TIME_INVALID);
         }
 
         // BỔ SUNG: Chặn đăng ký nếu Workshop đang bị ẩn (active = false)
         if (Boolean.FALSE.equals(workshop.getActive())) {
-            throw new RuntimeException("Workshop này hiện không còn hoạt động hoặc đã bị đóng!");
+            throw new AppException(ErrorCode.WORKSHOP_INACTIVE);
         }
 
         // 3. Kiểm tra số lượng vé còn lại
         int updatedRows = workshopRepository.updateParticipants(workshopId, quantity);
         if (updatedRows == 0) {
-            throw new RuntimeException("Workshop đã hết chỗ hoặc số lượng đăng ký vượt quá giới hạn!");
+            throw new AppException(ErrorCode.REGISTRATION_OUT_OF_SLOTS);
         }
 
         // 4. Gọi Identity Service lấy thông tin User (Username, Email...)
         UserResponse user = userClient.getMyInfor();
         if (user == null) {
-            throw new RuntimeException("Không tìm thấy thông tin người dùng từ Identity Service!");
+            throw new AppException(ErrorCode.REGISTRATION_USER_NOT_FOUND);
+        }
+
+        // Bổ sung validate: Nếu có truyền phone mới thì kiểm tra định dạng
+        if (phone != null && !phone.isBlank() && !phone.matches("^(\\+84|0)\\d{9,10}$")) {
+            throw new AppException(ErrorCode.REGISTRATION_INVALID_PHONE);
         }
 
         // 5. Lưu thông tin đăng ký vào Database
         WorkshopRegistration registration = WorkshopRegistration.builder()
                 .workshop(workshop)
                 .customerId(userId)
-                .customerName(user.getUsername())
+                .customerName(name != null && !name.isBlank() ? name : user.getUsername())
+                .customerPhone(phone != null && !phone.isBlank() ? phone : user.getPhone())
+                .customerEmail(user.getEmail()) // Mặc định lấy từ Profile, không cho override
                 .ticketQuantity(quantity)
                 .note(note)
                 .participationDate(participationDate)
@@ -82,7 +95,7 @@ public class RegistrationService {
         WorkshopRegistration savedReg = registrationRepository.save(registration);
 
         // 6. Gửi thông báo qua RabbitMQ (Async)
-        sendNotificationToRabbitMQ(user, workshop, quantity);
+        sendNotificationToRabbitMQ(registration.getCustomerName(), registration.getCustomerEmail(), workshop, quantity);
 
         log.info("Đăng ký thành công! ID Đăng ký: {}", savedReg.getId());
 
@@ -90,11 +103,11 @@ public class RegistrationService {
         return toResponse(savedReg, user);
     }
 
-    private void sendNotificationToRabbitMQ(UserResponse user, Workshop workshop, Integer quantity) {
+    private void sendNotificationToRabbitMQ(String userName, String userEmail, Workshop workshop, Integer quantity) {
         try {
             Map<String, Object> emailEvent = new HashMap<>();
-            emailEvent.put("userEmail", user.getEmail());
-            emailEvent.put("userName", user.getUsername());
+            emailEvent.put("userEmail", userEmail);
+            emailEvent.put("userName", userName);
             emailEvent.put("workshopName", workshop.getName());
             emailEvent.put("quantity", quantity);
 
@@ -103,7 +116,7 @@ public class RegistrationService {
                     RabbitMQConfig.REGISTRATION_ROUTING_KEY,
                     emailEvent
             );
-            log.info("Đã bắn Event thông báo lên RabbitMQ cho User: {}", user.getUsername());
+            log.info("Đã bắn Event thông báo lên RabbitMQ cho User: {}", userName);
         } catch (Exception e) {
             log.error("Không thể gửi thông báo RabbitMQ (có thể server RabbitMQ chưa chạy): {}", e.getMessage());
             // Không ném lỗi ra ngoài để tránh rollback transaction đăng ký thành công
@@ -152,16 +165,16 @@ public class RegistrationService {
     public void cancelRegistration(Long registrationId, Long userId) {
         // 1. Tìm bản ghi đăng ký
         WorkshopRegistration registration = registrationRepository.findById(registrationId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đăng ký!"));
+                .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
 
         // 2. Kiểm tra quyền sở hữu (tránh việc user A hủy vé của user B)
         if (!registration.getCustomerId().equals(userId)) {
-            throw new RuntimeException("Bạn không có quyền hủy đơn đăng ký này!");
+            throw new AppException(ErrorCode.REGISTRATION_UNAUTHORIZED);
         }
 
         // 3. Kiểm tra trạng thái (chỉ hủy khi đơn đang ở trạng thái CONFIRMED)
         if (registration.getStatus() != RegistrationStatus.CONFIRMED) {
-            throw new RuntimeException("Đơn hàng này đã bị hủy hoặc đã hoàn thành, không thể hủy thêm.");
+            throw new AppException(ErrorCode.REGISTRATION_ALREADY_CANCELLED);
         }
 
         // 4. LOGIC QUAN TRỌNG: Kiểm tra điều kiện trước 3 ngày
@@ -171,7 +184,7 @@ public class RegistrationService {
 
         // Nếu thời gian hiện tại đã vượt quá (thời gian bắt đầu - 3 ngày)
         if (now.isAfter(workshopStartTime.minusDays(3))) {
-            throw new RuntimeException("Đã quá hạn hủy vé! Bạn chỉ có thể hủy trước ngày diễn ra ít nhất 3 ngày.");
+            throw new AppException(ErrorCode.REGISTRATION_CANCEL_DEADLINE);
         }
 
         // 5. Cập nhật trạng thái đơn hàng
@@ -185,7 +198,7 @@ public class RegistrationService {
         );
 
         if (updatedRows == 0) {
-            throw new RuntimeException("Có lỗi xảy ra khi hoàn trả số lượng vé!");
+            throw new AppException(ErrorCode.REGISTRATION_REFUND_FAILED);
         }
 
         log.info("User {} đã hủy thành công đơn đăng ký {}. Vé đã được hoàn lại kho.", userId, registrationId);
@@ -194,10 +207,10 @@ public class RegistrationService {
     @Transactional
     public void checkInRegistration(Long registrationId) {
         WorkshopRegistration workshopRegistration = registrationRepository.findById(registrationId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đăng ký!"));
+                .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
 
         if (workshopRegistration.getStatus() != RegistrationStatus.CONFIRMED) {
-            throw new RuntimeException("Đơn đăng ký không hợp lệ để check-in");
+            throw new AppException(ErrorCode.REGISTRATION_INVALID_CHECKIN);
         }
 
         workshopRegistration.setStatus(RegistrationStatus.COMPLETED);
@@ -210,7 +223,7 @@ public class RegistrationService {
     @Transactional(readOnly = true)
     public RegistrationResponse getRegistrationById(Long registrationId) {
         WorkshopRegistration registration = registrationRepository.findById(registrationId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đăng ký ID: " + registrationId));
+                .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
         return toResponse(registration, null);
     }
 
@@ -224,7 +237,9 @@ public class RegistrationService {
         return RegistrationResponse.builder()
                 .id(registration.getId())
                 .customerId(registration.getCustomerId())
-                .customerName(user != null ? user.getUsername() : registration.getCustomerName())
+                .customerName(registration.getCustomerName())
+                .customerPhone(registration.getCustomerPhone())
+                .customerEmail(registration.getCustomerEmail())
 
                 .workshopId(registration.getWorkshop().getId())
                 .workshopName(registration.getWorkshop().getName())

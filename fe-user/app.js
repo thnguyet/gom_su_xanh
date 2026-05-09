@@ -606,6 +606,8 @@
           '</label>' +
           '<input class="gsx-reg-input" id="' + f.id + '" ' +
             'type="' + f.type + '" ' +
+            (f.id === 'reg-qty' ? 'min="1" ' : '') +
+            (f.id === 'reg-phone' ? 'maxlength="11" ' : '') +
             'placeholder="' + f.placeholder + '" ' +
             (f.required ? 'required ' : '') +
             'autocomplete="off">' +
@@ -686,6 +688,19 @@
       modal.classList.add('is-open');
     });
     document.body.style.overflow = 'hidden';
+    
+    // Dynamic phone maxlength
+    var phoneInput = modal.querySelector('#reg-phone');
+    if (phoneInput) {
+      phoneInput.addEventListener('input', function() {
+        var val = this.value.trim();
+        if (val.startsWith('+')) {
+          this.setAttribute('maxlength', '11');
+        } else {
+          this.setAttribute('maxlength', '10');
+        }
+      });
+    }
 
     // Auto-fill user info if logged in
     var token = localStorage.getItem('gsx_token');
@@ -752,6 +767,36 @@
       if (errBox) errBox.style.display = 'none';
     }
 
+    function setFieldError(id, msg) {
+      var field = modal.querySelector(id);
+      if (!field) return;
+      field.classList.add('is-error');
+      
+      // Remove existing error msg if any
+      var existing = field.parentNode.querySelector('.gsx-field-error');
+      if (existing) existing.parentNode.removeChild(existing);
+      
+      var err = document.createElement('span');
+      err.className = 'gsx-field-error';
+      err.textContent = msg;
+      field.parentNode.appendChild(err);
+
+      // Clear on input
+      var onInput = function() {
+        clearFieldError(id);
+        field.removeEventListener('input', onInput);
+      };
+      field.addEventListener('input', onInput);
+    }
+
+    function clearFieldError(id) {
+      var field = modal.querySelector(id);
+      if (!field) return;
+      field.classList.remove('is-error');
+      var err = field.parentNode.querySelector('.gsx-field-error');
+      if (err) err.parentNode.removeChild(err);
+    }
+
     // Close handlers
     if (closeBtn) closeBtn.addEventListener('click', closeRegistrationModal);
     if (backdrop) backdrop.addEventListener('click', closeRegistrationModal);
@@ -772,29 +817,22 @@
       isProcessing = true;
 
       try {
-        // Validation
+        // 1. Validate mandatory fields
         var allValid = true;
         var inputs = form.querySelectorAll('.gsx-reg-input[required]');
         Array.prototype.forEach.call(inputs, function(inp) {
           if (!inp.value.trim()) {
             allValid = false;
-            inp.classList.add('is-error');
-            inp.addEventListener('input', function onFix() {
-              if (inp.value.trim()) {
-                inp.classList.remove('is-error');
-                inp.removeEventListener('input', onFix);
-              }
-            });
+            setFieldError('#' + inp.id, 'Trường này không được để trống');
           }
         });
 
         if (!allValid) {
-          showModalError('Vui lòng điền đầy đủ thông tin bắt buộc');
           isProcessing = false;
           return;
         }
 
-        // Date validation: must be within workshop dates
+        // 2. Date validation
         if (window.gsxCurrentWorkshop) {
           var selDate = new Date(modal.querySelector('#reg-date').value);
           var wsStart = new Date(window.gsxCurrentWorkshop.startDate);
@@ -807,13 +845,39 @@
           if (selDate < wsStart || selDate > wsEnd) {
             var startStr = wsStart.toLocaleDateString('vi-VN');
             var endStr = wsEnd.toLocaleDateString('vi-VN');
-            showModalError('Ngày tham gia không hợp lệ! Workshop này diễn ra từ ' + startStr + ' đến ' + endStr);
+            setFieldError('#reg-date', 'Workshop chỉ diễn ra từ ' + startStr + ' đến ' + endStr);
             isProcessing = false;
-            modal.querySelector('#reg-date').classList.add('is-error');
             return;
           }
         }
 
+        // 3. Collect Values & Validate Phone/Qty
+        var nameVal = modal.querySelector('#reg-name').value;
+        var phoneVal = modal.querySelector('#reg-phone').value;
+        var qty = modal.querySelector('#reg-qty').value;
+        var dateVal = modal.querySelector('#reg-date').value;
+        var timeVal = modal.querySelector('#reg-time').value;
+        var note = modal.querySelector('#reg-note').value;
+
+        var phoneRegex = /^(0\d{9}|\+84\d{9})$/;
+        var cleanPhone = phoneVal.replace(/\s/g, '');
+        if (!phoneRegex.test(cleanPhone)) {
+          var errorMsg = 'Số điện thoại phải có đúng 10 chữ số (Ví dụ: 0912345678)';
+          if (cleanPhone.startsWith('0') && cleanPhone.length !== 10) {
+            errorMsg = 'Số điện thoại bắt đầu bằng 0 phải có đúng 10 chữ số';
+          }
+          setFieldError('#reg-phone', errorMsg);
+          isProcessing = false;
+          return;
+        }
+
+        if (!qty || parseInt(qty) <= 0) {
+          setFieldError('#reg-qty', 'Số lượng tham gia phải lớn hơn 0');
+          isProcessing = false;
+          return;
+        }
+
+        // --- ALL VALIDATED, START LOADING ---
         submitBtn.classList.add('is-loading');
         var btnText = submitBtn.querySelector('.gsx-reg-submit-text');
         if (btnText) btnText.textContent = 'Đang gửi…';
@@ -823,20 +887,15 @@
         if (!token) {
           var pendingData = {
             workshopId: window.gsxCurrentWorkshopId || 1,
-            qty: modal.querySelector('#reg-qty').value,
-            date: modal.querySelector('#reg-date').value,
-            time: modal.querySelector('#reg-time').value
+            qty: qty,
+            date: dateVal,
+            time: timeVal
           };
           sessionStorage.setItem('gsx_pending_registration', JSON.stringify(pendingData));
           toast('Vui lòng đăng nhập để hoàn tất đăng ký');
           setTimeout(function() { go(pages.login); }, 800);
           return;
         }
-
-        var qty = modal.querySelector('#reg-qty').value;
-        var dateVal = modal.querySelector('#reg-date').value;
-        var timeVal = modal.querySelector('#reg-time').value;
-        var note = modal.querySelector('#reg-note').value;
 
         var wsId = window.gsxCurrentWorkshopId || 1;
         if (!wsId || wsId === 'undefined') {
@@ -852,6 +911,8 @@
         formData.append('participationDate', dateVal);
         formData.append('participationTime', timeVal);
         formData.append('note', note);
+        formData.append('name', nameVal);
+        formData.append('phone', phoneVal);
 
         fetch('http://localhost:8080/workshop/regis-workshops/register', {
           method: 'POST',

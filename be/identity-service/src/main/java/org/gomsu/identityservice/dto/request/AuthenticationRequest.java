@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AuthenticationRequest {
     @NotBlank(message = "Email hoặc Số điện thoại không được để trống!")
+    @Email(message = "Email không hợp lệ")
     private String email;
 
     @NotBlank(message = "Mật khẩu không được để trống!")

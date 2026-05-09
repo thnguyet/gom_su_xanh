@@ -24,4 +24,7 @@ public class PasswordChangeRequest {
     @Pattern(regexp = ".*[@#$%^&+=!].*", message = "Mật khẩu phải có ít nhất một ký tự đặc biệt (@#$%^&+=!)")
     @Pattern(regexp = "^\\S+$", message = "Mật khẩu không được chứa khoảng trắng")
     private String newPassword;
+
+    @NotBlank(message = "Mật khẩu xác nhận không được để trống!")
+    private String confirmPassword;
 }

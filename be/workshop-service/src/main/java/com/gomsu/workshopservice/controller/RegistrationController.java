@@ -34,13 +34,15 @@ public class RegistrationController {
             @RequestParam Long workshopId,
             @RequestParam Integer quantity,
             @RequestParam(required = false) String note,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String phone,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate participationDate,
             @RequestParam String participationTime) {
 
         // Giả sử trong Token Nguyệt lưu userId vào claim tên là "id"
         Long userId = Long.valueOf(jwt.getClaim("userId").toString());
 
-        RegistrationResponse response = registerWorkshop.registerWorkshop(userId, workshopId, quantity, note, participationDate, participationTime);
+        RegistrationResponse response = registerWorkshop.registerWorkshop(userId, workshopId, quantity, note, participationDate, participationTime, name, phone);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

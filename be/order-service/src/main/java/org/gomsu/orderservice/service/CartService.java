@@ -6,6 +6,8 @@ import org.gomsu.orderservice.dto.ProductDTO;
 import org.gomsu.orderservice.dto.response.CartResponse;
 import org.gomsu.orderservice.entity.Cart;
 import org.gomsu.orderservice.entity.CartItem;
+import org.gomsu.orderservice.exception.AppException;
+import org.gomsu.orderservice.exception.ErrorCode;
 import org.gomsu.orderservice.repository.CartRepository;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +51,9 @@ public class CartService {
 
     // Them san pham vao gio hang
     public CartResponse addToCart(Long customerId, Long productId, Integer quantity) {
+        if (quantity == null || quantity <= 0) {
+            throw new AppException(ErrorCode.INVALID_QUANTITY);
+        }
 
         // 1. Gọi Product Service để check kho trước (Dùng Feign Client)
         // Giả sử Nguyệt đã có hàm getProductById bên ProductClient
@@ -68,7 +73,7 @@ public class CartService {
         int totalWanted = currentInCart + quantity;
 
         if (totalWanted > product.getStockQuantity()) {
-            throw new RuntimeException("Kho chỉ còn " + product.getStockQuantity() + " sản phẩm!");
+            throw new AppException(ErrorCode.CART_INSUFFICIENT_STOCK);
         }
 
         // Neu gio hang co san pham do roi thi tang so luong len
@@ -90,10 +95,13 @@ public class CartService {
 
     // Cap nhat so luong cho san pham co trong gio hang
     public CartResponse updateQuantity(Long customerId, Long productId, Integer newQuantity) {
+        if (newQuantity == null || newQuantity <= 0) {
+            throw new AppException(ErrorCode.INVALID_QUANTITY);
+        }
         // 1. Check kho trước khi cho cập nhật (Tránh việc khách sửa 1 thành 100 trong giỏ)
         ProductDTO product = productClient.getProductById(productId);
         if (newQuantity > product.getStockQuantity()) {
-            throw new RuntimeException("Không thể cập nhật. Kho chỉ còn " + product.getStockQuantity() + " sản phẩm!");
+            throw new AppException(ErrorCode.CART_INSUFFICIENT_STOCK);
         }
 
         // 2. Tim gio hang cua customerId
@@ -103,7 +111,7 @@ public class CartService {
         CartItem itemToUpdate = cart.getCartItems().stream()
                 .filter(item -> item.getProductId().equals(productId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Sản phẩm không có trong giỏ hàng"));
+                .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
 
         itemToUpdate.setQuantity(newQuantity);
 
