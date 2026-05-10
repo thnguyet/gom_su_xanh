@@ -1,6 +1,5 @@
 package org.gomsu.identityservice.dto.request;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -14,7 +13,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AuthenticationRequest {
     @NotBlank(message = "Email hoặc Số điện thoại không được để trống!")
-    @Email(message = "Email không hợp lệ")
+    @Pattern(
+            regexp = "^([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}|0\\d{9})$",
+            message = "Email hoặc Số điện thoại không đúng định dạng!"
+    )
     private String email;
 
     @NotBlank(message = "Mật khẩu không được để trống!")
